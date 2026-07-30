@@ -60,3 +60,25 @@ Se usan para centro e identificación, no para inventar la costa.
 La descarga KML del conjunto REDIAM 2011 devuelve actualmente 404. Por eso se
 eligió la capa vectorial DERA reproducible y más reciente, en lugar de copiar
 una geometría desde un visor o recurrir a OSM.
+
+## Edificios
+
+Se usa el servicio ATOM INSPIRE Buildings de la Dirección General del Catastro,
+municipio `04064-MOJACAR`, actualización 20-02-2026. El fichero
+`A.ES.SDGC.BU.04064.buildingpart.gml` contiene polígonos EPSG:25830 y
+`numberOfFloorsAboveGround`. El recorte incluye 160 partes.
+
+Descarga:
+<https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04064-MOJACAR/A.ES.SDGC.BU.04064.zip>.
+El servicio permite el uso gratuito mencionando a la Dirección General del
+Catastro como autora y propietaria.
+
+Las alturas son aproximaciones declaradas: `plantas × 3,1 m`. No se presentan
+como alturas LiDAR ni arquitectónicas exactas.
+
+## Calles
+
+Los ejes proceden de OpenStreetMap mediante una consulta Overpass reproducible,
+se filtran por `highway` y se convierten en polígonos simplificados durante el
+pipeline. Datos © OpenStreetMap contributors, licencia ODbL 1.0:
+<https://www.openstreetmap.org/copyright>.

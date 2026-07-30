@@ -12,23 +12,24 @@
     603050.0,
     4108050.0
   ],
-  "webResolutionMeters": 5.0,
-  "width": 90,
-  "height": 170,
+  "webResolutionMeters": 2.5,
+  "smoothingPasses": 1,
+  "width": 180,
+  "height": 340,
   "nodataCells": 0,
   "filledSeamCells": 0,
   "minElevation": 0.0,
-  "maxElevation": 42.787532806396484,
-  "minLandElevation": 0.5001013278961182,
+  "maxElevation": 42.974876403808594,
+  "minLandElevation": 0.5002577304840088,
   "byteOrder": "little-endian",
   "dataType": "float32",
-  "assetBytes": 61200,
+  "assetBytes": 244800,
   "transform": [
-    5.0,
+    2.5,
     0.0,
     602600.0,
     0.0,
-    -5.0,
+    -2.5,
     4108050.0
   ]
 }

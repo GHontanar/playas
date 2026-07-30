@@ -19,6 +19,10 @@ if (metadata.minElevation < -0.01 || metadata.maxElevation <= metadata.minElevat
   failures.push("rango de elevación inválido");
 }
 await stat(`public${config.coastlineAsset}`);
+const buildings = JSON.parse(await readFile(`public${config.buildingsAsset}`, "utf8"));
+const roads = JSON.parse(await readFile(`public${config.roadsAsset}`, "utf8"));
+if (buildings.features.length < 1) failures.push("no hay edificios en el chunk");
+if (roads.features.length < 1) failures.push("no hay calles en el chunk");
 const shadowTerrainStat = await stat(`public${config.shadowTerrain.terrain.asset}`);
 const expectedShadowBytes = config.shadowTerrain.terrain.width *
   config.shadowTerrain.terrain.height * Float32Array.BYTES_PER_ELEMENT;

@@ -20,8 +20,8 @@ ortográfica verdadera.
 
 ### B. Malla propia Three.js
 
-La malla visible Float32 de 90 × 170 se convierte en 15.300 vértices y
-30.082 triángulos. Una segunda malla de baja resolución, invisible en color
+La malla visible Float32 de 180 × 340 se convierte en 61.200 vértices y
+121.362 triángulos. Una segunda malla de baja resolución, invisible en color
 pero activa en el shadow map, conserva el relieve exterior. Three.js proporciona
 cámara ortográfica, materiales, recorte,
 exageración y `DirectionalLight` con sombras. La transformación EPSG:25830 a

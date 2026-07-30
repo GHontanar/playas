@@ -38,17 +38,18 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   const material = new THREE.MeshStandardMaterial({
-    color: "#43565a",
-    roughness: 0.98,
-    metalness: 0,
-    flatShading: true
+    color: "#8a6477",
+    roughness: 1,
+    metalness: 0
   });
   const sides = new THREE.Mesh(geometry, material);
   sides.castShadow = true;
-  sides.receiveShadow = true;
+  // Evita bandas de shadow acne en las paredes coplanares con el borde denso
+  // del terreno; la sombra informativa se lee en la superficie superior.
+  sides.receiveShadow = false;
 
   const bottomMaterial = new THREE.MeshStandardMaterial({
-    color: "#34494d",
+    color: "#65536f",
     roughness: 1,
     metalness: 0,
     side: THREE.DoubleSide

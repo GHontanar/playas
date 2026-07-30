@@ -1,13 +1,13 @@
 :root {
   color: #173a3d;
-  background: #e9e7de;
+  background: #f2ece4;
   font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
   font-synthesis: none;
 }
 
 * { box-sizing: border-box; }
 html, body, #app { min-height: 100%; margin: 0; }
-body { background: #e9e7de; }
+body { background: #f2ece4; }
 button, input { font: inherit; }
 
 .terrain-app {
@@ -27,12 +27,12 @@ button, input { font: inherit; }
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-  background: #b8d3d0;
+  background: #eadfd7;
   box-shadow: 0 22px 70px #173a3d24;
 }
 .scene { width: 100%; height: 100%; }
 .scene canvas { width: 100%; height: 100%; display: block; }
-.loading, .scene-error { position: absolute; inset: 0; display: grid; place-items: center; padding: 30px; background: #b8d3d0; text-align: center; z-index: 4; }
+.loading, .scene-error { position: absolute; inset: 0; display: grid; place-items: center; padding: 30px; background: #eadfd7; text-align: center; z-index: 4; }
 .scene-error { color: #8d2f28; }
 .scene-error[hidden] { display: none; }
 
@@ -84,12 +84,13 @@ summary { cursor: pointer; font-size: 11px; color: #4c6968; }
 .check { display: flex !important; align-items: center; min-height: 44px; }
 .debug-grid p { margin: 0; color: #607978; font-size: 10px; }
 footer { margin-top: 24px; padding-top: 13px; border-top: 1px solid #78939344; color: #607978; font-size: 10px; line-height: 1.6; }
+footer a { color: #496f70; text-underline-offset: 2px; }
 
 @media (max-width: 650px) {
   .terrain-app { padding: 14px; }
   .scene-shell {
-    height: 52vh;
-    min-height: 390px;
+    height: 44vh;
+    min-height: 340px;
     margin-top: 176px;
     overflow: visible;
     border-radius: 12px;

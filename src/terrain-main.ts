@@ -53,8 +53,13 @@ app.innerHTML = `
       </details>
     </section>
     <footer>
-      <p>Solo modela la orografía del terreno desnudo; no incluye edificios, árboles ni mobiliario. “Oculto por relieve” es una estimación desde el centro de la playa.</p>
+      <p>Edificios simplificados según plantas catastrales; no incluye árboles ni mobiliario. “Oculto por relieve” evalúa únicamente el perfil orográfico desde el centro de la playa.</p>
       <p>${config.attribution.join(" · ")}</p>
+      <p class="data-credits">
+        <a href="https://www.catastro.hacienda.gob.es/webinspire/index.html" target="_blank" rel="noopener">Edificios: Dirección General del Catastro</a>
+        ·
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">Calles: © OpenStreetMap contributors, ODbL</a>
+      </p>
     </footer>
   </main>`;
 

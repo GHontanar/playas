@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
+import { toonMaterial } from "../styles/toonMaterial";
 
 type TerrainSpec = BeachConfig["terrain"];
 type ProjectedBounds = BeachConfig["projectedBounds"];
 
 export interface TerrainModel {
-  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshToonMaterial>;
   heights: Float32Array;
   geometry: THREE.BufferGeometry;
 }
@@ -29,9 +30,9 @@ export async function loadTerrain(
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;
   const colors = new Float32Array(positions.count * 3);
-  const sand = new THREE.Color("#d8c890");
-  const low = new THREE.Color("#918d78");
-  const high = new THREE.Color("#666b62");
+  const sand = new THREE.Color("#f1cc68");
+  const low = new THREE.Color("#aeb57f");
+  const high = new THREE.Color("#797f75");
   const color = new THREE.Color();
 
   for (let row = 0; row < height; row++) {
@@ -53,10 +54,8 @@ export async function loadTerrain(
   }
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
-  const material = new THREE.MeshStandardMaterial({
+  const material = toonMaterial({
     vertexColors: true,
-    roughness: 0.96,
-    metalness: 0,
     wireframe: false
   });
   const mesh = new THREE.Mesh(geometry, material);
@@ -91,4 +90,27 @@ export function estimateTerrainHorizon(
     maxAngle = Math.max(maxAngle, Math.atan2(elevation - originElevation, distance) * 180 / Math.PI);
   }
   return maxAngle;
+}
+
+export function sampleTerrainElevation(
+  heights: Float32Array,
+  config: Pick<BeachConfig, "terrain" | "projectedBounds">,
+  localX: number,
+  localZ: number
+): number {
+  const { width, height } = config.terrain;
+  const bounds = config.projectedBounds;
+  const sizeX = bounds.east - bounds.west;
+  const sizeZ = bounds.north - bounds.south;
+  const column = Math.min(width - 1, Math.max(0, (localX / sizeX + 0.5) * (width - 1)));
+  const row = Math.min(height - 1, Math.max(0, (0.5 - localZ / sizeZ) * (height - 1)));
+  const x0 = Math.floor(column);
+  const y0 = Math.floor(row);
+  const x1 = Math.min(width - 1, x0 + 1);
+  const y1 = Math.min(height - 1, y0 + 1);
+  const tx = column - x0;
+  const ty = row - y0;
+  const top = heights[y0 * width + x0] * (1 - tx) + heights[y0 * width + x1] * tx;
+  const bottom = heights[y1 * width + x0] * (1 - tx) + heights[y1 * width + x1] * tx;
+  return top * (1 - ty) + bottom * ty;
 }

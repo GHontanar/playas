@@ -15,11 +15,11 @@
   "terrain": {
     "verticalExaggeration": 1.5,
     "sourceResolutionMeters": 2,
-    "webResolutionMeters": 5,
-    "width": 90,
-    "height": 170,
+    "webResolutionMeters": 2.5,
+    "width": 180,
+    "height": 340,
     "minElevation": 0,
-    "maxElevation": 42.79,
+    "maxElevation": 42.97,
     "asset": "/terrain/assets/ventanicas-dem.f32"
   },
   "chunk": { "depthMeters": 90 },
@@ -44,8 +44,12 @@
     }
   },
   "coastlineAsset": "/terrain/assets/ventanicas-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/ventanicas-buildings.geojson",
+  "roadsAsset": "/terrain/assets/ventanicas-roads.geojson",
   "attribution": [
     "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
-    "Línea de costa DERA (IECA), CC BY 4.0"
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
   ]
 }

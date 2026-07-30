@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data": "scripts/download-dem.sh && scripts/download-coastline.sh && scripts/prepare-dem.sh && scripts/prepare-coastline.sh && npm run verify:assets",
+    "data": "scripts/download-dem.sh && scripts/download-coastline.sh && scripts/download-urban.sh && scripts/prepare-dem.sh && scripts/prepare-horizon.sh && scripts/prepare-coastline.sh && scripts/prepare-urban.sh && npm run verify:assets",
     "verify:assets": "tsx scripts/verify-assets.ts"
   },
   "engines": {

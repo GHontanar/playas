@@ -109,9 +109,10 @@ npx wrangler pages dev dist
 
 ## Prototipo topográfico de Ventanicas
 
-Vertical slice con MDT02 oficial, costa DERA, malla Three.js, cámara
-ortográfica, SunCalc y sombra física horaria del relieve. No se ha integrado
-con banderas ni añade meteorología. La decisión gráfica está en
+Vertical slice con MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
+calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
+sombra física horaria. No se ha integrado con banderas ni añade meteorología.
+La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 
 Comprobaciones:
@@ -129,9 +130,12 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements-geo.txt
 scripts/download-dem.sh
 scripts/download-coastline.sh
+scripts/download-urban.sh
 scripts/inspect-dem.sh
 scripts/prepare-dem.sh
+scripts/prepare-horizon.sh
 scripts/prepare-coastline.sh
+scripts/prepare-urban.sh
 npm run verify:assets
 ```
 

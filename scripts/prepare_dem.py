@@ -17,6 +17,7 @@ def main() -> None:
     parser.add_argument("--east", type=float, required=True)
     parser.add_argument("--north", type=float, required=True)
     parser.add_argument("--resolution", type=float, required=True)
+    parser.add_argument("--smooth-passes", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--metadata", type=Path, required=True)
     parser.add_argument("--preview", type=Path, required=True)
@@ -53,6 +54,13 @@ def main() -> None:
         nodata_count = 0
     # El MDT interpola el agua alrededor de cero; para la maqueta se fija a nivel del mar.
     heights[heights < 0] = 0
+    for _ in range(args.smooth_passes):
+        padded = np.pad(heights, 1, mode="edge")
+        heights = (
+            padded[:-2, :-2] + 2 * padded[:-2, 1:-1] + padded[:-2, 2:] +
+            2 * padded[1:-1, :-2] + 4 * padded[1:-1, 1:-1] + 2 * padded[1:-1, 2:] +
+            padded[2:, :-2] + 2 * padded[2:, 1:-1] + padded[2:, 2:]
+        ).astype("<f4") / 16
     args.output.parent.mkdir(parents=True, exist_ok=True)
     heights.tofile(args.output)
 
@@ -64,6 +72,7 @@ def main() -> None:
         "sourceResolutionMeters": 2,
         "bounds": [args.west, args.south, args.east, args.north],
         "webResolutionMeters": args.resolution,
+        "smoothingPasses": args.smooth_passes,
         "width": int(heights.shape[1]),
         "height": int(heights.shape[0]),
         "nodataCells": nodata_count,

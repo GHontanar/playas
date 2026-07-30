@@ -13,6 +13,7 @@
     4108550.0
   ],
   "webResolutionMeters": 15.0,
+  "smoothingPasses": 0,
   "width": 140,
   "height": 127,
   "nodataCells": 0,

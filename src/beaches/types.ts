@@ -46,6 +46,8 @@ export const beachConfigSchema = z.object({
     terrain: terrainSchema
   }),
   coastlineAsset: z.string(),
+  buildingsAsset: z.string(),
+  roadsAsset: z.string(),
   attribution: z.array(z.string()).min(1)
 });
 

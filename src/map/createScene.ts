@@ -4,6 +4,8 @@ import { loadTerrain, type TerrainModel } from "./terrain";
 import { loadCoastline } from "./coastline";
 import { createSunLight } from "./shadows";
 import { createChunkBase } from "./chunkBase";
+import { createUrbanLayer } from "./urban";
+import { toonMaterial } from "../styles/toonMaterial";
 
 export interface SceneController {
   terrain: TerrainModel;
@@ -26,8 +28,8 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   container.append(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#b8d3d0");
-  scene.fog = new THREE.Fog("#b8d3d0", 8000, 15000);
+  scene.background = new THREE.Color("#eadfd7");
+  scene.fog = new THREE.Fog("#eadfd7", 8000, 15000);
   const b = config.projectedBounds;
   const sizeX = b.east - b.west;
   const sizeZ = b.north - b.south;
@@ -49,6 +51,12 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   scene.add(terrain.mesh);
   const chunkBase = createChunkBase(terrain.heights, config);
   scene.add(chunkBase.group);
+  const urban = await createUrbanLayer(
+    config,
+    terrain.heights,
+    config.terrain.verticalExaggeration
+  );
+  scene.add(urban.group);
   const shadowTerrain = await loadTerrain(config, config.shadowTerrain);
   const visibleCenterX = (b.west + b.east) / 2;
   const visibleCenterZ = (b.south + b.north) / 2;
@@ -68,14 +76,14 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
 
   const sea = new THREE.Mesh(
     new THREE.PlaneGeometry(sizeX, sizeZ),
-    new THREE.MeshStandardMaterial({ color: "#327b83", roughness: 0.82, transparent: true, opacity: 0.94 })
+    toonMaterial({ color: "#55a9aa", transparent: true, opacity: 0.97 })
   );
   sea.rotateX(-Math.PI / 2);
-  sea.position.y = 0.6;
+  sea.position.y = 1.5;
   sea.receiveShadow = true;
   scene.add(sea);
 
-  scene.add(new THREE.HemisphereLight("#dce9dc", "#273d42", 1.45));
+  scene.add(new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35));
   const shadowWidth = shadowBounds.east - shadowBounds.west;
   const shadowDepth = shadowBounds.north - shadowBounds.south;
   const shadowOffset = Math.hypot(
@@ -134,6 +142,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       currentExaggeration = value;
       terrain.mesh.scale.y = value;
       chunkBase.setExaggeration(value);
+      urban.group.scale.y = value / config.terrain.verticalExaggeration;
       shadowTerrain.mesh.scale.y = value;
       resize();
     },
@@ -144,6 +153,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       terrain.geometry.dispose();
       terrain.mesh.material.dispose();
       chunkBase.dispose();
+      urban.dispose();
       shadowTerrain.geometry.dispose();
       shadowTerrain.mesh.material.dispose();
       renderer.dispose();

@@ -16,18 +16,22 @@ python3 -m venv .venv
 ```sh
 scripts/download-dem.sh
 scripts/download-coastline.sh
+scripts/download-urban.sh
 scripts/inspect-dem.sh
 scripts/prepare-dem.sh
+scripts/prepare-horizon.sh
 scripts/prepare-coastline.sh
+scripts/prepare-urban.sh
 npm run verify:assets
 ```
 
 `download-dem.sh` usa los identificadores estables del Centro de Descargas.
 `prepare_dem.py` comprueba EPSG:25830 y resolución 2 m, une las dos hojas,
-recorta el rectángulo métrico y remuestrea bilinealmente a 15 m. La distinta
-alineación de las dos rejillas deja una costura de una celda (127 muestras),
-rellenada por vecino próximo dentro de un radio máximo de cuatro celdas; el
-resultado se rechaza si queda algún nodata. Produce:
+recorta el rectángulo métrico y remuestrea bilinealmente. El derivado visible
+usa 2,5 m y una pasada de suavizado gaussiano 3×3; el caster usa 15 m sin
+suavizado. Si la alineación de rejillas deja una costura, se rellena dentro de
+un radio máximo de cuatro celdas y se rechaza el resultado si queda algún
+nodata. Produce:
 
 - `ventanicas-dem.f32`: matriz Float32 little-endian, filas de norte a sur;
 - `ventanicas-dem.json`: trazabilidad, transformada, dimensiones y min/max;
@@ -36,11 +40,16 @@ resultado se rechaza si queda algún nodata. Produce:
 `prepare_coastline.py` abre `T01_07_LineaCostaAndalucia`, comprueba el CRS,
 intersecta geometrías reales con el chunk y escribe GeoJSON EPSG:25830.
 
+`prepare_urban.py` recorta las partes de edificio INSPIRE de Catastro, conserva
+el número de plantas y deriva una altura visual de 3,1 m por planta. Los ejes
+OSM se reproyectan a EPSG:25830, se filtran por clase y se convierten offline
+en cintas de 2,5–8 m de ancho. El navegador solo recibe los GeoJSON derivados.
+
 ## Extensión del chunk
 
 El chunk visible usa EPSG:25830: oeste 602600, sur 4107200, este 603050,
 norte 4108050. Son **450 × 850 m**, con los 502 m de Ventanicas, mar y una
-franja corta tras la arena. La resolución web de 5 m da 90 × 170 muestras.
+franja corta tras la arena. La resolución web de 2,5 m da 180 × 340 muestras.
 
 La física usa además `ventanicas-horizon.f32`, un caster invisible de
 2,1 × 1,9 km y 15 m de resolución. Conserva los cerros capaces de ocultar el

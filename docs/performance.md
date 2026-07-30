@@ -4,18 +4,24 @@ Medición de build en la máquina de desarrollo, 30-07-2026:
 
 | Recurso | Sin comprimir | gzip aproximado |
 |---|---:|---:|
-| JavaScript Three.js + aplicación | 615.747 B | 159.000 B |
-| DEM visible Float32 | 61.200 B | 20.470 B |
+| JavaScript Three.js + aplicación | 655.580 B | 171.780 B |
+| DEM visible Float32 | 244.800 B | 80.399 B |
 | Caster/horizonte Float32 | 71.120 B | 48.841 B |
 | Costa GeoJSON | 1.316 B | 548 B |
+| Edificios catastrales GeoJSON | 86.405 B | 14.877 B |
+| Calles OSM GeoJSON | 13.597 B | 5.646 B |
 | CSS | 3.222 B | 1.370 B |
-| Build completo | ~755 KB | < 250 KB transferibles |
+| Build completo | ~1,15 MB | < 350 KB transferibles |
 
-Geometría visible: 15.300 vértices, 30.082 triángulos; caster invisible:
+Geometría visible: 61.200 vértices, 121.362 triángulos; caster invisible:
 17.780 vértices y 35.028 triángulos. Shadow map: 1536² en escritorio
 (unos 9 MB para profundidad de 32 bits) y 1024² en móvil (unos 4 MB), más
 recursos internos del driver. El
 pixel ratio se limita a 1,75 y el antialias se desactiva por encima de 1,5 DPR.
+
+Las 160 partes de edificio se fusionan en cinco mallas, una por color de la
+paleta; las calles se fusionan en una sexta malla. Así la capa urbana añade seis
+llamadas de dibujo principales, no una por edificio.
 
 El cambio horario actualiza una luz y el shadow map; no cambia la geometría ni
 genera peticiones. Los assets son estáticos y cacheables por Cloudflare.
