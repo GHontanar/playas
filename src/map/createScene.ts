@@ -5,7 +5,7 @@ import { loadCoastline } from "./coastline";
 import { createSunLight } from "./shadows";
 import { createChunkBase } from "./chunkBase";
 import { createUrbanLayer } from "./urban";
-import { toonMaterial } from "../styles/toonMaterial";
+import { createSea, type SeaState } from "./sea";
 
 export interface SceneController {
   terrain: TerrainModel;
@@ -14,6 +14,7 @@ export interface SceneController {
   renderer: THREE.WebGLRenderer;
   setExaggeration(value: number): void;
   setWireframe(value: boolean): void;
+  setSeaState(value: SeaState): void;
   resize(): void;
   dispose(): void;
 }
@@ -74,14 +75,8 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   scene.add(shadowTerrain.mesh);
   scene.add(await loadCoastline(config));
 
-  const sea = new THREE.Mesh(
-    new THREE.PlaneGeometry(sizeX, sizeZ),
-    toonMaterial({ color: "#55a9aa", transparent: true, opacity: 0.97 })
-  );
-  sea.rotateX(-Math.PI / 2);
-  sea.position.y = 1.5;
-  sea.receiveShadow = true;
-  scene.add(sea);
+  const sea = await createSea(sizeX, sizeZ, config);
+  scene.add(sea.group);
 
   scene.add(new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35));
   const shadowWidth = shadowBounds.east - shadowBounds.west;
@@ -97,8 +92,10 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   scene.add(light, light.target);
 
   let frame = 0;
+  const clock = new THREE.Clock();
   const render = () => {
     frame = requestAnimationFrame(render);
+    sea.update(clock.getElapsedTime());
     renderer.render(scene, camera);
   };
   render();
@@ -147,6 +144,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       resize();
     },
     setWireframe(value) { terrain.mesh.material.wireframe = value; },
+    setSeaState(value) { sea.setState(value); },
     resize,
     dispose() {
       cancelAnimationFrame(frame);
@@ -154,6 +152,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       terrain.mesh.material.dispose();
       chunkBase.dispose();
       urban.dispose();
+      sea.dispose();
       shadowTerrain.geometry.dispose();
       shadowTerrain.mesh.material.dispose();
       renderer.dispose();

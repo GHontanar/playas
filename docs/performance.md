@@ -4,14 +4,15 @@ Medición de build en la máquina de desarrollo, 30-07-2026:
 
 | Recurso | Sin comprimir | gzip aproximado |
 |---|---:|---:|
-| JavaScript Three.js + aplicación | 655.580 B | 171.780 B |
-| DEM visible Float32 | 244.800 B | 80.399 B |
-| Caster/horizonte Float32 | 71.120 B | 48.841 B |
-| Costa GeoJSON | 1.316 B | 548 B |
-| Edificios catastrales GeoJSON | 86.405 B | 14.877 B |
-| Calles OSM GeoJSON | 13.597 B | 5.646 B |
-| CSS | 3.222 B | 1.370 B |
-| Build completo | ~1,15 MB | < 350 KB transferibles |
+| JavaScript Three.js + aplicación | 672.350 B | 176.940 B |
+| DEM visible Float32 | 244.800 B | 80.530 B |
+| Caster/horizonte Float32 | 71.120 B | 48.943 B |
+| Costa GeoJSON | 1.316 B | 549 B |
+| Edificios catastrales GeoJSON | 86.405 B | 14.990 B |
+| Calles OSM GeoJSON | 13.597 B | 5.658 B |
+| Normal map del agua WebP | 60.330 B | 60.390 B |
+| CSS | 3.339 B | 1.440 B |
+| Build y assets principales | ~1,16 MB | ~390 KB transferibles |
 
 Geometría visible: 61.200 vértices, 121.362 triángulos; caster invisible:
 17.780 vértices y 35.028 triángulos. Shadow map: 1536² en escritorio
@@ -25,6 +26,10 @@ llamadas de dibujo principales, no una por edificio.
 
 El cambio horario actualiza una luz y el shadow map; no cambia la geometría ni
 genera peticiones. Los assets son estáticos y cacheables por Cloudflare.
+El oleaje usa un plano subdividido de 17.557 vértices deformado en el vertex
+shader y cuatro cintas costeras pequeñas. Cada frame actualiza cuatro uniforms y
+las posiciones de las cintas; seleccionar otro estado no crea geometría ni
+peticiones.
 
 Se realizó un smoke test headless Chromium a 1280 × 900 y 390 × 844: carga,
 WebGL, controles y layout sin errores de página. No se publica un dato de FPS

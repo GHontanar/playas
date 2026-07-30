@@ -8,7 +8,7 @@
 * { box-sizing: border-box; }
 html, body, #app { min-height: 100%; margin: 0; }
 body { background: #f2ece4; }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 
 .terrain-app {
   width: min(1240px, 100%);
@@ -67,7 +67,7 @@ dd { margin: 2px 0 0; font-size: 11px; }
   padding: 21px 2px 5px;
 }
 .controls label { display: grid; gap: 8px; font-size: 11px; color: #4c6968; }
-input[type="date"], button {
+input[type="date"], button, select {
   min-height: 44px;
   padding: 9px 12px;
   color: #173a3d;

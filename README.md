@@ -112,6 +112,8 @@ npx wrangler pages dev dist
 Vertical slice con MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
 sombra física horaria. No se ha integrado con banderas ni añade meteorología.
+El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
+agitado—, sin representar observaciones ni predicciones marinas.
 La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 
@@ -122,6 +124,11 @@ npm test
 npm run verify:assets
 npm run build
 ```
+
+Estado validado de Ventanicas: 18 pruebas unitarias, regeneración determinista
+desde los originales locales, contraste de horizonte con PVGIS y smoke tests
+WebGL a 1280 × 900 y 390 × 844. La medición de FPS/memoria GPU queda reservada
+para un móvil físico.
 
 Regeneración geográfica desde las fuentes oficiales:
 

@@ -5,6 +5,7 @@ import { createScene } from "./map/createScene";
 import { estimateTerrainHorizon } from "./map/terrain";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
+import type { SeaState } from "./map/sea";
 
 const config = parseBeachConfig(rawConfig);
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -34,6 +35,13 @@ app.innerHTML = `
       </aside>
     </section>
     <section class="controls" aria-label="Controles solares">
+      <label>Estado artístico del mar
+        <select id="sea-state">
+          <option value="calm">Calma</option>
+          <option value="moderate" selected>Marejadilla</option>
+          <option value="rough">Agitado</option>
+        </select>
+      </label>
       <label>Fecha<input id="date" type="date" value="${initial.dateISO}"></label>
       <label class="time-control">
         Hora <output id="slider-output">—</output>
@@ -70,6 +78,7 @@ const timeInput = document.querySelector<HTMLInputElement>("#time")!;
 const shadowsInput = document.querySelector<HTMLInputElement>("#shadows")!;
 const wireframeInput = document.querySelector<HTMLInputElement>("#wireframe")!;
 const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration")!;
+const seaStateInput = document.querySelector<HTMLSelectElement>("#sea-state")!;
 
 if (!window.WebGLRenderingContext) {
   showError("Este dispositivo no ofrece WebGL, necesario para mostrar la maqueta 3D.");
@@ -115,6 +124,9 @@ async function initialise() {
   dateInput.addEventListener("input", update);
   timeInput.addEventListener("input", update);
   shadowsInput.addEventListener("change", update);
+  seaStateInput.addEventListener("change", () => {
+    controller.setSeaState(seaStateInput.value as SeaState);
+  });
   wireframeInput.addEventListener("change", () => controller.setWireframe(wireframeInput.checked));
   exaggerationInput.addEventListener("input", () => {
     const value = clampExaggeration(Number(exaggerationInput.value));
