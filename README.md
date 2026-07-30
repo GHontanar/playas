@@ -95,18 +95,72 @@ Si prefieres un Worker independiente, pon ahí su URL `https://…workers.dev/`.
 ## Desarrollo
 
 ```sh
-npx wrangler pages dev .
+npm install
+npm run dev
 ```
 
-Sirve la página y `/api/banner` juntos, igual que en producción.
+La vista de banderas sigue en `/`; el prototipo topográfico está en
+`/terrain/`. Para probar también la Pages Function localmente sobre el build:
+
+```sh
+npm run build
+npx wrangler pages dev dist
+```
+
+## Prototipo topográfico de Ventanicas
+
+Vertical slice con MDT02 oficial, costa DERA, malla Three.js, cámara
+ortográfica, SunCalc y sombra física horaria del relieve. No se ha integrado
+con banderas ni añade meteorología. La decisión gráfica está en
+[`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
+
+Comprobaciones:
+
+```sh
+npm test
+npm run verify:assets
+npm run build
+```
+
+Regeneración geográfica desde las fuentes oficiales:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-geo.txt
+scripts/download-dem.sh
+scripts/download-coastline.sh
+scripts/inspect-dem.sh
+scripts/prepare-dem.sh
+scripts/prepare-coastline.sh
+npm run verify:assets
+```
+
+Los originales se guardan en `data/source/`, ignorado por Git. Véanse
+[`docs/data-sources.md`](docs/data-sources.md),
+[`docs/terrain-pipeline.md`](docs/terrain-pipeline.md) y
+[`docs/validation.md`](docs/validation.md).
 
 ## Despliegue
 
-Ya configurado: Cloudflare Pages con integración Git sobre este repo, **sin build command**
-y con **output directory `/`**. El directorio `functions/` se detecta solo, así que la web y
-el proxy salen en el mismo despliegue y cada push a `main` redespliega. No hace falta
-`wrangler deploy` para nada, salvo que quieras el proxy como Worker aparte
-(`npx wrangler deploy` desde `worker/`).
+La nueva entrada TypeScript requiere cambiar una vez la configuración de
+Cloudflare Pages a:
+
+- build command: `npm run build`
+- output directory: `dist`
+
+El directorio raíz `functions/` sigue siendo detectado por Pages y el build
+conserva sin cambios la página de banderas como `dist/index.html`.
+
+Despliegue manual equivalente:
+
+```sh
+npm run build
+npx wrangler pages deploy dist --project-name playas-16y
+```
+
+La integración Git continúa siendo la vía recomendada tras actualizar esos dos
+campos. El Worker independiente solo se despliega, si se desea, con
+`npx wrangler deploy` desde `worker/`.
 
 ## Notas
 

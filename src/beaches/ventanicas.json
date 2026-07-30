@@ -1,0 +1,51 @@
+{
+  "id": "ventanicas",
+  "name": "Ventanicas",
+  "timezone": "Europe/Madrid",
+  "center": { "lat": 37.109198, "lon": -1.843914 },
+  "bounds": { "west": -1.845305, "south": 37.105503, "east": -1.840125, "north": 37.113114 },
+  "projectedBounds": {
+    "west": 602600,
+    "south": 4107200,
+    "east": 603050,
+    "north": 4108050,
+    "crs": "EPSG:25830"
+  },
+  "camera": { "bearing": 135, "pitch": 35.264, "roll": 0, "distance": 1100 },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 5,
+    "width": 90,
+    "height": 170,
+    "minElevation": 0,
+    "maxElevation": 42.79,
+    "asset": "/terrain/assets/ventanicas-dem.f32"
+  },
+  "chunk": { "depthMeters": 90 },
+  "shadowTerrain": {
+    "bounds": { "west": -1.860570, "south": 37.100693, "east": -1.836680, "north": 37.117587 },
+    "projectedBounds": {
+      "west": 601250,
+      "south": 4106650,
+      "east": 603350,
+      "north": 4108550,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 140,
+      "height": 127,
+      "minElevation": 0,
+      "maxElevation": 329.95,
+      "asset": "/terrain/assets/ventanicas-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/ventanicas-coastline.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0"
+  ]
+}
