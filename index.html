@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>Estado de las playas · Mojácar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ECEAE2;
+    --panel:#F4F2EB;
+    --ink:#22403F;
+    --mute:#6C7B76;
+    --faint:#9BA69F;
+    --line:rgba(34,64,63,.14);
+    --line-soft:rgba(34,64,63,.08);
+    --accent:#1C7A87;
+    --verde:#2F9E54;
+    --amarilla:#D9A016;
+    --roja:#C4392B;
+    --medusa:#7B4FA3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:14px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(26px,7vw,52px) clamp(18px,6vw,28px) 60px;
+    animation:fade .5s ease both;
+  }
+  @keyframes fade{from{opacity:0}}
+  .wrap{max-width:560px;margin:0 auto}
+
+  /* Header */
+  h1{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:clamp(32px,9vw,44px);line-height:1;letter-spacing:-.015em;
+    margin:0;color:var(--ink);
+  }
+  .sub{
+    font-size:11.5px;letter-spacing:.02em;color:var(--mute);
+    margin:12px 0 0;
+  }
+
+  /* Meta row */
+  .meta{
+    display:flex;align-items:center;gap:14px;
+    margin:26px 0 0;padding:13px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    font-size:11px;color:var(--mute);letter-spacing:.02em;
+  }
+  .meta .src b{color:var(--ink);font-weight:500}
+  .meta .spacer{flex:1}
+  button.refresh{
+    font-family:inherit;font-size:11px;letter-spacing:.04em;color:var(--accent);
+    background:none;border:none;padding:4px 2px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  button.refresh svg{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  button.refresh.spin svg{transform:rotate(360deg)}
+  button.refresh:active{opacity:.6}
+
+  /* Legend */
+  .legend{
+    display:flex;flex-wrap:wrap;gap:6px 16px;
+    padding:13px 0 0;font-size:11px;color:var(--mute);
+  }
+  .lg{display:flex;align-items:center;gap:6px}
+  .lg i{width:8px;height:8px;border-radius:2px;display:inline-block}
+
+  /* Beach list */
+  .list{margin-top:4px}
+  .beach{
+    padding:22px 0;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .beach:last-child{border-bottom:none}
+
+  .row{display:flex;align-items:baseline;gap:10px}
+  .code{color:var(--faint);font-size:12px;font-weight:500;min-width:20px}
+  .name{
+    font-family:"Fraunces",serif;font-weight:500;font-size:19px;
+    letter-spacing:-.01em;line-height:1.1;color:var(--ink);flex:1;
+  }
+  .hours{color:var(--mute);font-size:10.5px;white-space:nowrap}
+
+  .banners{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+  .banner{
+    display:flex;align-items:center;justify-content:center;
+    min-height:38px;min-width:52px;position:relative;
+  }
+  .banner.main{min-height:46px}
+  .banner img{max-height:44px;max-width:230px;display:block}
+  .banner.mini img{max-height:34px;max-width:150px}
+  .banner .skel{
+    width:64px;height:30px;border-radius:3px;background:var(--line);
+    animation:breathe 1.6s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:.9}}
+  .banner .fail{font-size:10.5px;color:var(--faint);letter-spacing:.03em}
+
+  /* Footer */
+  .foot{
+    margin-top:34px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--mute);line-height:1.7;
+  }
+  .foot p{margin:0 0 7px}
+  .foot a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line)}
+  .foot .emg{color:var(--roja);font-weight:500}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Mojácar</h1>
+  <p class="sub">Estado de las playas · Salvamento y socorrismo 2026</p>
+
+  <div class="meta">
+    <span class="src">Fuente <b>gestiondeplayas.com</b></span>
+    <span class="spacer"></span>
+    <span id="stamp">—</span>
+    <button class="refresh" id="btn" onclick="refresh()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Actualizar
+    </button>
+  </div>
+
+  <div class="legend">
+    <span class="lg"><i style="background:var(--verde)"></i> verde · baño permitido</span>
+    <span class="lg"><i style="background:var(--amarilla)"></i> amarilla · precaución</span>
+    <span class="lg"><i style="background:var(--roja)"></i> roja · prohibido</span>
+    <span class="lg"><i style="background:var(--medusa)"></i> medusas</span>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="foot">
+    <p>Se lee directo del proveedor que alimenta la web del ayuntamiento, saltándose el widget roto de <a href="https://www.mojacar.es/mojacar-disfruta/estado-de-las-playas/" target="_blank" rel="noopener">mojacar.es</a>. El estado oficial solo cambia una vez al día (aprox. 9 abr – 9 oct, franja 11:30–11:45); fuera de eso el dato queda igual.</p>
+    <p>Emergencias: <span class="emg">112</span>.</p>
+  </div>
+
+</div>
+
+<script>
+// Pega aquí la URL de tu Worker de Cloudflare (ver playas-mojacar-proxy.js)
+// para esquivar hotlink / CORS / sandbox. Déjalo "" para pedir directo al proveedor.
+const PROXY = "";
+const KEY = "jhJJhg53435HJjjh255l";
+const BASE = "https://www.gestiondeplayas.com/api/";
+const BEACHES = [
+  {code:"01", name:"Marina de la Torre", hours:"12–19h"},
+  {code:"04", name:"Descargador",        hours:"11–19h"},
+  {code:"05", name:"Piedra Villazar",    hours:"11–19h"},
+  {code:"07", name:"El Cantal",          hours:"11–19h"},
+  {code:"09", name:"Lance Nuevo",        hours:"12–19h"},
+  {code:"12", name:"Ventanicas",         hours:"12–19h"},
+  {code:"13", name:"Venta del Bancal",   hours:"12–19h"},
+];
+
+function url(code, evento){
+  if(PROXY){
+    return `${PROXY}?playa=${code}&evento=${evento}`;
+  }
+  return `${BASE}?localidad=mojacar&playa=${code}&evento=${evento}&tipo=banner&tamano=mini&clave_api=${KEY}`;
+}
+
+function bannerEl(code, evento, cls){
+  const b = document.createElement("div");
+  b.className = "banner" + (cls ? " " + cls : "");
+
+  const sk = document.createElement("div");
+  sk.className = "skel";
+  b.appendChild(sk);
+
+  const img = document.createElement("img");
+  img.alt = evento;
+  img.referrerPolicy = "no-referrer";
+  img.dataset.code = code;
+  img.dataset.evento = evento;
+  img.style.display = "none";
+  img.onload = () => {
+    sk.remove();
+    img.style.display = "";
+    const f = b.querySelector(".fail");
+    if(f) f.remove();
+  };
+  img.onerror = () => {
+    sk.remove();
+    img.style.display = "none";
+    if(!b.querySelector(".fail")){
+      const f = document.createElement("div");
+      f.className = "fail";
+      f.textContent = "sin señal";
+      b.appendChild(f);
+    }
+  };
+  b.appendChild(img);
+  return b;
+}
+
+function buildBeach(be){
+  const el = document.createElement("div");
+  el.className = "beach";
+
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML =
+    `<span class="code">${be.code}</span>` +
+    `<span class="name">${be.name}</span>` +
+    `<span class="hours">${be.hours}</span>`;
+  el.appendChild(row);
+
+  const banners = document.createElement("div");
+  banners.className = "banners";
+  banners.appendChild(bannerEl(be.code, "bandera", "main"));
+  banners.appendChild(bannerEl(be.code, "medusas", "mini"));
+  banners.appendChild(bannerEl(be.code, "fecha", "mini"));
+  el.appendChild(banners);
+
+  return el;
+}
+
+function render(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  BEACHES.forEach(be => list.appendChild(buildBeach(be)));
+  refresh(true);
+}
+
+function refresh(silent){
+  const now = Date.now();
+  document.querySelectorAll(".banner img").forEach(img => {
+    const b = img.closest(".banner");
+    const oldFail = b.querySelector(".fail");
+    if(oldFail) oldFail.remove();
+    img.style.display = "none";
+    if(!b.querySelector(".skel")){
+      const sk = document.createElement("div");
+      sk.className = "skel";
+      b.insertBefore(sk, img);
+    }
+    img.src = url(img.dataset.code, img.dataset.evento) + "&_ts=" + now;
+  });
+  const d = new Date();
+  document.getElementById("stamp").textContent =
+    d.toLocaleTimeString("es-ES", {hour:"2-digit", minute:"2-digit"});
+  if(!silent){
+    const btn = document.getElementById("btn");
+    btn.classList.add("spin");
+    setTimeout(() => btn.classList.remove("spin"), 620);
+  }
+}
+
+render();
+// Sin auto-refresco: el estado oficial solo cambia una vez al día (~11:30–11:45).
+// Se carga al abrir la página y solo se vuelve a pedir al pulsar «Actualizar».
+</script>
+</body>
+</html>
