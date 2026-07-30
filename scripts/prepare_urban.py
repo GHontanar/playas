@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
+import argparse
 import json
-import sys
 from pathlib import Path
 
 import fiona
@@ -8,8 +8,6 @@ from pyproj import Transformer
 from shapely.geometry import LineString, box, mapping, shape
 from shapely.ops import unary_union
 
-BOUNDS = (602600, 4107200, 603050, 4108050)
-CLIP = box(*BOUNDS)
 ROAD_WIDTHS = {
     "tertiary": 8,
     "secondary": 8,
@@ -32,13 +30,14 @@ def feature_collection(name: str, features: list[dict], source: str) -> dict:
     }
 
 
-def buildings(source: Path) -> dict:
+def buildings(source: Path, bounds: tuple[float, float, float, float], name: str) -> dict:
+    clip = box(*bounds)
     features = []
     with fiona.open(source, layer="BuildingPart") as collection:
         if collection.crs.to_epsg() != 25830:
             raise SystemExit(f"CRS catastral inesperado: {collection.crs}")
-        for raw in collection.filter(bbox=BOUNDS):
-            geometry = shape(raw["geometry"]).intersection(CLIP)
+        for raw in collection.filter(bbox=bounds):
+            geometry = shape(raw["geometry"]).intersection(clip)
             if geometry.is_empty or geometry.area < 2:
                 continue
             floors = max(1, int(raw["properties"].get("numberOfFloorsAboveGround") or 1))
@@ -53,13 +52,14 @@ def buildings(source: Path) -> dict:
                 "geometry": mapping(geometry),
             })
     return feature_collection(
-        "ventanicas-buildings",
+        f"{name}-buildings",
         features,
         "Dirección General del Catastro, INSPIRE BU, municipio 04064",
     )
 
 
-def roads(source: Path) -> dict:
+def roads(source: Path, bounds: tuple[float, float, float, float], name: str) -> dict:
+    clip = box(*bounds)
     payload = json.loads(source.read_text(encoding="utf-8"))
     transformer = Transformer.from_crs(4326, 25830, always_xy=True)
     buffered = []
@@ -74,7 +74,7 @@ def roads(source: Path) -> dict:
             transformer.transform(point["lon"], point["lat"])
             for point in coordinates
         ])
-        polygon = line.buffer(width / 2, cap_style="flat", join_style="round").intersection(CLIP)
+        polygon = line.buffer(width / 2, cap_style="flat", join_style="round").intersection(clip)
         if not polygon.is_empty:
             buffered.append(polygon)
             classes.append(road_class)
@@ -84,7 +84,7 @@ def roads(source: Path) -> dict:
         "properties": {"classes": sorted(set(classes))},
         "geometry": mapping(merged),
     }] if not merged.is_empty else []
-    return feature_collection("ventanicas-roads", features, "© OpenStreetMap contributors, ODbL 1.0")
+    return feature_collection(f"{name}-roads", features, "© OpenStreetMap contributors, ODbL 1.0")
 
 
 def write(path: Path, payload: dict) -> None:
@@ -93,5 +93,14 @@ def write(path: Path, payload: dict) -> None:
 
 
 if __name__ == "__main__":
-    write(Path(sys.argv[3]), buildings(Path(sys.argv[1])))
-    write(Path(sys.argv[4]), roads(Path(sys.argv[2])))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("buildings_source", type=Path)
+    parser.add_argument("roads_source", type=Path)
+    parser.add_argument("buildings_output", type=Path)
+    parser.add_argument("roads_output", type=Path)
+    parser.add_argument("--name", required=True)
+    parser.add_argument("--bounds", nargs=4, required=True, type=float, metavar=("W", "S", "E", "N"))
+    args = parser.parse_args()
+    bounds = tuple(args.bounds)
+    write(args.buildings_output, buildings(args.buildings_source, bounds, args.name))
+    write(args.roads_output, roads(args.roads_source, bounds, args.name))

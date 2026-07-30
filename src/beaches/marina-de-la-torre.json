@@ -1,0 +1,86 @@
+{
+  "id": "marina-de-la-torre",
+  "name": "Marina de la Torre",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.163133,
+    "lon": -1.823962
+  },
+  "bounds": {
+    "west": -1.826553,
+    "south": 37.153812,
+    "east": -1.820046,
+    "north": 37.172496
+  },
+  "projectedBounds": {
+    "west": 604200,
+    "south": 4112580,
+    "east": 604752,
+    "north": 4114660,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1800
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 138,
+    "height": 520,
+    "minElevation": 0,
+    "maxElevation": 21.45,
+    "asset": "/terrain/assets/marina-de-la-torre-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 604387.2948,
+      "z": 4112691.1373
+    },
+    "end": {
+      "x": 604447.2857,
+      "z": 4114542.7358
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.843539,
+      "south": 37.147625,
+      "east": -1.816534,
+      "north": 37.178861
+    },
+    "projectedBounds": {
+      "west": 602700,
+      "south": 4111875,
+      "east": 605055,
+      "north": 4115370,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 157,
+      "height": 233,
+      "minElevation": 0,
+      "maxElevation": 157.85,
+      "asset": "/terrain/assets/marina-de-la-torre-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/marina-de-la-torre-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/marina-de-la-torre-buildings.geojson",
+  "roadsAsset": "/terrain/assets/marina-de-la-torre-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

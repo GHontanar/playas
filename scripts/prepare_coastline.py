@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
+import argparse
 import json
-import sys
 from pathlib import Path
 
 import fiona
 from shapely.geometry import box, mapping, shape
 
-BOUNDS = (602600, 4107200, 603050, 4108050)
 LAYER = "T01_07_LineaCostaAndalucia"
 
 
-def main(source: Path, output: Path) -> None:
-    clip = box(*BOUNDS)
+def main(source: Path, output: Path, bounds: tuple[float, float, float, float], name: str) -> None:
+    clip = box(*bounds)
     features = []
     with fiona.open(source, layer=LAYER) as collection:
         if collection.crs.to_epsg() != 25830:
             raise SystemExit(f"CRS de costa inesperado: {collection.crs}")
-        for feature in collection.filter(bbox=BOUNDS):
+        for feature in collection.filter(bbox=bounds):
             geometry = shape(feature["geometry"]).intersection(clip)
             if not geometry.is_empty:
                 features.append({
@@ -31,7 +30,7 @@ def main(source: Path, output: Path) -> None:
         raise SystemExit("La línea de costa no intersecta el chunk")
     payload = {
         "type": "FeatureCollection",
-        "name": "ventanicas-coastline",
+        "name": f"{name}-coastline",
         "crs": {"type": "name", "properties": {"name": "EPSG:25830"}},
         "features": features,
     }
@@ -40,4 +39,10 @@ def main(source: Path, output: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]), Path(sys.argv[2]))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("source", type=Path)
+    parser.add_argument("output", type=Path)
+    parser.add_argument("--name", required=True)
+    parser.add_argument("--bounds", nargs=4, required=True, type=float, metavar=("W", "S", "E", "N"))
+    args = parser.parse_args()
+    main(args.source, args.output, tuple(args.bounds), args.name)

@@ -1,0 +1,86 @@
+{
+  "id": "descargador",
+  "name": "Descargador",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.139791,
+    "lon": -1.827817
+  },
+  "bounds": {
+    "west": -1.831008,
+    "south": 37.135108,
+    "east": -1.822756,
+    "north": 37.144491
+  },
+  "projectedBounds": {
+    "west": 603830,
+    "south": 4110500,
+    "east": 604550,
+    "north": 4111550,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1300
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 3,
+    "width": 240,
+    "height": 350,
+    "minElevation": 0,
+    "maxElevation": 22.78,
+    "asset": "/terrain/assets/descargador-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 604014.5219,
+      "z": 4110602.7136
+    },
+    "end": {
+      "x": 604245,
+      "z": 4111440
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.848046,
+      "south": 37.128875,
+      "east": -1.819168,
+      "north": 37.150765
+    },
+    "projectedBounds": {
+      "west": 602325,
+      "south": 4109790,
+      "east": 604860,
+      "north": 4112250,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 169,
+      "height": 164,
+      "minElevation": 0,
+      "maxElevation": 177.6,
+      "asset": "/terrain/assets/descargador-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/descargador-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/descargador-buildings.geojson",
+  "roadsAsset": "/terrain/assets/descargador-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

@@ -5,22 +5,24 @@ Medición de build en la máquina de desarrollo, 30-07-2026:
 | Recurso | Sin comprimir | gzip aproximado |
 |---|---:|---:|
 | JavaScript Three.js + aplicación | 672.350 B | 176.940 B |
-| DEM visible Float32 | 244.800 B | 80.530 B |
-| Caster/horizonte Float32 | 71.120 B | 48.943 B |
+| DEM visible Float32 por playa | 140–424 KB | 78–161 KB |
+| Caster/horizonte por playa | 76–146 KB | 49–101 KB |
 | Costa GeoJSON | 1.316 B | 549 B |
 | Edificios catastrales GeoJSON | 86.405 B | 14.990 B |
 | Calles OSM GeoJSON | 13.597 B | 5.658 B |
 | Normal map del agua WebP | 60.330 B | 60.390 B |
 | CSS | 3.339 B | 1.440 B |
-| Build y assets principales | ~1,16 MB | ~390 KB transferibles |
+| Todos los derivados de las 7 playas | 4.679.467 B | no se cargan conjuntamente |
 
-Geometría visible: 61.200 vértices, 121.362 triángulos; caster invisible:
-17.780 vértices y 35.028 triángulos. Shadow map: 1536² en escritorio
+La playa seleccionada carga únicamente sus seis derivados; cambiarla navega a
+otra URL y permite que el navegador libere la escena anterior. El mayor DEM
+visible comprimido mide unos 161 KB y el mayor caster unos 101 KB.
+Shadow map: 1536² en escritorio
 (unos 9 MB para profundidad de 32 bits) y 1024² en móvil (unos 4 MB), más
 recursos internos del driver. El
 pixel ratio se limita a 1,75 y el antialias se desactiva por encima de 1,5 DPR.
 
-Las 160 partes de edificio se fusionan en cinco mallas, una por color de la
+Las partes de edificio de cada playa se fusionan en cinco mallas, una por color de la
 paleta; las calles se fusionan en una sexta malla. Así la capa urbana añade seis
 llamadas de dibujo principales, no una por edificio.
 

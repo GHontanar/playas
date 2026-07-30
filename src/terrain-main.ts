@@ -1,13 +1,13 @@
 import "./styles/terrain.css";
-import rawConfig from "./beaches/ventanicas.json";
-import { parseBeachConfig, clampExaggeration } from "./beaches/types";
+import { beaches, getBeach } from "./beaches/catalog";
+import { clampExaggeration } from "./beaches/types";
 import { createScene } from "./map/createScene";
 import { estimateTerrainHorizon } from "./map/terrain";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import type { SeaState } from "./map/sea";
 
-const config = parseBeachConfig(rawConfig);
+const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const app = document.querySelector<HTMLElement>("#app")!;
 const initial = nowInMojacar();
 
@@ -18,9 +18,15 @@ app.innerHTML = `
         <a href="/" class="back">Mojácar / experimento topográfico</a>
         <h1>${config.name}</h1>
       </div>
-      <span class="model-tag">MDT02 · maqueta 3D</span>
+      <label class="beach-picker">Playa
+        <select id="beach">
+          ${beaches.map((beach) =>
+            `<option value="${beach.id}"${beach.id === config.id ? " selected" : ""}>${beach.name}</option>`
+          ).join("")}
+        </select>
+      </label>
     </header>
-    <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de Ventanicas">
+    <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de ${config.name}">
       <div id="scene" class="scene"><div id="loading" class="loading">Preparando el relieve…</div></div>
       <div id="scene-error" class="scene-error" hidden></div>
       <aside class="solar-card" aria-live="polite">
@@ -79,6 +85,12 @@ const shadowsInput = document.querySelector<HTMLInputElement>("#shadows")!;
 const wireframeInput = document.querySelector<HTMLInputElement>("#wireframe")!;
 const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration")!;
 const seaStateInput = document.querySelector<HTMLSelectElement>("#sea-state")!;
+const beachInput = document.querySelector<HTMLSelectElement>("#beach")!;
+beachInput.addEventListener("change", () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set("beach", beachInput.value);
+  window.location.assign(url);
+});
 
 if (!window.WebGLRenderingContext) {
   showError("Este dispositivo no ofrece WebGL, necesario para mostrar la maqueta 3D.");

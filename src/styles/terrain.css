@@ -19,7 +19,7 @@ button, input, select { font: inherit; }
 .title { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
 .title h1 { margin: 3px 0 0; font: 500 clamp(32px, 6vw, 58px)/.95 Georgia, serif; letter-spacing: -.03em; }
 .back { color: #477071; font-size: 11px; text-decoration: none; }
-.model-tag { padding: 7px 10px; border: 1px solid #78939366; border-radius: 99px; font-size: 10px; white-space: nowrap; }
+.beach-picker { display: grid; gap: 5px; width: min(230px, 46vw); color: #4c6968; font-size: 10px; }
 
 .scene-shell {
   min-height: 540px;

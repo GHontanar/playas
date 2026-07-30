@@ -1,0 +1,86 @@
+{
+  "id": "el-cantal",
+  "name": "El Cantal",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.126418,
+    "lon": -1.831154
+  },
+  "bounds": {
+    "west": -1.834585,
+    "south": 37.122073,
+    "east": -1.827022,
+    "north": 37.13076
+  },
+  "projectedBounds": {
+    "west": 603530,
+    "south": 4109050,
+    "east": 604190,
+    "north": 4110022,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1250
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 3,
+    "width": 220,
+    "height": 324,
+    "minElevation": 0,
+    "maxElevation": 28.82,
+    "asset": "/terrain/assets/el-cantal-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 603714.7441,
+      "z": 4109151
+    },
+    "end": {
+      "x": 603890.2677,
+      "z": 4109910
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.851619,
+      "south": 37.11593,
+      "east": -1.823433,
+      "north": 37.137151
+    },
+    "projectedBounds": {
+      "west": 602025,
+      "south": 4108350,
+      "east": 604500,
+      "north": 4110735,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 165,
+      "height": 159,
+      "minElevation": 0,
+      "maxElevation": 269.08,
+      "asset": "/terrain/assets/el-cantal-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/el-cantal-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/el-cantal-buildings.geojson",
+  "roadsAsset": "/terrain/assets/el-cantal-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

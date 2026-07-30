@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import {
-  isVentanicasSeaPoint,
-  ventanicasSeawardNormal,
+  coastlineEnvelope,
+  coastXAt,
+  isSeaPoint,
+  seawardNormal,
   type CoastLine
 } from "./coastalOrientation";
 
@@ -46,10 +48,11 @@ export async function createSea(
 ): Promise<SeaController> {
   const group = new THREE.Group();
   const coastlines = await loadLocalCoastlines(config);
+  const breakerCoastline = createBreakerCoastline(coastlines, config);
   const geometry = new THREE.PlaneGeometry(sizeX, sizeZ, 96, 180);
   geometry.setAttribute(
     "coastMask",
-    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines), 1)
+    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines, config.seaSide), 1)
   );
   const normalMap = await new THREE.TextureLoader().loadAsync(
     "/terrain/textures/mediterranean-waves-normal.webp"
@@ -131,7 +134,7 @@ export async function createSea(
   group.add(surface);
 
   const breakers = Array.from({ length: SETTINGS.rough.breakerCount }, (_, index) =>
-    createBreaker(coastlines, index, config)
+    createBreaker([breakerCoastline], index, config)
   );
   for (const breaker of breakers) group.add(breaker.mesh);
 
@@ -185,8 +188,39 @@ export async function createSea(
   };
 }
 
-function createCoastMask(geometry: THREE.PlaneGeometry, coastlines: CoastLine[]): number[] {
-  const coast = coastlines.flat().sort((a, b) => a[1] - b[1]);
+function createBreakerCoastline(coastlines: CoastLine[], config: BeachConfig): CoastLine {
+  const centerX = (config.projectedBounds.west + config.projectedBounds.east) / 2;
+  const centerZ = (config.projectedBounds.south + config.projectedBounds.north) / 2;
+  const start: [number, number] = [
+    config.shoreline.start.x - centerX,
+    config.shoreline.start.z - centerZ
+  ];
+  const end: [number, number] = [
+    config.shoreline.end.x - centerX,
+    config.shoreline.end.z - centerZ
+  ];
+  const dx = end[0] - start[0];
+  const dz = end[1] - start[1];
+  const length = Math.hypot(dx, dz);
+  const sampleCount = Math.max(12, Math.round(length / 12));
+  const envelope = coastlineEnvelope(coastlines, config.seaSide);
+  const coast = Array.from({ length: sampleCount + 1 }, (_, index) => {
+    const progress = index / sampleCount;
+    const targetZ = start[1] + dz * progress;
+    return [coastXAt(envelope, targetZ), targetZ] as [number, number];
+  });
+  if (coast.length < 3) {
+    throw new Error(`La costa oficial de ${config.name} no contiene puntos suficientes para el oleaje`);
+  }
+  return coast;
+}
+
+function createCoastMask(
+  geometry: THREE.PlaneGeometry,
+  coastlines: CoastLine[],
+  seaSide: BeachConfig["seaSide"]
+): number[] {
+  const coast = coastlineEnvelope(coastlines, seaSide);
   const positions = geometry.attributes.position;
   const mask: number[] = [];
   for (let index = 0; index < positions.count; index++) {
@@ -194,7 +228,7 @@ function createCoastMask(geometry: THREE.PlaneGeometry, coastlines: CoastLine[])
     // PlaneGeometry se rota después -90°: su Y local positivo apunta al sur.
     const z = -positions.getY(index);
     // En la costa oriental de Mojácar, el mar queda al este (X UTM mayor).
-    mask.push(isVentanicasSeaPoint(coast, x, z, 1.5) ? 1 : 0);
+    mask.push(isSeaPoint(coast, x, z, seaSide, 1.5) ? 1 : 0);
   }
   return mask;
 }
@@ -247,7 +281,7 @@ function createBreaker(coastlines: CoastLine[], index: number, config: BeachConf
       const next = line[Math.min(line.length - 1, point + 1)];
       const dx = next[0] - previous[0];
       const dz = next[1] - previous[1];
-      const normal = ventanicasSeawardNormal(dx, dz);
+      const normal = seawardNormal(dx, dz, config.seaSide);
       return { x, z, nx: normal.x, nz: normal.z };
     });
   }

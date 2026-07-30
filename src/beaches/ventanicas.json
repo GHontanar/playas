@@ -2,8 +2,16 @@
   "id": "ventanicas",
   "name": "Ventanicas",
   "timezone": "Europe/Madrid",
-  "center": { "lat": 37.109198, "lon": -1.843914 },
-  "bounds": { "west": -1.845305, "south": 37.105503, "east": -1.840125, "north": 37.113114 },
+  "center": {
+    "lat": 37.109198,
+    "lon": -1.843914
+  },
+  "bounds": {
+    "west": -1.845305,
+    "south": 37.105503,
+    "east": -1.840125,
+    "north": 37.113114
+  },
   "projectedBounds": {
     "west": 602600,
     "south": 4107200,
@@ -11,7 +19,12 @@
     "north": 4108050,
     "crs": "EPSG:25830"
   },
-  "camera": { "bearing": 135, "pitch": 35.264, "roll": 0, "distance": 1100 },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1100
+  },
   "terrain": {
     "verticalExaggeration": 1.5,
     "sourceResolutionMeters": 2,
@@ -22,9 +35,27 @@
     "maxElevation": 42.97,
     "asset": "/terrain/assets/ventanicas-dem.f32"
   },
-  "chunk": { "depthMeters": 90 },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 602620.3138,
+      "z": 4107374
+    },
+    "end": {
+      "x": 602817,
+      "z": 4107849
+    }
+  },
   "shadowTerrain": {
-    "bounds": { "west": -1.860570, "south": 37.100693, "east": -1.836680, "north": 37.117587 },
+    "bounds": {
+      "west": -1.86057,
+      "south": 37.100693,
+      "east": -1.83668,
+      "north": 37.117587
+    },
     "projectedBounds": {
       "west": 601250,
       "south": 4106650,

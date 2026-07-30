@@ -107,9 +107,12 @@ npm run build
 npx wrangler pages dev dist
 ```
 
-## Prototipo topográfico de Ventanicas
+## Maquetas topográficas de las siete playas
 
-Vertical slice con MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
+La ruta `/terrain/` permite elegir Marina de la Torre, Descargador, Piedra
+Villazar, El Cantal, Lance Nuevo, Ventanicas y Venta del Bancal. Cada playa
+tiene recorte, cámara, tramo litoral y caster orográfico propios, pero comparte
+la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
 sombra física horaria. No se ha integrado con banderas ni añade meteorología.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
@@ -125,10 +128,10 @@ npm run verify:assets
 npm run build
 ```
 
-Estado validado de Ventanicas: 18 pruebas unitarias, regeneración determinista
-desde los originales locales, contraste de horizonte con PVGIS y smoke tests
-WebGL a 1280 × 900 y 390 × 844. La medición de FPS/memoria GPU queda reservada
-para un móvil físico.
+Estado validado: configuración y assets de las siete playas, pruebas unitarias,
+regeneración desde originales locales y smoke tests WebGL de escritorio y
+móvil. El contraste independiente de horizonte se realizó en Ventanicas; la
+medición de FPS/memoria GPU queda reservada para un móvil físico.
 
 Regeneración geográfica desde las fuentes oficiales:
 
@@ -138,12 +141,14 @@ python3 -m venv .venv
 scripts/download-dem.sh
 scripts/download-coastline.sh
 scripts/download-urban.sh
-scripts/inspect-dem.sh
-scripts/prepare-dem.sh
-scripts/prepare-horizon.sh
-scripts/prepare-coastline.sh
-scripts/prepare-urban.sh
+npm run data
 npm run verify:assets
+```
+
+Con las fuentes ya descargadas, se puede regenerar solo una playa:
+
+```sh
+npm run data:beach -- el-cantal
 ```
 
 Los originales se guardan en `data/source/`, ignorado por Git. Véanse

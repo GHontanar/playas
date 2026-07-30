@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  coastlineEnvelope,
   coastXAt,
-  isVentanicasSeaPoint,
-  ventanicasSeawardNormal
+  isSeaPoint,
+  seawardNormal
 } from "../src/map/coastalOrientation";
 
 const coast: Array<[number, number]> = [[0, 0], [10, 100], [30, 200]];
@@ -14,14 +15,21 @@ describe("orientación costa-mar de Ventanicas", () => {
   });
 
   it("clasifica como mar únicamente el lado oriental y respeta el margen", () => {
-    expect(isVentanicasSeaPoint(coast, 22, 150, 1.5)).toBe(true);
-    expect(isVentanicasSeaPoint(coast, 21, 150, 1.5)).toBe(false);
-    expect(isVentanicasSeaPoint(coast, 19, 150)).toBe(false);
+    expect(isSeaPoint(coast, 22, 150, "east", 1.5)).toBe(true);
+    expect(isSeaPoint(coast, 21, 150, "east", 1.5)).toBe(false);
+    expect(isSeaPoint(coast, 19, 150, "east")).toBe(false);
   });
 
   it("orienta la normal de las rompientes hacia X UTM positiva", () => {
-    const normal = ventanicasSeawardNormal(0, 10);
+    const normal = seawardNormal(0, 10, "east");
     expect(normal.x).toBeCloseTo(1);
     expect(normal.z).toBeCloseTo(0);
+  });
+
+  it("reduce ramales costeros al borde exterior del lado del mar", () => {
+    expect(coastlineEnvelope([
+      [[0, 0], [2, 10]],
+      [[5, 0], [3, 10]]
+    ], "east", 1)).toEqual([[5, 0], [3, 10]]);
   });
 });

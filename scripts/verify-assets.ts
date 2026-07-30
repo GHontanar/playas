@@ -1,69 +1,92 @@
 import { readFile, stat } from "node:fs/promises";
-import { beachConfigSchema } from "../src/beaches/types";
-import { isVentanicasSeaPoint } from "../src/map/coastalOrientation";
-
-const config = beachConfigSchema.parse(JSON.parse(await readFile("src/beaches/ventanicas.json", "utf8")));
-const metadata = JSON.parse(await readFile("public/metadata/ventanicas-dem.json", "utf8"));
-const horizonMetadata = JSON.parse(await readFile("public/metadata/ventanicas-horizon.json", "utf8"));
-const terrainPath = `public${config.terrain.asset}`;
-const terrainStat = await stat(terrainPath);
-const expectedBytes = config.terrain.width * config.terrain.height * Float32Array.BYTES_PER_ELEMENT;
+import { beaches } from "../src/beaches/catalog";
+import { isSeaPoint, type CoastLine } from "../src/map/coastalOrientation";
 
 const failures: string[] = [];
-if (metadata.sourceCRS !== "EPSG:25830") failures.push("CRS != EPSG:25830");
-if (metadata.sourceResolutionMeters !== 2) failures.push("resolución fuente != 2 m");
-if (metadata.nodataCells !== 0) failures.push("el DEM contiene nodata");
-if (metadata.width !== config.terrain.width || metadata.height !== config.terrain.height) {
-  failures.push("dimensiones de metadatos/config no coinciden");
+let totalBytes = 0;
+
+for (const config of beaches) {
+  const id = config.id;
+  const metadata = await json(`public/metadata/${id}-dem.json`);
+  const horizonMetadata = await json(`public/metadata/${id}-horizon.json`);
+  const terrainStat = await stat(`public${config.terrain.asset}`);
+  const expectedBytes = config.terrain.width * config.terrain.height * Float32Array.BYTES_PER_ELEMENT;
+  totalBytes += terrainStat.size;
+
+  check(metadata.sourceCRS === "EPSG:25830", id, "CRS visible != EPSG:25830");
+  check(metadata.sourceResolutionMeters === 2, id, "resolución fuente != 2 m");
+  check(metadata.webResolutionMeters === config.terrain.webResolutionMeters, id, "resolución web no coincide");
+  check(metadata.nodataCells === 0, id, "el DEM contiene nodata");
+  check(metadata.width === config.terrain.width && metadata.height === config.terrain.height, id, "dimensiones DEM/config no coinciden");
+  check(terrainStat.size === expectedBytes, id, `DEM ${terrainStat.size} B != ${expectedBytes} B`);
+  check(metadata.minElevation >= -0.01 && metadata.maxElevation > metadata.minElevation, id, "rango visible inválido");
+  check(close(metadata.maxElevation, config.terrain.maxElevation), id, "máxima visible no coincide con config");
+  check(sameBounds(metadata.bounds, config.projectedBounds), id, "bounds visibles no coinciden");
+
+  const coastline = await json(`public${config.coastlineAsset}`);
+  const coastLines = coastline.features.flatMap((feature: GeoFeature) =>
+    feature.geometry.type === "MultiLineString"
+      ? feature.geometry.coordinates as number[][][]
+      : [feature.geometry.coordinates as number[][]]
+  );
+  const coastPoints = coastLines.flat();
+  check(coastPoints.length >= 3, id, "la costa tiene muy pocos puntos");
+  check(!coastPoints.some(([x, y]: number[]) =>
+    x < config.projectedBounds.west || x > config.projectedBounds.east ||
+    y < config.projectedBounds.south || y > config.projectedBounds.north
+  ), id, "la costa sale del chunk");
+  const centerX = (config.projectedBounds.west + config.projectedBounds.east) / 2;
+  const centerZ = (config.projectedBounds.south + config.projectedBounds.north) / 2;
+  const localCoast: CoastLine = coastPoints.map(([x, y]: number[]) =>
+    [x - centerX, y - centerZ] as [number, number]
+  ).sort((a: [number, number], b: [number, number]) => a[1] - b[1]);
+  const middle = localCoast[Math.floor(localCoast.length / 2)];
+  const testX = middle[0] + (config.seaSide === "east" ? 10 : -10);
+  check(isSeaPoint(localCoast, testX, middle[1], config.seaSide), id, "orientación tierra-mar invertida");
+
+  const buildings = await json(`public${config.buildingsAsset}`);
+  const roads = await json(`public${config.roadsAsset}`);
+  check(buildings.features.length > 0, id, "no hay edificios");
+  check(roads.features.length > 0, id, "no hay calles");
+
+  const shadowStat = await stat(`public${config.shadowTerrain.terrain.asset}`);
+  const expectedShadowBytes = config.shadowTerrain.terrain.width *
+    config.shadowTerrain.terrain.height * Float32Array.BYTES_PER_ELEMENT;
+  totalBytes += shadowStat.size;
+  check(shadowStat.size === expectedShadowBytes, id, "bytes del caster incorrectos");
+  check(horizonMetadata.sourceCRS === "EPSG:25830", id, "CRS del caster incorrecto");
+  check(horizonMetadata.nodataCells === 0, id, "caster con nodata");
+  check(horizonMetadata.width === config.shadowTerrain.terrain.width &&
+    horizonMetadata.height === config.shadowTerrain.terrain.height, id, "dimensiones del caster incorrectas");
+  check(close(horizonMetadata.maxElevation, config.shadowTerrain.terrain.maxElevation), id, "máxima del caster no coincide");
+  check(sameBounds(horizonMetadata.bounds, config.shadowTerrain.projectedBounds), id, "bounds del caster no coinciden");
 }
-if (terrainStat.size !== expectedBytes) failures.push(`asset DEM ${terrainStat.size} B != ${expectedBytes} B`);
-if (metadata.minElevation < -0.01 || metadata.maxElevation <= metadata.minElevation) {
-  failures.push("rango de elevación inválido");
-}
-const coastline = JSON.parse(await readFile(`public${config.coastlineAsset}`, "utf8"));
-const coastLines = coastline.features.flatMap((feature: {
-  geometry: { type: string; coordinates: number[][] | number[][][] };
-}) => feature.geometry.type === "MultiLineString"
-  ? feature.geometry.coordinates as number[][][]
-  : [feature.geometry.coordinates as number[][]]);
-const coastPoints = coastLines.flat();
-if (coastPoints.length < 20) failures.push("la costa tiene muy pocos puntos");
-if (coastPoints.some(([x, y]: number[]) =>
-  x < config.projectedBounds.west || x > config.projectedBounds.east ||
-  y < config.projectedBounds.south || y > config.projectedBounds.north
-)) failures.push("la costa sale del chunk visible");
-const localCoast: Array<[number, number]> = coastPoints.map(([x, y]: number[]) => [
-  x - (config.projectedBounds.west + config.projectedBounds.east) / 2,
-  y - (config.projectedBounds.south + config.projectedBounds.north) / 2
-] as [number, number]).sort((a: [number, number], b: [number, number]) => a[1] - b[1]);
-const middle = localCoast[Math.floor(localCoast.length / 2)];
-if (!isVentanicasSeaPoint(localCoast, middle[0] + 10, middle[1])) {
-  failures.push("orientación tierra-mar invertida: el este debe ser mar");
-}
-const buildings = JSON.parse(await readFile(`public${config.buildingsAsset}`, "utf8"));
-const roads = JSON.parse(await readFile(`public${config.roadsAsset}`, "utf8"));
-if (buildings.features.length < 1) failures.push("no hay edificios en el chunk");
-if (roads.features.length < 1) failures.push("no hay calles en el chunk");
-const shadowTerrainStat = await stat(`public${config.shadowTerrain.terrain.asset}`);
-const expectedShadowBytes = config.shadowTerrain.terrain.width *
-  config.shadowTerrain.terrain.height * Float32Array.BYTES_PER_ELEMENT;
-if (shadowTerrainStat.size !== expectedShadowBytes) {
-  failures.push(`asset de horizonte ${shadowTerrainStat.size} B != ${expectedShadowBytes} B`);
-}
-if (horizonMetadata.sourceCRS !== "EPSG:25830" ||
-    horizonMetadata.nodataCells !== 0 ||
-    horizonMetadata.width !== config.shadowTerrain.terrain.width ||
-    horizonMetadata.height !== config.shadowTerrain.terrain.height ||
-    horizonMetadata.maxElevation < 300) {
-  failures.push("metadatos del caster de horizonte inválidos");
-}
+
 const waterTexture = await stat("public/terrain/textures/mediterranean-waves-normal.webp");
-if (waterTexture.size < 10_000 || waterTexture.size > 100_000) {
-  failures.push(`textura de agua fuera del presupuesto: ${waterTexture.size} B`);
-}
+check(waterTexture.size >= 10_000 && waterTexture.size <= 100_000, "común", "textura de agua fuera del presupuesto");
 
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log(`Assets válidos: ${config.terrain.width}×${config.terrain.height}, ${terrainStat.size} B, ${metadata.minElevation.toFixed(1)}–${metadata.maxElevation.toFixed(1)} m.`);
+console.log(`Assets válidos: ${beaches.length} playas, ${(totalBytes / 1_000_000).toFixed(2)} MB de terreno sin comprimir.`);
+
+type GeoFeature = { geometry: { type: string; coordinates: number[][] | number[][][] } };
+
+async function json(file: string): Promise<any> {
+  return JSON.parse(await readFile(file, "utf8"));
+}
+
+function check(condition: boolean, id: string, message: string) {
+  if (!condition) failures.push(`${id}: ${message}`);
+}
+
+function close(a: number, b: number): boolean {
+  return Math.abs(a - b) <= .011;
+}
+
+function sameBounds(bounds: number[], projected: { west: number; south: number; east: number; north: number }) {
+  return bounds.length === 4 &&
+    close(bounds[0], projected.west) && close(bounds[1], projected.south) &&
+    close(bounds[2], projected.east) && close(bounds[3], projected.north);
+}

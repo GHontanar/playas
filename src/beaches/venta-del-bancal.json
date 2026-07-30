@@ -1,0 +1,86 @@
+{
+  "id": "venta-del-bancal",
+  "name": "Venta del Bancal",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.103617,
+    "lon": -1.846406
+  },
+  "bounds": {
+    "west": -1.848664,
+    "south": 37.099226,
+    "east": -1.841778,
+    "north": 37.107992
+  },
+  "projectedBounds": {
+    "west": 602310,
+    "south": 4106500,
+    "east": 602910,
+    "north": 4107480,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1250
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 2.5,
+    "width": 240,
+    "height": 392,
+    "minElevation": 0,
+    "maxElevation": 60.02,
+    "asset": "/terrain/assets/venta-del-bancal-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 602500,
+      "z": 4106600
+    },
+    "end": {
+      "x": 602620.3138,
+      "z": 4107374
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.865635,
+      "south": 37.09308,
+      "east": -1.838306,
+      "north": 37.114313
+    },
+    "projectedBounds": {
+      "west": 600810,
+      "south": 4105800,
+      "east": 603210,
+      "north": 4108185,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 160,
+      "height": 159,
+      "minElevation": 0,
+      "maxElevation": 426.73,
+      "asset": "/terrain/assets/venta-del-bancal-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/venta-del-bancal-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/venta-del-bancal-buildings.geojson",
+  "roadsAsset": "/terrain/assets/venta-del-bancal-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

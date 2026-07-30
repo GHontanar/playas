@@ -40,6 +40,11 @@ export const beachConfigSchema = z.object({
   chunk: z.object({
     depthMeters: z.number().min(10).max(300)
   }),
+  seaSide: z.enum(["east", "west"]),
+  shoreline: z.object({
+    start: z.object({ x: z.number(), z: z.number() }),
+    end: z.object({ x: z.number(), z: z.number() })
+  }),
   shadowTerrain: z.object({
     bounds: boundsSchema,
     projectedBounds: projectedBoundsSchema,

@@ -1,0 +1,86 @@
+{
+  "id": "piedra-villazar",
+  "name": "Piedra Villazar",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.134408,
+    "lon": -1.828968
+  },
+  "bounds": {
+    "west": -1.831837,
+    "south": 37.132412,
+    "east": -1.825688,
+    "north": 37.136948
+  },
+  "projectedBounds": {
+    "west": 603760,
+    "south": 4110200,
+    "east": 604300,
+    "north": 4110710,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 135,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1050
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 2.5,
+    "width": 216,
+    "height": 204,
+    "minElevation": 0,
+    "maxElevation": 20.56,
+    "asset": "/terrain/assets/piedra-villazar-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "shoreline": {
+    "start": {
+      "x": 603941.7553,
+      "z": 4110306
+    },
+    "end": {
+      "x": 604014.52,
+      "z": 4110602.7136
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.848931,
+      "south": 37.12618,
+      "east": -1.822157,
+      "north": 37.143223
+    },
+    "projectedBounds": {
+      "west": 602250,
+      "south": 4109490,
+      "east": 604605,
+      "north": 4111410,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 157,
+      "height": 128,
+      "minElevation": 0,
+      "maxElevation": 207.65,
+      "asset": "/terrain/assets/piedra-villazar-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/piedra-villazar-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/piedra-villazar-buildings.geojson",
+  "roadsAsset": "/terrain/assets/piedra-villazar-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

@@ -42,7 +42,7 @@ La escala de las olas es expresiva, no métrica. Longitud, altura y anchura de
 espuma están exageradas deliberadamente para que el oleaje sea legible desde la
 cámara isométrica y en pantallas móviles.
 
-La superficie se recorta en el shader con la línea DERA: en Ventanicas solo se
-renderiza al este de la costa. Las rompientes usan la misma orientación y
-conservan un margen mar adentro antes de disiparse, por lo que no atraviesan la
-arena.
+La superficie se recorta en el shader con la envolvente marina de la línea
+DERA. Las rompientes se limitan mediante los extremos oficiales de cada playa,
+se suavizan a partir de puntos DERA y conservan un margen mar adentro antes de
+disiparse. Así, puertos y ramales vecinos no crean espuma cruzada sobre arena.

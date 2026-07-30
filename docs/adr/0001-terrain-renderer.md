@@ -56,6 +56,6 @@ superior sin desplazar el fondo.
 
 ## Consecuencias
 
-Para siete playas se generará un asset/config por playa y se reutilizarán escena,
-Sol y controles. Si más adelante se añade navegación geográfica continua,
+Las siete playas usan ya un asset/config por playa y reutilizan escena, Sol,
+oleaje y controles mediante un catálogo declarativo. Si más adelante se añade navegación geográfica continua,
 MapLibre puede envolver la selección de playa sin migrar las maquetas.

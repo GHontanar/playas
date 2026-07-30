@@ -22,3 +22,5 @@ download() {
 
 download 11275511 "MDT02-ETRS89-HU30-1031-2-COB2.TIF"
 download 11275514 "MDT02-ETRS89-HU30-1032-1-COB2.TIF"
+# Marina de la Torre continúa al norte de la hoja 1032-1.
+download 11275463 "MDT02-ETRS89-HU30-1015-3-COB2.TIF"
