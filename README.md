@@ -7,6 +7,49 @@ Lee los datos de `gestiondeplayas.com`, el proveedor que alimenta la web del ayu
 en lugar de depender del widget de
 [mojacar.es](https://www.mojacar.es/mojacar-disfruta/estado-de-las-playas/).
 
+## Estado del repo
+
+Situación a **30-07-2026**.
+
+| | |
+|---|---|
+| Producción | https://playas-16y.pages.dev/ |
+| Repo | `git@github.com:GHontanar/playas.git`, rama única `main` |
+| Despliegue | Cloudflare Pages con integración Git: cada push a `main` redespliega |
+| Acceso desde este equipo | deploy key ed25519 en `~/.ssh/id_ed25519`, sin passphrase, con *Allow write access* |
+
+Historia, tres commits:
+
+1. `9cd6c1d` — la página estática inicial.
+2. `e61a2b3` — el proxy funcional: seguir el `src` del fragmento HTML en vez de tratar el
+   endpoint como una imagen. Sin esto no cargaba ni un banner.
+3. `037a804` — el aviso de medusas deja de ser un hueco en blanco.
+
+### Qué está comprobado
+
+- Los 3 eventos (`bandera`, `medusas`, `fecha`) de las 7 playas, contra el proveedor real
+  a través de `wrangler pages dev`: todos 200, con el GIF del estado correcto.
+- El caso «hay medusas», simulando el fragmento del proveedor porque hoy no hay ninguna:
+  devuelve el GIF morado íntegro.
+- Parámetros inválidos (`playa`, `evento`, `tamano` fuera de las listas blancas): 400.
+
+### Qué no está comprobado
+
+- Los banners servidos **desde producción**; lo verificado es el mismo código bajo
+  `wrangler pages dev`.
+- El estado **bandera roja**: no se ha dado ningún día de los observados.
+- El comportamiento **fuera de temporada** (antes del 9 abr o después del 9 oct), cuando
+  presumiblemente todas las playas pasan a `bandera=sin`.
+
+### Decisión pendiente
+
+La lista de las 7 playas está hardcodeada en `BEACHES` (`index.html`), porque la API no
+expone nombres. Si el ayuntamiento dota un puesto más a mitad de temporada, la página no
+lo mostrará. La alternativa propuesta y no implementada es un `/api/estado` que devuelva
+en un solo JSON los códigos 01–15 leídos con `tipo=texto`, y que la página pinte solo los
+que traen bandera ≠ `sin`: la lista deja de ir a mano, las banderas se pintan en CSS con
+las variables de `:root` y se pasa de 21 peticiones por carga a 1.
+
 ## Por qué hace falta un proxy
 
 El endpoint del proveedor **no devuelve una imagen**, devuelve un fragmento de HTML
@@ -59,9 +102,11 @@ Sirve la página y `/api/banner` juntos, igual que en producción.
 
 ## Despliegue
 
-Cloudflare Pages con integración Git: sin build command, output directory `/`. El
-directorio `functions/` se detecta solo, así que la web y el proxy se despliegan en el
-mismo paso y cada `git push` redespliega.
+Ya configurado: Cloudflare Pages con integración Git sobre este repo, **sin build command**
+y con **output directory `/`**. El directorio `functions/` se detecta solo, así que la web y
+el proxy salen en el mismo despliegue y cada push a `main` redespliega. No hace falta
+`wrangler deploy` para nada, salvo que quieras el proxy como Worker aparte
+(`npx wrangler deploy` desde `worker/`).
 
 ## Notas
 
