@@ -26,6 +26,17 @@ el `src`, comprueba que sigue apuntando al dominio del proveedor y reexpone los 
 GIF con CORS abierto. El evento `fecha` no es una imagen ni en origen (devuelve un `<span>`
 con la marca de tiempo), así que se sirve como SVG para que entre por el mismo `<img>`.
 
+Dos rarezas más del proveedor que el proxy normaliza:
+
+- **«Sin medusas» es una imagen en blanco.** `banner-*-blanca.gif` es un GIF de 200×88 con
+  el 100% de los píxeles blancos, así que en la página se veía un hueco vacío al lado de la
+  bandera. Se sustituye por la etiqueta «sin medusas». Cuando sí hay medusas el proveedor
+  sirve `banner-*-medusas.gif` (morado) y esa imagen se pasa tal cual.
+- **Los códigos de playa tienen huecos.** Solo 01, 04, 05, 07, 09, 12 y 13 tienen socorrismo
+  y datos del día; el resto (02, 03, 06, 08, 10, 11, 14, 15…) existen en el sistema pero
+  responden `bandera=sin` con la fecha del cierre del día anterior. La API no expone los
+  nombres de las playas, así que la lista de `BEACHES` va a mano en `index.html`.
+
 ## Estructura
 
 | Ruta | Qué es |

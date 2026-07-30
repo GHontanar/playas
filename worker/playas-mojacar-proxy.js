@@ -94,6 +94,14 @@ export default {
         { "X-Upstream-Status": String(fragStatus) });
     }
 
+    // "Sin medusas" lo codifica el proveedor como banner-*-blanca.gif, que es un GIF de
+    // 200x88 con el 100% de los píxeles blancos: en la página se ve como un hueco vacío
+    // al lado de la bandera. Se sustituye por una etiqueta legible. Cuando sí hay
+    // medusas el src es banner-*-medusas.gif (morado) y se sirve la imagen tal cual.
+    if (evento === "medusas" && /-blanca\.\w+$/i.test(src)) {
+      return svgText("sin medusas", fragStatus);
+    }
+
     // El src es del proveedor o no se sigue: si no, esto sería un proxy abierto.
     let imgUrl;
     try {
