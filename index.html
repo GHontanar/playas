@@ -152,9 +152,11 @@
 </div>
 
 <script>
-// Pega aquí la URL de tu Worker de Cloudflare (ver playas-mojacar-proxy.js)
-// para esquivar hotlink / CORS / sandbox. Déjalo "" para pedir directo al proveedor.
-const PROXY = "";
+// El proxy es obligatorio: el proveedor devuelve un fragmento de HTML con la imagen
+// dentro (no la imagen) y sin cabeceras CORS. Ver worker/playas-mojacar-proxy.js.
+// Ruta relativa = lo sirve la propia Pages Function (functions/api/banner.js).
+// Si prefieres un Worker suelto, pon aquí su URL: "https://TU-WORKER.workers.dev/".
+const PROXY = "/api/banner";
 const KEY = "jhJJhg53435HJjjh255l";
 const BASE = "https://www.gestiondeplayas.com/api/";
 const BEACHES = [

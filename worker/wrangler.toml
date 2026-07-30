@@ -1,0 +1,6 @@
+# Solo para desplegar el proxy como Worker independiente (`npx wrangler deploy`
+# desde este directorio). Si despliegas la página en Cloudflare Pages no hace
+# falta: functions/api/banner.js ya lo publica en /api/banner con la propia web.
+name = "playas-mojacar-proxy"
+main = "playas-mojacar-proxy.js"
+compatibility_date = "2026-07-30"
