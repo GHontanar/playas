@@ -10,7 +10,6 @@ export default defineConfig({
       input: {
         main: resolve(root, "index.html"),
         coast: resolve(root, "coast/index.html"),
-        flags: resolve(root, "flags/index.html"),
         terrain: resolve(root, "terrain/index.html")
       }
     }

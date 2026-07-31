@@ -99,10 +99,9 @@ npm install
 npm run dev
 ```
 
-La entrada topográfica general está en `/` (y se conserva el alias `/coast/`);
-las fichas están en `/terrain/`. La portada histórica de banderas permanece
-archivada en `/flags/`, sin enlaces desde la aplicación. Se puede probar la
-maqueta con colores ficticios mediante `/?demo=1`. Para probar también la
+La vista de banderas sigue en `/`; el prototipo topográfico está en
+`/terrain/`. La entrada panorámica experimental está en `/coast/`; se puede
+probar con colores ficticios mediante `/coast/?demo=1`. Para probar también la
 Pages Function localmente sobre el build:
 
 ```sh
@@ -184,7 +183,7 @@ Cloudflare Pages a:
 - output directory: `dist`
 
 El directorio raíz `functions/` sigue siendo detectado por Pages y el build
-conserva la página histórica de banderas como `dist/flags/index.html`.
+conserva sin cambios la página de banderas como `dist/index.html`.
 
 Despliegue manual equivalente:
 
