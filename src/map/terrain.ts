@@ -33,7 +33,12 @@ export async function loadTerrain(
   const sand = new THREE.Color("#f1cc68");
   const low = new THREE.Color("#aeb57f");
   const high = new THREE.Color("#797f75");
+  const illustratedSand = new THREE.Color("#e7ad55");
+  const illustratedSandLight = new THREE.Color("#f4cf72");
+  const illustratedEarth = new THREE.Color("#a69661");
+  const illustratedRock = new THREE.Color("#666b70");
   const color = new THREE.Color();
+  const illustrated = config.visualStyle === "mediterranean-illustrated" && source === config;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
@@ -41,7 +46,26 @@ export async function loadTerrain(
       const sourceRow = height - 1 - row;
       const elevation = Math.max(0, heights[sourceRow * width + col]);
       positions.setY(index, elevation);
-      if (elevation <= 10) {
+      if (illustrated) {
+        const left = heights[sourceRow * width + Math.max(0, col - 1)];
+        const right = heights[sourceRow * width + Math.min(width - 1, col + 1)];
+        const north = heights[Math.max(0, sourceRow - 1) * width + col];
+        const south = heights[Math.min(height - 1, sourceRow + 1) * width + col];
+        const slope = Math.hypot(right - left, south - north) /
+          Math.max(1, source.terrain.webResolutionMeters * 2);
+        const mineralNoise = (
+          Math.sin(col * .29 + row * .17)
+          + Math.sin(col * .071 - row * .113) * .7
+        ) * .5 + .5;
+        if (elevation <= 7) {
+          color.copy(illustratedSand).lerp(illustratedSandLight, .38 + mineralNoise * .34);
+        } else {
+          const heightMix = Math.min(1, (elevation - 7) / Math.max(1, source.terrain.maxElevation - 7));
+          const rockMix = Math.min(1, slope * 1.7 + heightMix * .52);
+          color.copy(illustratedEarth).lerp(illustratedRock, rockMix);
+          color.offsetHSL(0, 0, (mineralNoise - .5) * .055);
+        }
+      } else if (elevation <= 10) {
         color.copy(sand);
       } else {
         const t = Math.min(1, (elevation - 10) / Math.max(1, source.terrain.maxElevation - 10));

@@ -116,7 +116,9 @@ la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
 sombra física horaria. No se ha integrado con banderas ni añade meteorología.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
-agitado—, sin representar observaciones ni predicciones marinas.
+agitado— dentro de los controles de depuración. La escena acepta también la
+procedencia del estado para conectarlo posteriormente a bandera o datos
+marinos, pero todavía no representa observaciones ni predicciones.
 La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 

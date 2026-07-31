@@ -1,10 +1,10 @@
 # Rendimiento
 
-Medición de build en la máquina de desarrollo, 30-07-2026:
+Medición de build en la máquina de desarrollo, 31-07-2026:
 
 | Recurso | Sin comprimir | gzip aproximado |
 |---|---:|---:|
-| JavaScript Three.js + aplicación | 672.350 B | 176.940 B |
+| JavaScript Three.js + aplicación | ~694 KB | ~183 KB |
 | DEM visible Float32 por playa | 140–424 KB | 78–161 KB |
 | Caster/horizonte por playa | 76–146 KB | 49–101 KB |
 | Costa GeoJSON | 1.316 B | 549 B |
@@ -26,12 +26,18 @@ Las partes de edificio de cada playa se fusionan en cinco mallas, una por color 
 paleta; las calles se fusionan en una sexta malla. Así la capa urbana añade seis
 llamadas de dibujo principales, no una por edificio.
 
+La variante ilustrada de Lance añade tres mallas de cubiertas, un contorno
+viario, dos cintas de arena húmeda, la malla del espigón, un borde de zócalo y
+una sombra de contacto. No añade descargas ni texturas nuevas. El cálculo de
+distancia a costa se realiza una sola vez al crear el plano marino.
+
 El cambio horario actualiza una luz y el shadow map; no cambia la geometría ni
 genera peticiones. Los assets son estáticos y cacheables por Cloudflare.
-El oleaje usa un plano subdividido de 17.557 vértices deformado en el vertex
-shader y cuatro cintas costeras pequeñas. Cada frame actualiza cuatro uniforms y
-las posiciones de las cintas; seleccionar otro estado no crea geometría ni
-peticiones.
+El modo volumétrico de Lance Nuevo desplaza el plano marino y calcula las
+normales en el vertex shader; la espuma se deriva en el fragment shader. Cada
+frame actualiza únicamente el tiempo. No recalcula geometría en CPU, no añade
+draw calls y no genera peticiones. El modo anterior permanece disponible en
+Depuración para comparación.
 
 Se realizó un smoke test headless Chromium a 1280 × 900 y 390 × 844: carga,
 WebGL, controles y layout sin errores de página. No se publica un dato de FPS

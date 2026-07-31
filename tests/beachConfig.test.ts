@@ -30,6 +30,7 @@ describe("configuración declarativa de playa", () => {
     ]);
     expect(lance.seaLevelMeters).toBe(0.15);
     expect(lance.worldAxes).toBe("south-positive");
+    expect(lance.visualStyle).toBe("mediterranean-illustrated");
     expect(lance.camera.bearing).toBe(45);
     expect(lance.camera.roll).toBe(0);
     const parsed = beaches.map(parseBeachConfig);
@@ -40,7 +41,9 @@ describe("configuración declarativa de playa", () => {
     )).toBe(true);
     expect(parsed
       .filter((beach) => beach.id !== "lance-nuevo")
-      .every((beach) => beach.coastalStructures.length === 0)).toBe(true);
+      .every((beach) =>
+        beach.coastalStructures.length === 0 && beach.visualStyle === "classic"
+      )).toBe(true);
   });
 
   it("rechaza bounds invertidos", () => {

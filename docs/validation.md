@@ -111,6 +111,20 @@ de cada playa en el azimut solar y compara elevación del Sol con el máximo
 ángulo del perfil. La sombra visible procede del shadow map de Three.js, no de
 rotar un hillshade.
 
+## Validación de la variante artística de Lance Nuevo
+
+La variante `mediterranean-illustrated` se ha comprobado de forma aislada en
+Lance Nuevo a mediodía, con Sol bajo, de noche y a 390 px de ancho. La
+geometría geográfica, el vector solar y el shadow map no cambian: el tratamiento
+artístico afecta a materiales, paleta, luz de relleno, atmósfera, agua y
+acabado del pedestal.
+
+El gradiente y el brillo del agua, la arena húmeda, las cubiertas coloreadas,
+los trazos del viario y los estratos laterales son recursos visuales. No
+representan batimetría, humedad medida, materiales constructivos ni geología
+clasificada. Las rompientes continúan ligadas a la costa derivada y excluyen
+el espigón; su escala y cadencia están exageradas intencionadamente.
+
 ## Límites
 
 - MDT de 2 m remuestreado a 2,5 m con una pasada de suavizado visual, y 15 m

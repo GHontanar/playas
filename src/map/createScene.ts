@@ -5,7 +5,8 @@ import { loadCoastline } from "./coastline";
 import { createSunLight } from "./shadows";
 import { createChunkBase } from "./chunkBase";
 import { createUrbanLayer } from "./urban";
-import { createSea, type SeaState } from "./sea";
+import { createSea, type SeaConditions, type WaterMode } from "./sea";
+import type { Vector3Like } from "../solar/sunVector";
 
 export interface SceneController {
   terrain: TerrainModel;
@@ -14,7 +15,10 @@ export interface SceneController {
   renderer: THREE.WebGLRenderer;
   setExaggeration(value: number): void;
   setWireframe(value: boolean): void;
-  setSeaState(value: SeaState): void;
+  setSeaConditions(value: SeaConditions): void;
+  setWaterMode(value: WaterMode): void;
+  setSeaSun(vector: Vector3Like, visible: boolean): void;
+  setSolarAppearance(altitudeDegrees: number, aboveHorizon: boolean): void;
   resize(): void;
   dispose(): void;
 }
@@ -26,6 +30,10 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  if (config.visualStyle === "mediterranean-illustrated") {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+  }
   container.append(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -88,7 +96,13 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   const sea = await createSea(sizeX, sizeZ, config);
   world.add(sea.group);
 
-  scene.add(new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35));
+  const hemisphere = new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35);
+  const ambient = new THREE.AmbientLight("#637987", 0);
+  const fill = new THREE.DirectionalLight("#8ba6b8", 0);
+  // Luz de relleno desde el lado de cámara: evita masas negras cuando el
+  // relieve oculta el Sol, sin proyectar una segunda sombra.
+  fill.position.set(2600, 4200, 2600);
+  scene.add(hemisphere, ambient, fill);
   const shadowWidth = shadowBounds.east - shadowBounds.west;
   const shadowDepth = shadowBounds.north - shadowBounds.south;
   const shadowOffset = Math.hypot(
@@ -155,7 +169,34 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       resize();
     },
     setWireframe(value) { terrain.mesh.material.wireframe = value; },
-    setSeaState(value) { sea.setState(value); },
+    setSeaConditions(value) { sea.setConditions(value); },
+    setWaterMode(value) { sea.setMode(value); },
+    setSeaSun(vector, visible) { sea.setSun(vector, visible); },
+    setSolarAppearance(altitudeDegrees, aboveHorizon) {
+      if (config.visualStyle !== "mediterranean-illustrated") return;
+      const daylight = aboveHorizon
+        ? THREE.MathUtils.smoothstep(altitudeDegrees, -2, 28)
+        : 0;
+      const horizonWarmth = aboveHorizon
+        ? 1 - THREE.MathUtils.smoothstep(altitudeDegrees, 4, 24)
+        : 0;
+      const background = new THREE.Color("#183440")
+        .lerp(new THREE.Color("#d69578"), Math.max(horizonWarmth, daylight * .35))
+        .lerp(new THREE.Color("#f1e5db"), daylight);
+      scene.background = background;
+      if (scene.fog) scene.fog.color.copy(background);
+      hemisphere.color.copy(new THREE.Color("#6f91a0").lerp(new THREE.Color("#fff2d8"), daylight));
+      hemisphere.groundColor.copy(new THREE.Color("#302b42").lerp(new THREE.Color("#6b5a68"), daylight));
+      hemisphere.intensity = .58 + daylight * .55;
+      ambient.color.copy(new THREE.Color("#526b7b").lerp(new THREE.Color("#ffe3c0"), daylight));
+      ambient.intensity = .32 + horizonWarmth * .42 + daylight * .12;
+      fill.color.copy(new THREE.Color("#66859b").lerp(new THREE.Color("#ffe0bc"), daylight));
+      fill.intensity = .55 + horizonWarmth * 1.25 + daylight * .1;
+      light.color.copy(new THREE.Color("#ff9b67").lerp(new THREE.Color("#fff5d8"), 1 - horizonWarmth));
+      light.intensity = aboveHorizon ? 2.25 + daylight * .6 : 0;
+      renderer.toneMappingExposure = .82 + daylight * .18;
+      urban.setDaylight(daylight);
+    },
     resize,
     dispose() {
       cancelAnimationFrame(frame);

@@ -7,6 +7,7 @@ import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import type { SeaState } from "./map/sea";
+import type { WaterMode } from "./map/sea";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -42,13 +43,6 @@ app.innerHTML = `
       </aside>
     </section>
     <section class="controls" aria-label="Controles solares">
-      <label>Estado artístico del mar
-        <select id="sea-state">
-          <option value="calm">Calma</option>
-          <option value="moderate" selected>Marejadilla</option>
-          <option value="rough">Agitado</option>
-        </select>
-      </label>
       <label>Fecha<input id="date" type="date" value="${initial.dateISO}"></label>
       <label class="time-control">
         Hora <output id="slider-output">—</output>
@@ -58,6 +52,19 @@ app.innerHTML = `
       <details>
         <summary>Depuración</summary>
         <div class="debug-grid">
+          <label>Estado artístico del mar
+            <select id="sea-state">
+              <option value="calm">Calma</option>
+              <option value="moderate" selected>Marejadilla</option>
+              <option value="rough">Agitado</option>
+            </select>
+          </label>
+          <label>Modelo de agua
+            <select id="water-mode">
+              <option value="volumetric"${config.visualStyle === "mediterranean-illustrated" ? " selected" : ""}>Volumétrica</option>
+              <option value="legacy"${config.visualStyle !== "mediterranean-illustrated" ? " selected" : ""}>Anterior</option>
+            </select>
+          </label>
           <label>Exageración <output id="exaggeration-output">${config.terrain.verticalExaggeration.toFixed(1)}×</output>
             <input id="exaggeration" type="range" min="0.5" max="3" step="0.1" value="${config.terrain.verticalExaggeration}">
           </label>
@@ -86,6 +93,7 @@ const shadowsInput = document.querySelector<HTMLInputElement>("#shadows")!;
 const wireframeInput = document.querySelector<HTMLInputElement>("#wireframe")!;
 const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration")!;
 const seaStateInput = document.querySelector<HTMLSelectElement>("#sea-state")!;
+const waterModeInput = document.querySelector<HTMLSelectElement>("#water-mode")!;
 const beachInput = document.querySelector<HTMLSelectElement>("#beach")!;
 beachInput.addEventListener("change", () => {
   const url = new URL(window.location.href);
@@ -121,6 +129,8 @@ async function initialise() {
       SUN_LIGHT_RADIUS
     );
     controller.renderer.shadowMap.enabled = shadowsInput.checked;
+    controller.setSeaSun(solar.vector, solar.aboveHorizon);
+    controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
     text("#time-readout", `${formatMinutes(minutes)} · Europe/Madrid`);
     text("#slider-output", formatMinutes(minutes));
     text("#azimuth", `${solar.azimuthDegrees.toFixed(1)}°`);
@@ -138,7 +148,13 @@ async function initialise() {
   timeInput.addEventListener("input", update);
   shadowsInput.addEventListener("change", update);
   seaStateInput.addEventListener("change", () => {
-    controller.setSeaState(seaStateInput.value as SeaState);
+    controller.setSeaConditions({
+      state: seaStateInput.value as SeaState,
+      source: "debug"
+    });
+  });
+  waterModeInput.addEventListener("change", () => {
+    controller.setWaterMode(waterModeInput.value as WaterMode);
   });
   wireframeInput.addEventListener("change", () => controller.setWireframe(wireframeInput.checked));
   exaggerationInput.addEventListener("input", () => {

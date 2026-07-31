@@ -40,6 +40,7 @@
   },
   "seaSide": "east",
   "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
   "seaLevelMeters": 0.15,
   "coastalStructures": [
     {

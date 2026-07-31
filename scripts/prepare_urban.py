@@ -17,6 +17,9 @@ ROAD_WIDTHS = {
     "pedestrian": 3,
     "unclassified": 4,
     "track": 2.5,
+    "footway": 2,
+    "path": 1.5,
+    "cycleway": 2.5,
 }
 
 
@@ -62,8 +65,7 @@ def roads(source: Path, bounds: tuple[float, float, float, float], name: str) ->
     clip = box(*bounds)
     payload = json.loads(source.read_text(encoding="utf-8"))
     transformer = Transformer.from_crs(4326, 25830, always_xy=True)
-    buffered = []
-    classes = []
+    buffered_by_class: dict[str, list] = {}
     for element in payload.get("elements", []):
         road_class = element.get("tags", {}).get("highway")
         width = ROAD_WIDTHS.get(road_class)
@@ -76,14 +78,20 @@ def roads(source: Path, bounds: tuple[float, float, float, float], name: str) ->
         ])
         polygon = line.buffer(width / 2, cap_style="flat", join_style="round").intersection(clip)
         if not polygon.is_empty:
-            buffered.append(polygon)
-            classes.append(road_class)
-    merged = unary_union(buffered)
-    features = [{
-        "type": "Feature",
-        "properties": {"classes": sorted(set(classes))},
-        "geometry": mapping(merged),
-    }] if not merged.is_empty else []
+            buffered_by_class.setdefault(road_class, []).append(polygon)
+    features = []
+    for road_class, geometries in sorted(buffered_by_class.items()):
+        merged = unary_union(geometries)
+        if merged.is_empty:
+            continue
+        features.append({
+            "type": "Feature",
+            "properties": {
+                "class": road_class,
+                "widthMeters": ROAD_WIDTHS[road_class],
+            },
+            "geometry": mapping(merged),
+        })
     return feature_collection(f"{name}-roads", features, "© OpenStreetMap contributors, ODbL 1.0")
 
 
