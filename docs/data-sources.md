@@ -13,7 +13,7 @@ terreno desnudo interpolado a partir de puntos LiDAR clasificados como suelo.
 | Cobertura local | vuelo/derivado de 2020 |
 | Formato original | COG GeoTIFF, Float32 |
 | CRS | ETRS89 / UTM 30N (EPSG:25830), alturas ortométricas |
-| Hojas | Mojácar: `1015-3`, `1031-2`, `1032-1`; Carboneras: `1031-4`, `1046-2`, `1046-4` |
+| Hojas | Mojácar: `1015-3`, `1031-2`, `1032-1`; Carboneras: `1031-4`, `1046-2`, `1046-4`; Garrucha y Vera: `1015-3` |
 | Ficheros | `MDT02-ETRS89-HU30-{1015-3,1031-2,1032-1}-COB2.TIF` |
 | Tamaños descargados | 35.089.768 B, 108.911.204 B y 13.108.768 B |
 | Identificadores CNIG | `11275463`, `11275511`, `11275514` |
@@ -70,7 +70,8 @@ una geometría desde un visor o recurrir a OSM.
 ## Edificios
 
 Se usa el servicio ATOM INSPIRE Buildings de la Dirección General del Catastro,
-municipios `04064-MOJACAR` y `04032-CARBONERAS`. El fichero
+municipios `04064-MOJACAR`, `04032-CARBONERAS`, `04049-GARRUCHA` y
+`04100-VERA`. El fichero
 `A.ES.SDGC.BU.04064.buildingpart.gml` contiene polígonos EPSG:25830 y
 `numberOfFloorsAboveGround`. Cada recorte contiene únicamente las partes que
 intersectan su chunk.
@@ -79,6 +80,8 @@ Descarga:
 <https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04064-MOJACAR/A.ES.SDGC.BU.04064.zip>.
 Para Carboneras se usa
 <https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04032-CARBONERAS/A.ES.SDGC.BU.04032.zip>.
+Garrucha y Vera se descargan por el mismo servicio ATOM mediante
+`scripts/download-urban.sh`.
 El servicio permite el uso gratuito mencionando a la Dirección General del
 Catastro como autora y propietaria.
 

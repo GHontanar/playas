@@ -11,11 +11,11 @@ describe("configuración declarativa de playa", () => {
     expect(parsed.terrain.sourceResolutionMeters).toBe(2);
   });
 
-  it("valida las siete playas de cada municipio sin identificadores duplicados", () => {
+  it("valida todos los catálogos municipales sin identificadores duplicados", () => {
     const parsed = beaches.map(parseBeachConfig);
-    expect(parsed).toHaveLength(14);
-    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(14);
-    expect(municipalities.every((municipality) => municipality.beaches.length === 7)).toBe(true);
+    expect(parsed).toHaveLength(21);
+    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(21);
+    expect(municipalities.map((municipality) => municipality.beaches.length)).toEqual([7, 7, 3, 4]);
     for (const beach of parsed) {
       expect(beach.shoreline.start.x).toBeGreaterThanOrEqual(beach.projectedBounds.west);
       expect(beach.shoreline.start.x).toBeLessThanOrEqual(beach.projectedBounds.east);
@@ -34,9 +34,11 @@ describe("configuración declarativa de playa", () => {
     expect(carboneras.overview.id).toBe("carboneras-coast");
     expect(carboneras.overview.projectedBounds.north - carboneras.overview.projectedBounds.south)
       .toBeGreaterThan(11_000);
+    expect(municipalities.find((item) => item.id === "garrucha")?.overview.id).toBe("garrucha-coast");
+    expect(municipalities.find((item) => item.id === "vera")?.overview.id).toBe("vera-coast");
   });
 
-  it("declara los espigones oficiales sin aplicarlos a las demás playas", () => {
+  it("declara los espigones oficiales solo donde existen", () => {
     const lance = beaches.map(parseBeachConfig).find((beach) => beach.id === "lance-nuevo")!;
     const bancal = beaches.map(parseBeachConfig).find((beach) => beach.id === "venta-del-bancal")!;
     expect(lance.coastalStructures).toEqual([
@@ -60,8 +62,13 @@ describe("configuración declarativa de playa", () => {
       beach.visualStyle === "mediterranean-illustrated"
     )).toBe(true);
     expect(parsed
-      .filter((beach) => !["lance-nuevo", "venta-del-bancal"].includes(beach.id))
+      .filter((beach) => ![
+        "lance-nuevo", "venta-del-bancal", "garrucha-playa",
+        "garrucha-posito", "garrucha-playazo"
+      ].includes(beach.id))
       .every((beach) => beach.coastalStructures.length === 0)).toBe(true);
+    expect(parsed.filter((beach) => beach.municipalityId === "garrucha")
+      .every((beach) => beach.coastalStructures.length > 0)).toBe(true);
   });
 
   it("rechaza bounds invertidos", () => {

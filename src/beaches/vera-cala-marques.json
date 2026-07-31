@@ -1,0 +1,92 @@
+{
+  "id": "vera-cala-marques",
+  "name": "Cala Marqués",
+  "municipalityId": "vera",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.229235,
+    "lon": -1.797793
+  },
+  "bounds": {
+    "west": -1.802275,
+    "south": 37.22722,
+    "east": -1.79432,
+    "north": 37.231258
+  },
+  "projectedBounds": {
+    "west": 606253,
+    "south": 4120751,
+    "east": 606953,
+    "north": 4121208,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 630
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 175,
+    "height": 114,
+    "minElevation": 0.01,
+    "maxElevation": 6.98,
+    "asset": "/terrain/assets/vera-cala-marques-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 606603.2,
+      "z": 4120891.3
+    },
+    "end": {
+      "x": 606692.4,
+      "z": 4121067.9
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.833915,
+      "south": 37.222127,
+      "east": -1.790853,
+      "north": 37.236631
+    },
+    "projectedBounds": {
+      "west": 603453,
+      "south": 4120151,
+      "east": 607253,
+      "north": 4121808,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 253,
+      "height": 110,
+      "minElevation": 0,
+      "maxElevation": 108.67,
+      "asset": "/terrain/assets/vera-cala-marques-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/vera-cala-marques-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/vera-cala-marques-buildings.geojson",
+  "roadsAsset": "/terrain/assets/vera-cala-marques-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

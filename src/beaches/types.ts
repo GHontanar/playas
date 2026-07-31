@@ -26,7 +26,7 @@ const terrainSchema = z.object({
 export const beachConfigSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  municipalityId: z.enum(["mojacar", "carboneras"]).default("mojacar"),
+  municipalityId: z.enum(["mojacar", "carboneras", "garrucha", "vera"]).default("mojacar"),
   timezone: z.literal("Europe/Madrid"),
   center: z.object({ lat: z.number(), lon: z.number() }),
   bounds: boundsSchema,
@@ -50,6 +50,8 @@ export const beachConfigSchema = z.object({
     featureId: z.number(),
     kind: z.literal("breakwater")
   })).default([]),
+  overviewZonePaddingMeters: z.number().min(0).max(500).default(0),
+  coastalWaterEdgeSeeding: z.boolean().default(false),
   shoreline: z.object({
     start: z.object({ x: z.number(), z: z.number() }),
     end: z.object({ x: z.number(), z: z.number() })

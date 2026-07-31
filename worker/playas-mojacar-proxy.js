@@ -52,9 +52,11 @@ export default {
       return new Response(null, { headers: cors() });
     }
     if (url.pathname.endsWith("/api/status")) {
-      return url.searchParams.get("municipality") === "carboneras"
-        ? observedCarbonerasStatus()
-        : observedStatus();
+      const municipality = url.searchParams.get("municipality") || "mojacar";
+      if (municipality === "carboneras") return observedCarbonerasStatus();
+      if (municipality === "mojacar") return observedStatus();
+      if (["garrucha", "vera"].includes(municipality)) return unavailableMunicipalityStatus(municipality);
+      return fail(400, "Municipio no válido");
     }
 
     const playa = url.searchParams.get("playa");
@@ -197,6 +199,18 @@ async function observedStatus() {
   } catch (error) {
     return fail(502, "No se pudo normalizar el estado oficial: " + error.message);
   }
+}
+
+function unavailableMunicipalityStatus(municipality) {
+  const ids = municipality === "garrucha"
+    ? ["garrucha-playa", "garrucha-posito", "garrucha-playazo"]
+    : ["vera-marinas-bolaga", "vera-puerto-rey", "vera-playazo", "vera-cala-marques"];
+  return new Response(JSON.stringify({
+    fetchedAt: new Date().toISOString(),
+    beaches: ids.map(beachId => ({ beachId, flag: "unknown", lifeguardService: "unknown", jellyfish: null, observedAtLocal: null, source: "unavailable" })),
+  }), {
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=300, s-maxage=600", ...cors() },
+  });
 }
 
 const CARBONERAS_STATUS_URL = "https://www.proteccioncivilcarboneras.es/playaszenkra/salvamento_playas_banderas_2026.php";

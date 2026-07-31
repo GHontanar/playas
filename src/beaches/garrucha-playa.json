@@ -1,0 +1,95 @@
+{
+  "id": "garrucha-playa",
+  "name": "Playa de Garrucha",
+  "municipalityId": "garrucha",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.1755,
+    "lon": -1.822529
+  },
+  "bounds": {
+    "west": -1.827326,
+    "south": 37.170838,
+    "east": -1.818744,
+    "north": 37.180172
+  },
+  "projectedBounds": {
+    "west": 604108,
+    "south": 4114468,
+    "east": 604857,
+    "north": 4115513,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 941
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 187,
+    "height": 261,
+    "minElevation": 0,
+    "maxElevation": 54.46,
+    "asset": "/terrain/assets/garrucha-playa-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [
+    { "featureId": 10125300000252, "kind": "breakwater" },
+    { "featureId": 10125300001431, "kind": "breakwater" }
+  ],
+  "shoreline": {
+    "start": {
+      "x": 604458,
+      "z": 4114608
+    },
+    "end": {
+      "x": 604597,
+      "z": 4115373
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.85331,
+      "south": 37.165684,
+      "east": -1.815281,
+      "north": 37.185545
+    },
+    "projectedBounds": {
+      "west": 601808,
+      "south": 4113868,
+      "east": 605157,
+      "north": 4116113,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 223,
+      "height": 150,
+      "minElevation": 0,
+      "maxElevation": 108.14,
+      "asset": "/terrain/assets/garrucha-playa-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/garrucha-playa-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/garrucha-playa-buildings.geojson",
+  "roadsAsset": "/terrain/assets/garrucha-playa-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

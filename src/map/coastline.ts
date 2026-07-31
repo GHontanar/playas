@@ -43,9 +43,17 @@ export async function loadCoastline(
         wetSandLines.push(localLine);
       }
       if (!isStructure) continue;
-      const shape = new THREE.Shape(localLine.map(([x, z]) => new THREE.Vector2(x, -z)));
-      const geometry = new THREE.ShapeGeometry(shape);
-      geometry.rotateX(-Math.PI / 2);
+      const closes = Math.hypot(
+        localLine[0][0] - localLine.at(-1)![0],
+        localLine[0][1] - localLine.at(-1)![1]
+      ) <= 20;
+      // Algunos espigones de DERA son polígonos cerrados; el puerto de
+      // Garrucha, en cambio, llega como varios contornos abiertos. Cerrar esos
+      // contornos implícitamente con ShapeGeometry creaba grandes triángulos
+      // sobre arena y mar.
+      const geometry = closes
+        ? createClosedStructure(localLine)
+        : createOpenStructureRibbon(localLine, 10);
       const position = geometry.attributes.position;
       const stoneColours = new Float32Array(position.count * 3);
       const stoneDark = new THREE.Color("#514c58");
@@ -77,7 +85,7 @@ export async function loadCoastline(
       group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(outline), material));
     }
   }
-  const points = coastlineEnvelope(coastlines, config.seaSide)
+  const points = coastlineEnvelope(wetSandLines.length ? wetSandLines : coastlines, config.seaSide)
     .map(([x, z]) => new THREE.Vector3(x, 2, z));
   group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material));
   if (wetSandLines.length) {
@@ -96,6 +104,42 @@ export async function loadCoastline(
     }
   }
   return group;
+}
+
+function createClosedStructure(line: CoastLine): THREE.BufferGeometry {
+  const shape = new THREE.Shape(line.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const geometry = new THREE.ShapeGeometry(shape);
+  geometry.rotateX(-Math.PI / 2);
+  return geometry;
+}
+
+function createOpenStructureRibbon(line: CoastLine, width: number): THREE.BufferGeometry {
+  const positions = new Float32Array(line.length * 2 * 3);
+  const indices: number[] = [];
+  line.forEach(([x, z], index) => {
+    const previous = line[Math.max(0, index - 1)];
+    const next = line[Math.min(line.length - 1, index + 1)];
+    const dx = next[0] - previous[0];
+    const dz = next[1] - previous[1];
+    const length = Math.hypot(dx, dz) || 1;
+    const nx = -dz / length;
+    const nz = dx / length;
+    for (let side = 0; side < 2; side++) {
+      const distance = (side - .5) * width;
+      const offset = (index * 2 + side) * 3;
+      positions[offset] = x + nx * distance;
+      positions[offset + 1] = 0;
+      positions[offset + 2] = z + nz * distance;
+    }
+    if (index < line.length - 1) {
+      const offset = index * 2;
+      indices.push(offset, offset + 1, offset + 2, offset + 1, offset + 3, offset + 2);
+    }
+  });
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  return geometry;
 }
 
 function createLandwardRibbon(

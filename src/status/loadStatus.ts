@@ -8,6 +8,10 @@ export async function loadObservedStatus(demo = false, municipality = "mojacar")
       "carboneras-algarrobico", "carboneras-ancon", "carboneras-puntica",
       "carboneras-barquicos-cocones", "carboneras-marinicas", "carboneras-corral",
       "carboneras-los-muertos"
+    ] : municipality === "garrucha" ? [
+      "garrucha-playa", "garrucha-posito", "garrucha-playazo"
+    ] : municipality === "vera" ? [
+      "vera-marinas-bolaga", "vera-puerto-rey", "vera-playazo", "vera-cala-marques"
     ] : [
       "marina-de-la-torre", "descargador", "piedra-villazar", "el-cantal",
       "lance-nuevo", "ventanicas", "venta-del-bancal"
@@ -18,7 +22,7 @@ export async function loadObservedStatus(demo = false, municipality = "mojacar")
       lifeguardService: "active",
       jellyfish: index === 4,
       observedAtLocal: "modo de demostración",
-      source: municipality === "carboneras" ? "proteccion-civil-carboneras" : "gestiondeplayas"
+      source: municipality === "carboneras" ? "proteccion-civil-carboneras" : municipality === "mojacar" ? "gestiondeplayas" : "unavailable"
     }));
   }
   const response = await fetch(`/api/status?municipality=${encodeURIComponent(municipality)}`, { headers: { Accept: "application/json" } });

@@ -1,0 +1,92 @@
+{
+  "id": "vera-puerto-rey",
+  "name": "Puerto Rey",
+  "municipalityId": "vera",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.205952,
+    "lon": -1.80954
+  },
+  "bounds": {
+    "west": -1.815286,
+    "south": 37.198895,
+    "east": -1.80481,
+    "north": 37.213013
+  },
+  "projectedBounds": {
+    "west": 605138,
+    "south": 4117594,
+    "east": 606048,
+    "north": 4119172,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1420
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 228,
+    "height": 394,
+    "minElevation": 0,
+    "maxElevation": 11.15,
+    "asset": "/terrain/assets/vera-puerto-rey-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 605488.8,
+      "z": 4117734.6
+    },
+    "end": {
+      "x": 605787.4,
+      "z": 4119032
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.846914,
+      "south": 37.193799,
+      "east": -1.801344,
+      "north": 37.218386
+    },
+    "projectedBounds": {
+      "west": 602338,
+      "south": 4116994,
+      "east": 606348,
+      "north": 4119772,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 267,
+      "height": 185,
+      "minElevation": 0,
+      "maxElevation": 47.34,
+      "asset": "/terrain/assets/vera-puerto-rey-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/vera-puerto-rey-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/vera-puerto-rey-buildings.geojson",
+  "roadsAsset": "/terrain/assets/vera-puerto-rey-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

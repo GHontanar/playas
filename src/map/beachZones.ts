@@ -6,7 +6,7 @@ import { sampleTerrainElevation } from "./terrain";
 import { loadJson } from "./assets";
 
 type CoastGeoJSON = {
-  features: Array<{ geometry: { type: string; coordinates: number[][] | number[][][] } }>;
+  features: Array<{ properties?: { id_dera?: number }; geometry: { type: string; coordinates: number[][] | number[][][] } }>;
 };
 
 const FLAG_COLOURS: Record<FlagState, string> = {
@@ -32,7 +32,9 @@ export async function createBeachZones(
   const data = await loadJson<CoastGeoJSON>(overview.coastlineAsset);
   const centerX = (overview.projectedBounds.west + overview.projectedBounds.east) / 2;
   const centerZ = (overview.projectedBounds.south + overview.projectedBounds.north) / 2;
+  const structureIds = new Set(overview.coastalStructures.map(({ featureId }) => featureId));
   const lines = data.features.flatMap((feature) => {
+    if (feature.properties?.id_dera && structureIds.has(feature.properties.id_dera)) return [];
     const source = feature.geometry.type === "MultiLineString"
       ? feature.geometry.coordinates as number[][][]
       : [feature.geometry.coordinates as number[][]];
@@ -135,6 +137,8 @@ function createBeachLabel(beach: BeachConfig, overview: BeachConfig, coast: Coas
   texture.minFilter = THREE.LinearFilter;
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
   const label = new THREE.Sprite(material);
+  const coastSpan = overview.projectedBounds.north - overview.projectedBounds.south;
+  const labelWidth = THREE.MathUtils.clamp(coastSpan * .09, 300, 780);
   const centerZProjected = (beach.shoreline.start.z + beach.shoreline.end.z) / 2;
   const overviewCenterZ = (overview.projectedBounds.south + overview.projectedBounds.north) / 2;
   const z = centerZProjected - overviewCenterZ;
@@ -148,7 +152,7 @@ function createBeachLabel(beach: BeachConfig, overview: BeachConfig, coast: Coas
   const x = coastXAt(coast, z) + normal.x * 120;
   const labelZ = z + normal.z * 120;
   label.position.set(x, overview.seaLevelMeters + 55, labelZ);
-  label.scale.set(780, 163, 1);
+  label.scale.set(labelWidth, labelWidth * 163 / 780, 1);
   label.center.set(.5, 0);
   label.renderOrder = 10;
   label.name = `beach-label:${beach.id}`;
@@ -163,8 +167,8 @@ function zoneGeometry(
   heights: Float32Array,
   overviewCenterZ: number
 ): THREE.BufferGeometry {
-  const minZ = Math.min(beach.shoreline.start.z, beach.shoreline.end.z) - overviewCenterZ;
-  const maxZ = Math.max(beach.shoreline.start.z, beach.shoreline.end.z) - overviewCenterZ;
+  const minZ = Math.min(beach.shoreline.start.z, beach.shoreline.end.z) - beach.overviewZonePaddingMeters - overviewCenterZ;
+  const maxZ = Math.max(beach.shoreline.start.z, beach.shoreline.end.z) + beach.overviewZonePaddingMeters - overviewCenterZ;
   const count = Math.max(8, Math.ceil((maxZ - minZ) / 35));
   const positions = new Float32Array((count + 1) * 3 * 3);
   const indices: number[] = [];
@@ -215,7 +219,10 @@ function createSeparatorGeometry(
   beaches: BeachConfig[]
 ): THREE.BufferGeometry {
   const boundaries = beaches
-    .flatMap((beach) => [beach.shoreline.start.z, beach.shoreline.end.z])
+    .flatMap((beach) => [
+      beach.shoreline.start.z - beach.overviewZonePaddingMeters,
+      beach.shoreline.end.z + beach.overviewZonePaddingMeters
+    ])
     .sort((a, b) => a - b)
     .filter((value, index, all) => index === 0 || value - all[index - 1] > 35)
     .map((z) => z - overviewCenterZ);

@@ -1,0 +1,92 @@
+{
+  "id": "vera-coast",
+  "name": "Costa de Vera",
+  "municipalityId": "vera",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.208793,
+    "lon": -1.808235
+  },
+  "bounds": {
+    "west": -1.822676,
+    "south": 37.185953,
+    "east": -1.793785,
+    "north": 37.231631
+  },
+  "projectedBounds": {
+    "west": 604500,
+    "south": 4116150,
+    "east": 607000,
+    "north": 4121250,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 32,
+    "roll": 0,
+    "distance": 7800
+  },
+  "terrain": {
+    "verticalExaggeration": 1.7,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 20,
+    "width": 125,
+    "height": 255,
+    "minElevation": 0,
+    "maxElevation": 70.31,
+    "asset": "/terrain/assets/vera-coast-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "overview",
+  "seaLevelMeters": 0.15,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 605124.9,
+      "z": 4116433.7
+    },
+    "end": {
+      "x": 606692.4,
+      "z": 4121067.9
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.822676,
+      "south": 37.185953,
+      "east": -1.793785,
+      "north": 37.231631
+    },
+    "projectedBounds": {
+      "west": 604500,
+      "south": 4116150,
+      "east": 607000,
+      "north": 4121250,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.7,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 40,
+      "width": 62,
+      "height": 128,
+      "minElevation": 0,
+      "maxElevation": 68.51,
+      "asset": "/terrain/assets/vera-coast-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/vera-coast-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/vera-coast-buildings.geojson",
+  "roadsAsset": "/terrain/assets/vera-coast-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

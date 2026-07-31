@@ -14,6 +14,15 @@ import carbonerasPuntica from "./carboneras-puntica.json";
 import carbonerasMuertos from "./carboneras-los-muertos.json";
 import carbonerasAlgarrobico from "./carboneras-algarrobico.json";
 import carbonerasCorral from "./carboneras-corral.json";
+import garruchaCoast from "./garrucha-coast.json";
+import garruchaPlaya from "./garrucha-playa.json";
+import garruchaPosito from "./garrucha-posito.json";
+import garruchaPlayazo from "./garrucha-playazo.json";
+import veraCoast from "./vera-coast.json";
+import veraMarinas from "./vera-marinas-bolaga.json";
+import veraPuertoRey from "./vera-puerto-rey.json";
+import veraPlayazo from "./vera-playazo.json";
+import veraCalaMarques from "./vera-cala-marques.json";
 import { parseBeachConfig, type BeachConfig } from "./types";
 
 const mojacarBeaches: BeachConfig[] = [
@@ -37,7 +46,7 @@ const carbonerasBeaches = [
 ].map(parseBeachConfig);
 
 export interface MunicipalityCatalog {
-  id: "mojacar" | "carboneras";
+  id: "mojacar" | "carboneras" | "garrucha" | "vera";
   name: string;
   overview: BeachConfig;
   beaches: BeachConfig[];
@@ -45,7 +54,9 @@ export interface MunicipalityCatalog {
 
 export const municipalities: MunicipalityCatalog[] = [
   { id: "mojacar", name: "Mojácar", overview: parseBeachConfig(mojacarCoast), beaches: mojacarBeaches },
-  { id: "carboneras", name: "Carboneras", overview: parseBeachConfig(carbonerasCoast), beaches: carbonerasBeaches }
+  { id: "carboneras", name: "Carboneras", overview: parseBeachConfig(carbonerasCoast), beaches: carbonerasBeaches },
+  { id: "garrucha", name: "Garrucha", overview: parseBeachConfig(garruchaCoast), beaches: [garruchaPlaya, garruchaPosito, garruchaPlayazo].map(parseBeachConfig) },
+  { id: "vera", name: "Vera", overview: parseBeachConfig(veraCoast), beaches: [veraMarinas, veraPuertoRey, veraPlayazo, veraCalaMarques].map(parseBeachConfig) }
 ];
 export const beaches = municipalities.flatMap((municipality) => municipality.beaches);
 export const coastOverview = municipalities[0].overview;

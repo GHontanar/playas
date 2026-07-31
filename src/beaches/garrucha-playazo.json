@@ -1,0 +1,96 @@
+{
+  "id": "garrucha-playazo",
+  "name": "Playazo Garrucha",
+  "municipalityId": "garrucha",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.188448,
+    "lon": -1.817089
+  },
+  "bounds": {
+    "west": -1.821227,
+    "south": 37.185704,
+    "east": -1.813964,
+    "north": 37.191202
+  },
+  "projectedBounds": {
+    "west": 604629,
+    "south": 4116124,
+    "east": 605266,
+    "north": 4116742,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 573
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 159,
+    "height": 154,
+    "minElevation": 0,
+    "maxElevation": 25.83,
+    "asset": "/terrain/assets/garrucha-playazo-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [
+    { "featureId": 10125300001431, "kind": "breakwater" }
+  ],
+  "overviewZonePaddingMeters": 100,
+  "coastalWaterEdgeSeeding": true,
+  "shoreline": {
+    "start": {
+      "x": 604979,
+      "z": 4116384
+    },
+    "end": {
+      "x": 605006,
+      "z": 4116482
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.847216,
+      "south": 37.180552,
+      "east": -1.8105,
+      "north": 37.196575
+    },
+    "projectedBounds": {
+      "west": 602329,
+      "south": 4115524,
+      "east": 605566,
+      "north": 4117342,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 216,
+      "height": 121,
+      "minElevation": 0,
+      "maxElevation": 58.87,
+      "asset": "/terrain/assets/garrucha-playazo-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/garrucha-playazo-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/garrucha-playazo-buildings.geojson",
+  "roadsAsset": "/terrain/assets/garrucha-playazo-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "id": "garrucha-posito",
+  "name": "Pósito Garrucha",
+  "municipalityId": "garrucha",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.180355,
+    "lon": -1.821338
+  },
+  "bounds": {
+    "west": -1.825654,
+    "south": 37.177717,
+    "east": -1.818036,
+    "north": 37.183004
+  },
+  "projectedBounds": {
+    "west": 604247,
+    "south": 4115233,
+    "east": 604916,
+    "north": 4115828,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 602
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 167,
+    "height": 149,
+    "minElevation": 0,
+    "maxElevation": 53.14,
+    "asset": "/terrain/assets/garrucha-posito-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [
+    { "featureId": 10125300001431, "kind": "breakwater" }
+  ],
+  "shoreline": {
+    "start": {
+      "x": 604597,
+      "z": 4115373
+    },
+    "end": {
+      "x": 604656,
+      "z": 4115688
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.851641,
+      "south": 37.172563,
+      "east": -1.814572,
+      "north": 37.188378
+    },
+    "projectedBounds": {
+      "west": 601947,
+      "south": 4114633,
+      "east": 605216,
+      "north": 4116428,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 218,
+      "height": 120,
+      "minElevation": 0,
+      "maxElevation": 108.44,
+      "asset": "/terrain/assets/garrucha-posito-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/garrucha-posito-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/garrucha-posito-buildings.geojson",
+  "roadsAsset": "/terrain/assets/garrucha-posito-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

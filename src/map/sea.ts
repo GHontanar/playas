@@ -2,6 +2,8 @@ import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import {
   coastlineEnvelope,
+  coastalFloodMask,
+  lowElevationBoundarySeeds,
   coastXAt,
   isPointInPolygon,
   isSeaPoint,
@@ -70,7 +72,8 @@ export interface SeaController {
 export async function createSea(
   sizeX: number,
   sizeZ: number,
-  config: BeachConfig
+  config: BeachConfig,
+  terrainHeights: Float32Array
 ): Promise<SeaController> {
   const group = new THREE.Group();
   const settings = config.visualStyle === "mediterranean-illustrated"
@@ -92,7 +95,7 @@ export async function createSea(
   );
   geometry.setAttribute(
     "coastMask",
-    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines, config), 1)
+    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines, config, terrainHeights), 1)
   );
   geometry.setAttribute(
     "shoreDistance",
@@ -480,17 +483,23 @@ function createBreakerCoastline(coastlines: CoastLine[], config: BeachConfig): C
 function createCoastMask(
   geometry: THREE.PlaneGeometry,
   coastlines: CoastLine[],
-  config: BeachConfig
+  config: BeachConfig,
+  terrainHeights: Float32Array
 ): number[] {
-  const coast = coastlineEnvelope(coastlines, config.seaSide);
-  const landPolygon = config.coastalStructures.length
-    ? landPolygonFromCoastlines(
+  if (config.coastalStructures.length) {
+    return coastalFloodMask(
       coastlines,
       config.seaSide,
+      config.terrain.width,
+      config.terrain.height,
       (config.projectedBounds.east - config.projectedBounds.west) / 2,
-      (config.projectedBounds.north - config.projectedBounds.south) / 2
-    )
-    : undefined;
+      (config.projectedBounds.north - config.projectedBounds.south) / 2,
+      config.coastalWaterEdgeSeeding
+        ? lowElevationBoundarySeeds(terrainHeights, config.terrain.width, config.terrain.height)
+        : []
+    );
+  }
+  const coast = coastlineEnvelope(coastlines, config.seaSide);
   const positions = geometry.attributes.position;
   const mask: number[] = [];
   for (let index = 0; index < positions.count; index++) {
@@ -498,9 +507,7 @@ function createCoastMask(
     // PlaneGeometry se rota después -90°: su Y local positivo apunta al sur.
     const z = -positions.getY(index);
     // En la costa oriental de Mojácar, el mar queda al este (X UTM mayor).
-    const isSea = landPolygon
-      ? !isPointInPolygon([x, z], landPolygon)
-      : isSeaPoint(coast, x, z, config.seaSide, 1.5);
+    const isSea = isSeaPoint(coast, x, z, config.seaSide, 1.5);
     mask.push(isSea ? 1 : 0);
   }
   return mask;

@@ -1,0 +1,92 @@
+{
+  "id": "vera-playazo",
+  "name": "El Playazo",
+  "municipalityId": "vera",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.220113,
+    "lon": -1.803038
+  },
+  "bounds": {
+    "west": -1.811734,
+    "south": 37.210559,
+    "east": -1.795349,
+    "north": 37.229682
+  },
+  "projectedBounds": {
+    "west": 605437,
+    "south": 4118892,
+    "east": 606864,
+    "north": 4121032,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1926
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 357,
+    "height": 535,
+    "minElevation": 0,
+    "maxElevation": 74.46,
+    "asset": "/terrain/assets/vera-playazo-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 605787.4,
+      "z": 4119032
+    },
+    "end": {
+      "x": 606603.2,
+      "z": 4120891.3
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.843367,
+      "south": 37.205464,
+      "east": -1.791881,
+      "north": 37.235055
+    },
+    "projectedBounds": {
+      "west": 602637,
+      "south": 4118292,
+      "east": 607164,
+      "north": 4121632,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 302,
+      "height": 223,
+      "minElevation": 0,
+      "maxElevation": 102.28,
+      "asset": "/terrain/assets/vera-playazo-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/vera-playazo-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/vera-playazo-buildings.geojson",
+  "roadsAsset": "/terrain/assets/vera-playazo-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

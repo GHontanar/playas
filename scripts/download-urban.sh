@@ -9,6 +9,34 @@ cadastre_url="https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04064-MO
 if [[ ! -s "$cadastre_zip" ]]; then
   curl --fail --location --retry 3 "$cadastre_url" --output "$cadastre_zip"
 fi
+
+download_municipality() {
+  local code="$1"
+  local slug="$2"
+  local uppercase="$3"
+  local south="$4"
+  local west="$5"
+  local north="$6"
+  local east="$7"
+  local archive="$output_dir/${slug}-buildings.zip"
+  local directory="$output_dir/${slug}-buildings"
+  if [[ ! -s "$archive" ]]; then
+    curl --fail --location --retry 3 \
+      "https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/${code}-${uppercase}/A.ES.SDGC.BU.${code}.zip" \
+      --output "$archive"
+  fi
+  mkdir -p "$directory"
+  unzip -o "$archive" "A.ES.SDGC.BU.${code}.buildingpart.gml" -d "$directory"
+  local roads="$output_dir/${slug}-osm-roads.json"
+  if [[ ! -s "$roads" ]]; then
+    local query="[out:json][timeout:120];way[\"highway\"](${south},${west},${north},${east});out geom;"
+    curl --fail --retry 3 --get "https://overpass-api.de/api/interpreter" \
+      --data-urlencode "data=$query" --output "$roads"
+  fi
+}
+
+download_municipality "04049" "garrucha" "GARRUCHA" "37.145" "-1.86" "37.205" "-1.79"
+download_municipality "04100" "vera" "VERA" "37.18" "-1.9" "37.235" "-1.79"
 unzip -o "$cadastre_zip" "A.ES.SDGC.BU.04064.buildingpart.gml" -d "$output_dir"
 
 roads_json="$output_dir/mojacar-osm-roads.json"

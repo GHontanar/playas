@@ -126,7 +126,7 @@ export async function createScene(
 
   const [coastline, loadedSea] = await Promise.all([
     loadCoastline(config, terrain.heights, config.terrain.verticalExaggeration),
-    createSea(sizeX, sizeZ, config)
+    createSea(sizeX, sizeZ, config, terrain.heights)
   ]);
   world.add(coastline);
   sea = loadedSea;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   coastlineEnvelope,
+  coastalFloodMask,
   coastXAt,
   isPointInPolygon,
   isSeaPoint,
@@ -44,5 +45,19 @@ describe("orientación costa-mar de Ventanicas", () => {
     expect(isPointInPolygon([4, 0], polygon)).toBe(true);
     expect(isPointInPolygon([8, 0], polygon)).toBe(false);
     expect(isPointInPolygon([-4, 0], polygon)).toBe(true);
+  });
+
+  it("deja entrar el mar por una bocana sin atravesar los muelles", () => {
+    const mask = coastalFloodMask([
+      [[0, -5], [0, -1], [-3, -1], [-3, 1], [0, 1], [0, 5]]
+    ], "east", 21, 21, 5, 5);
+    const at = (x: number, z: number) => {
+      const col = Math.round((x + 5) / 10 * 20);
+      const row = Math.round((z + 5) / 10 * 20);
+      return mask[row * 21 + col];
+    };
+    expect(at(-1, 0)).toBe(1);
+    expect(at(-4, 3)).toBe(0);
+    expect(at(3, 3)).toBe(1);
   });
 });

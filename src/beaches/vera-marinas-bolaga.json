@@ -1,0 +1,92 @@
+{
+  "id": "vera-marinas-bolaga",
+  "name": "Las Marinas-Bolaga",
+  "municipalityId": "vera",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.194281,
+    "lon": -1.813456
+  },
+  "bounds": {
+    "west": -1.81957,
+    "south": 37.187211,
+    "east": -1.808363,
+    "north": 37.201358
+  },
+  "projectedBounds": {
+    "west": 604774,
+    "south": 4116293,
+    "east": 605749,
+    "north": 4117875,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1424
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 244,
+    "height": 396,
+    "minElevation": 0,
+    "maxElevation": 22.36,
+    "asset": "/terrain/assets/vera-marinas-bolaga-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 605124.9,
+      "z": 4116433.7
+    },
+    "end": {
+      "x": 605488.8,
+      "z": 4117734.6
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.851192,
+      "south": 37.182113,
+      "east": -1.804898,
+      "north": 37.206731
+    },
+    "projectedBounds": {
+      "west": 601974,
+      "south": 4115693,
+      "east": 606049,
+      "north": 4118475,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 272,
+      "height": 185,
+      "minElevation": 0,
+      "maxElevation": 44.47,
+      "asset": "/terrain/assets/vera-marinas-bolaga-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/vera-marinas-bolaga-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/vera-marinas-bolaga-buildings.geojson",
+  "roadsAsset": "/terrain/assets/vera-marinas-bolaga-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

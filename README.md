@@ -1,4 +1,4 @@
-# Estado de las playas · Mojácar y Carboneras
+# Estado de las playas · Levante de Almería
 
 Página estática de una sola vista con el estado de las banderas (verde / amarilla / roja)
 y el aviso de medusas de las playas de Mojácar.
@@ -113,10 +113,13 @@ npm run build
 npx wrangler pages dev dist
 ```
 
+Las otras vistas municipales son `/coast/?municipality=garrucha` y
+`/coast/?municipality=vera`.
+
 ## Maquetas topográficas por municipio
 
-La ruta `/terrain/` permite elegir las siete playas de Mojácar y las siete
-unidades operativas de Carboneras. En Mojácar incluye Marina de la Torre, Descargador, Piedra
+La ruta `/terrain/` permite elegir 21 playas de Mojácar, Carboneras, Garrucha y
+Vera. En Mojácar incluye Marina de la Torre, Descargador, Piedra
 Villazar, El Cantal, Lance Nuevo, Ventanicas y Venta del Bancal. Cada playa
 tiene recorte, cámara, tramo litoral y caster orográfico propios, pero comparte
 la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
@@ -184,6 +187,8 @@ El chunk general usa el mismo pipeline:
 ```sh
 npm run data:beach -- mojacar-coast
 npm run data:beach -- carboneras-coast
+npm run data:beach -- garrucha-coast
+npm run data:beach -- vera-coast
 ```
 
 Los originales se guardan en `data/source/`, ignorado por Git. Véanse
@@ -192,6 +197,8 @@ Los originales se guardan en `data/source/`, ignorado por Git. Véanse
 [`docs/validation.md`](docs/validation.md). La correspondencia entre el catálogo
 oficial y los puestos de Carboneras está en
 [`docs/carboneras-scope.md`](docs/carboneras-scope.md).
+El inventario y la limitación actual de banderas de Garrucha y Vera se explican
+en [`docs/garrucha-vera-scope.md`](docs/garrucha-vera-scope.md).
 
 ## Despliegue
 

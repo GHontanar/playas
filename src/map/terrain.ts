@@ -2,6 +2,8 @@ import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import { toonMaterial } from "../styles/toonMaterial";
 import { loadFloat32 } from "./assets";
+import { loadJson } from "./assets";
+import { coastalFloodMask, coastlineEnvelope, isSeaPoint, lowElevationBoundarySeeds, type CoastLine } from "./coastalOrientation";
 
 type TerrainSpec = BeachConfig["terrain"];
 type ProjectedBounds = BeachConfig["projectedBounds"];
@@ -16,7 +18,11 @@ export async function loadTerrain(
   config: BeachConfig,
   source: { terrain: TerrainSpec; projectedBounds: ProjectedBounds } = config
 ): Promise<TerrainModel> {
-  const heights = await loadFloat32(source.terrain.asset);
+  const visibleTerrain = source === config;
+  const [heights, coast] = await Promise.all([
+    loadFloat32(source.terrain.asset),
+    visibleTerrain ? loadTerrainCoastline(config) : Promise.resolve(undefined)
+  ]);
   const { width, height } = source.terrain;
   if (heights.length !== width * height) {
     throw new Error(`DEM inválido: ${heights.length} muestras; esperadas ${width * height}`);
@@ -38,12 +44,33 @@ export async function loadTerrain(
   const illustratedRock = new THREE.Color("#666b70");
   const color = new THREE.Color();
   const illustrated = config.visualStyle === "mediterranean-illustrated" && source === config;
+  const floodedSea = coast && config.coastalStructures.length
+    ? coastalFloodMask(
+      coast.lines,
+      config.seaSide,
+      width,
+      height,
+      sizeX / 2,
+      sizeZ / 2,
+      config.coastalWaterEdgeSeeding ? lowElevationBoundarySeeds(heights, width, height) : []
+    )
+    : undefined;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const index = row * width + col;
       const sourceRow = height - 1 - row;
-      const elevation = Math.max(0, heights[sourceRow * width + col]);
+      const demElevation = Math.max(0, heights[sourceRow * width + col]);
+      // MDT02 interpola la lámina de agua y en algunos sectores (Cala Marqués)
+      // llega a devolver varios metros positivos mar adentro. El MDT original
+      // se conserva en `heights` para trazabilidad y horizonte; solo se abate la
+      // malla visible donde la costa oficial clasifica el vértice como mar.
+      const offshore = floodedSea
+        ? floodedSea[index] === 1
+        : coast
+        ? isSeaPoint(coast.envelope, positions.getX(index), positions.getZ(index), config.seaSide, 1)
+        : false;
+      const elevation = offshore ? config.seaLevelMeters - 3 : demElevation;
       positions.setY(index, elevation);
       if (illustrated) {
         const left = heights[sourceRow * width + Math.max(0, col - 1)];
@@ -85,6 +112,23 @@ export async function loadTerrain(
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return { mesh, heights, geometry };
+}
+
+type CoastGeoJSON = {
+  features: Array<{ geometry: { type: string; coordinates: number[][] | number[][][] } }>;
+};
+
+async function loadTerrainCoastline(config: BeachConfig): Promise<{ envelope: CoastLine; lines: CoastLine[] }> {
+  const data = await loadJson<CoastGeoJSON>(config.coastlineAsset);
+  const centerX = (config.projectedBounds.west + config.projectedBounds.east) / 2;
+  const centerZ = (config.projectedBounds.south + config.projectedBounds.north) / 2;
+  const lines = data.features.flatMap((feature) => {
+    const source = feature.geometry.type === "MultiLineString"
+      ? feature.geometry.coordinates as number[][][]
+      : [feature.geometry.coordinates as number[][]];
+    return source.map((line) => line.map(([x, z]) => [x - centerX, z - centerZ] as [number, number]));
+  });
+  return { envelope: coastlineEnvelope(lines, config.seaSide), lines };
 }
 
 export async function loadShadowTerrain(config: BeachConfig): Promise<TerrainModel> {
