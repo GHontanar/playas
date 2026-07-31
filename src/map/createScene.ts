@@ -193,6 +193,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
         .lerp(new THREE.Color("#d69578"), Math.max(horizonWarmth, daylight * .35))
         .lerp(new THREE.Color("#f1e5db"), daylight);
       scene.background = background;
+      container.style.backgroundColor = background.getStyle();
       if (scene.fog) scene.fog.color.copy(background);
       hemisphere.color.copy(new THREE.Color("#6f91a0").lerp(new THREE.Color("#fff2d8"), daylight));
       hemisphere.groundColor.copy(new THREE.Color("#302b42").lerp(new THREE.Color("#6b5a68"), daylight));

@@ -1,15 +1,26 @@
 @import "./terrain.css";
 
+:root { --coast-sky: #eadfd7; background-color: var(--coast-sky); }
 html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
-.coast-story { min-height: 100%; }
-.story-stage { position: relative; height: 400svh; }
+html, body, #app, .coast-story { min-height: 100%; background-color: var(--coast-sky); }
+html, body { min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+body::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: -25vh -25vw;
+  background: var(--coast-sky);
+  pointer-events: none;
+}
+.story-stage { position: relative; height: 400vh; height: 400dvh; }
 .overview-scene {
   position: sticky;
   top: 0;
   width: 100%;
-  height: 100svh;
+  min-height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  background: #eadfd7;
+  background: var(--coast-sky);
 }
 .overview-scene canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
 .scene-error { z-index: 20; }
@@ -23,9 +34,9 @@ html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
   pointer-events: none;
 }
 .story-stop--general { top: 0; }
-.story-stop--north { top: 100svh; }
-.story-stop--centre { top: 200svh; }
-.story-stop--south { top: 300svh; }
+.story-stop--north { top: 100vh; top: 100dvh; }
+.story-stop--centre { top: 200vh; top: 200dvh; }
+.story-stop--south { top: 300vh; top: 300dvh; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

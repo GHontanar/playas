@@ -63,6 +63,9 @@ async function initialise() {
     SUN_LIGHT_RADIUS
   );
   controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
+  const skyColour = container.style.backgroundColor;
+  document.documentElement.style.setProperty("--coast-sky", skyColour);
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
   controller.setSeaSun(solar.vector, solar.aboveHorizon);
   document.querySelector("#loading")?.remove();
 
