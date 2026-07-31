@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-marinicas",
+  "name": "Las Marinicas",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 36.984817,
+    "lon": -1.900193
+  },
+  "bounds": {
+    "west": -1.905385,
+    "south": 36.97895,
+    "east": -1.896003,
+    "north": 36.990689
+  },
+  "projectedBounds": {
+    "west": 597423,
+    "south": 4093097,
+    "east": 598243,
+    "north": 4094409,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1181
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 205,
+    "height": 328,
+    "minElevation": 0,
+    "maxElevation": 48.09,
+    "asset": "/terrain/assets/carboneras-marinicas-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 597773.1,
+      "z": 4093237.7
+    },
+    "end": {
+      "x": 597982.1,
+      "z": 4094268.8
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.936916,
+      "south": 36.973828,
+      "east": -1.892554,
+      "north": 36.996065
+    },
+    "projectedBounds": {
+      "west": 594623,
+      "south": 4092497,
+      "east": 598543,
+      "north": 4095009,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 261,
+      "height": 167,
+      "minElevation": 0,
+      "maxElevation": 165.75,
+      "asset": "/terrain/assets/carboneras-marinicas-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-marinicas-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-marinicas-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-marinicas-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

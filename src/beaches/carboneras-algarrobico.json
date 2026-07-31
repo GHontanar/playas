@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-algarrobico",
+  "name": "El Algarrobico",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.029324,
+    "lon": -1.877165
+  },
+  "bounds": {
+    "west": -1.882978,
+    "south": 37.020728,
+    "east": -1.872359,
+    "north": 37.037934
+  },
+  "projectedBounds": {
+    "west": 599363,
+    "south": 4097755,
+    "east": 600285,
+    "north": 4099675,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1728
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 230,
+    "height": 480,
+    "minElevation": 0,
+    "maxElevation": 166.64,
+    "asset": "/terrain/assets/carboneras-algarrobico-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 599713,
+      "z": 4097895
+    },
+    "end": {
+      "x": 600024.6,
+      "z": 4099534.4
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.914527,
+      "south": 37.015612,
+      "east": -1.868906,
+      "north": 37.043309
+    },
+    "projectedBounds": {
+      "west": 596563,
+      "south": 4097155,
+      "east": 600585,
+      "north": 4100275,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 268,
+      "height": 208,
+      "minElevation": 0,
+      "maxElevation": 428.91,
+      "asset": "/terrain/assets/carboneras-algarrobico-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-algarrobico-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-algarrobico-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-algarrobico-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

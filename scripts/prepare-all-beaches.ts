@@ -11,7 +11,15 @@ const beachIds = [
   "el-cantal",
   "lance-nuevo",
   "ventanicas",
-  "venta-del-bancal"
+  "venta-del-bancal",
+  "carboneras-coast",
+  "carboneras-ancon",
+  "carboneras-barquicos-cocones",
+  "carboneras-marinicas",
+  "carboneras-puntica",
+  "carboneras-los-muertos",
+  "carboneras-algarrobico",
+  "carboneras-corral"
 ];
 const requested = process.argv[2];
 const selected = requested && requested !== "all" ? [requested] : beachIds;
@@ -32,6 +40,7 @@ if (!demSources.length) throw new Error("No hay hojas MDT02 en data/source");
 for (const id of selected) {
   const configPath = `src/beaches/${id}.json`;
   const config = beachConfigSchema.parse(JSON.parse(await readFile(configPath, "utf8")));
+  const carboneras = config.municipalityId === "carboneras";
   console.log(`\n== ${config.name} ==`);
   prepareDem(config, false);
   prepareDem(config, true);
@@ -44,8 +53,10 @@ for (const id of selected) {
   ]);
   run([
     python, "scripts/prepare_urban.py",
-    `${sourceDir}/A.ES.SDGC.BU.04064.buildingpart.gml`,
-    `${sourceDir}/mojacar-osm-roads.json`,
+    carboneras
+      ? `${sourceDir}/carboneras-buildings/A.ES.SDGC.BU.04032.buildingpart.gml`
+      : `${sourceDir}/A.ES.SDGC.BU.04064.buildingpart.gml`,
+    `${sourceDir}/${carboneras ? "carboneras" : "mojacar"}-osm-roads.json`,
     `${assetDir}/${id}-buildings.geojson`,
     `${assetDir}/${id}-roads.geojson`,
     "--name", id,

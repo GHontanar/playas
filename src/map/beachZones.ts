@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { beaches } from "../beaches/catalog";
 import type { BeachConfig } from "../beaches/types";
 import type { ObservedBeachStatus, FlagState } from "../status/types";
 import { coastlineEnvelope, coastXAt, seawardNormal, type CoastLine } from "./coastalOrientation";
@@ -27,7 +26,8 @@ export interface BeachZoneLayer {
 
 export async function createBeachZones(
   overview: BeachConfig,
-  heights: Float32Array
+  heights: Float32Array,
+  beaches: BeachConfig[]
 ): Promise<BeachZoneLayer> {
   const data = await loadJson<CoastGeoJSON>(overview.coastlineAsset);
   const centerX = (overview.projectedBounds.west + overview.projectedBounds.east) / 2;
@@ -60,7 +60,8 @@ export async function createBeachZones(
     overview,
     coast,
     heights,
-    centerZ
+    centerZ,
+    beaches
   );
   const separatorMaterial = new THREE.MeshBasicMaterial({
     color: "#274c50",
@@ -210,7 +211,8 @@ function createSeparatorGeometry(
   overview: BeachConfig,
   coast: CoastLine,
   heights: Float32Array,
-  overviewCenterZ: number
+  overviewCenterZ: number,
+  beaches: BeachConfig[]
 ): THREE.BufferGeometry {
   const boundaries = beaches
     .flatMap((beach) => [beach.shoreline.start.z, beach.shoreline.end.z])

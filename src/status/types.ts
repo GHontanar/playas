@@ -9,7 +9,7 @@ export interface ObservedBeachStatus {
   lifeguardService: LifeguardServiceState;
   jellyfish: boolean | null;
   observedAtLocal: string | null;
-  source: "gestiondeplayas";
+  source: "gestiondeplayas" | "proteccion-civil-carboneras";
 }
 
 export interface ObservedStatusResponse {

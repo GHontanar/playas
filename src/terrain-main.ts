@@ -1,5 +1,5 @@
 import "./styles/terrain.css";
-import { beaches, getBeach } from "./beaches/catalog";
+import { getBeach, getMunicipality, municipalities } from "./beaches/catalog";
 import { clampExaggeration } from "./beaches/types";
 import { createScene } from "./map/createScene";
 import { estimateTerrainHorizon } from "./map/terrain";
@@ -16,6 +16,8 @@ import type { ObservedBeachStatus } from "./status/types";
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight, seaStateLabel, windName, type BeachForecastPoint } from "./forecast/openMeteo";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
+const municipality = getMunicipality(config.municipalityId);
+document.title = `${config.name} · ${municipality.name}`;
 const app = document.querySelector<HTMLElement>("#app")!;
 const initial = nowInMojacar();
 
@@ -23,7 +25,7 @@ app.innerHTML = `
   <main class="terrain-app">
     <header class="title">
       <div>
-        <a href="/" class="back">Mojácar / experimento topográfico</a>
+        <a href="/coast/?municipality=${municipality.id}" class="back">${municipality.name} / costa</a>
         <h1>${config.name}</h1>
         <div id="beach-status" class="beach-status" data-service="loading" aria-live="polite">
           <i class="beach-status-colour" aria-hidden="true"></i>
@@ -33,9 +35,9 @@ app.innerHTML = `
       </div>
       <label class="beach-picker">Playa
         <select id="beach">
-          ${beaches.map((beach) =>
+          ${municipalities.map((item) => `<optgroup label="${item.name}">${item.beaches.map((beach) =>
             `<option value="${beach.id}"${beach.id === config.id ? " selected" : ""}>${beach.name}</option>`
-          ).join("")}
+          ).join("")}</optgroup>`).join("")}
         </select>
       </label>
     </header>
@@ -327,7 +329,7 @@ async function loadBeachStatus() {
   const element = document.querySelector<HTMLElement>("#beach-status")!;
   try {
     const demo = new URLSearchParams(window.location.search).get("demo") === "1";
-    const status = (await loadObservedStatus(demo)).find((candidate) => candidate.beachId === config.id);
+    const status = (await loadObservedStatus(demo, config.municipalityId)).find((candidate) => candidate.beachId === config.id);
     renderBeachStatus(element, status);
   } catch {
     renderBeachStatus(element, undefined);
@@ -345,10 +347,11 @@ function renderBeachStatus(element: HTMLElement, status: ObservedBeachStatus | u
     : status?.lifeguardService === "inactive"
       ? "Sin servicio de socorrismo"
       : "Bandera no disponible";
+  const permanentlyUnstaffed = ["carboneras-los-muertos", "carboneras-algarrobico"].includes(config.id);
   detail.textContent = activeFlag && status.observedAtLocal
     ? `Observada ${status.observedAtLocal}`
     : status?.lifeguardService === "inactive"
-      ? "Fuera del horario oficial"
+      ? permanentlyUnstaffed ? "Sin puesto municipal en la fuente oficial" : "Fuera del horario oficial"
       : "No se pudo confirmar el servicio";
 }
 

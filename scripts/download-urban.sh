@@ -17,3 +17,18 @@ if [[ ! -s "$roads_json" ]]; then
   curl --fail --retry 3 --get "https://overpass-api.de/api/interpreter" \
     --data-urlencode "data=$query" --output "$roads_json"
 fi
+
+carboneras_zip="$output_dir/CATASTRO-BU-04032-CARBONERAS.zip"
+carboneras_url="https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04032-CARBONERAS/A.ES.SDGC.BU.04032.zip"
+if [[ ! -s "$carboneras_zip" ]]; then
+  curl --fail --location --retry 3 "$carboneras_url" --output "$carboneras_zip"
+fi
+mkdir -p "$output_dir/carboneras-buildings"
+unzip -o "$carboneras_zip" "A.ES.SDGC.BU.04032.buildingpart.gml" -d "$output_dir/carboneras-buildings"
+
+carboneras_roads="$output_dir/carboneras-osm-roads.json"
+if [[ ! -s "$carboneras_roads" ]]; then
+  query='[out:json][timeout:120];way["highway"](36.915,-1.925,37.04,-1.855);out geom;'
+  curl --fail --retry 3 --get "https://overpass-api.de/api/interpreter" \
+    --data-urlencode "data=$query" --output "$carboneras_roads"
+fi

@@ -1,11 +1,11 @@
 import { readFile, stat } from "node:fs/promises";
-import { beaches, coastOverview } from "../src/beaches/catalog";
+import { beaches, municipalities } from "../src/beaches/catalog";
 import { isSeaPoint, type CoastLine } from "../src/map/coastalOrientation";
 
 const failures: string[] = [];
 let totalBytes = 0;
 
-const scenes = [coastOverview, ...beaches];
+const scenes = [...municipalities.map((municipality) => municipality.overview), ...beaches];
 for (const config of scenes) {
   const id = config.id;
   const metadata = await json(`public/metadata/${id}-dem.json`);
@@ -47,7 +47,8 @@ for (const config of scenes) {
 
   const buildings = await json(`public${config.buildingsAsset}`);
   const roads = await json(`public${config.roadsAsset}`);
-  check(buildings.features.length > 0, id, "no hay edificios");
+  const naturallyUnbuilt = ["carboneras-los-muertos", "carboneras-corral"].includes(id);
+  check(buildings.features.length > 0 || naturallyUnbuilt, id, "no hay edificios");
   check(roads.features.length > 0, id, "no hay calles");
 
   const shadowStat = await stat(`public${config.shadowTerrain.terrain.asset}`);

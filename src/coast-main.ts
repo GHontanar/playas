@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import "./styles/coast.css";
-import { coastOverview } from "./beaches/catalog";
+import { getMunicipality } from "./beaches/catalog";
 import { createScene } from "./map/createScene";
 import { createBeachZones } from "./map/beachZones";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
@@ -10,9 +10,12 @@ import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadS
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecast/openMeteo";
 
 const app = document.querySelector<HTMLElement>("#app")!;
+const municipality = getMunicipality(new URLSearchParams(window.location.search).get("municipality"));
+const coastOverview = municipality.overview;
+document.title = `Costa de ${municipality.name} · Estado de las playas`;
 app.innerHTML = `
   <main class="coast-story">
-    <section id="story-stage" class="story-stage" aria-label="Recorrido topográfico por las playas de Mojácar">
+    <section id="story-stage" class="story-stage" aria-label="Recorrido topográfico por las playas de ${municipality.name}">
       <div id="overview-scene" class="overview-scene">
         <div id="loading" class="loading">Preparando la costa completa…</div>
         <div id="overview-error" class="scene-error" hidden></div>
@@ -47,7 +50,7 @@ async function initialise() {
   performance.mark("coast-scene-complete");
   performance.measure("coast-time-to-complete-scene", "coast-initialise", "coast-scene-complete");
   controller.setSeaConditions({ state: "calm", source: "fallback" });
-  const zones = await createBeachZones(coastOverview, controller.terrain.heights);
+  const zones = await createBeachZones(coastOverview, controller.terrain.heights, municipality.beaches);
   controller.world.add(zones.group);
   controller.world.updateMatrixWorld(true);
 
@@ -94,13 +97,15 @@ async function initialise() {
   const averageAnchor = (indices: number[]) => indices
     .reduce((target, index) => target.add(anchors[index]), new THREE.Vector3())
     .multiplyScalar(1 / indices.length);
+  const groups = splitIntoGroups(anchors.length, 3);
   const viewpoints = [
     { target: new THREE.Vector3(), zoom: overviewZoom },
     // Marina is the end beach of the chunk: bias the target northwards and
     // leave more breathing room than in the inner sectors.
-    { target: anchors[0].clone().lerp(anchors[1], .35), zoom: detailZoom * .88 },
-    { target: averageAnchor([2, 3, 4]), zoom: detailZoom * .8 },
-    { target: averageAnchor([5, 6]), zoom: detailZoom }
+    ...groups.map((indices, index) => ({
+      target: averageAnchor(indices),
+      zoom: detailZoom * (index === groups.length - 1 ? 1 : .88)
+    }))
   ];
 
   const setCamera = (target: THREE.Vector3, zoom: number) => {
@@ -191,7 +196,7 @@ async function initialise() {
   const demo = new URLSearchParams(window.location.search).get("demo") === "1";
   const refreshStatus = async () => {
     try {
-      zones.setStatuses(await loadObservedStatus(demo));
+      zones.setStatuses(await loadObservedStatus(demo, municipality.id));
     } catch {
       zones.setStatuses([]);
     }
@@ -203,6 +208,14 @@ async function initialise() {
 function smoothstep(value: number) {
   const clamped = THREE.MathUtils.clamp(value, 0, 1);
   return clamped * clamped * (3 - 2 * clamped);
+}
+
+function splitIntoGroups(length: number, count: number): number[][] {
+  return Array.from({ length: Math.min(count, length) }, (_, group) => {
+    const start = Math.floor(group * length / count);
+    const end = Math.floor((group + 1) * length / count);
+    return Array.from({ length: Math.max(1, end - start) }, (_, index) => Math.min(length - 1, start + index));
+  });
 }
 
 function openBeach(beachId: string) {

@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-barquicos-cocones",
+  "name": "Los Barquicos-Los Cocones",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 36.99372,
+    "lon": -1.893958
+  },
+  "bounds": {
+    "west": -1.900787,
+    "south": 36.990896,
+    "east": -1.888141,
+    "north": 36.996547
+  },
+  "projectedBounds": {
+    "west": 597817,
+    "south": 4094427,
+    "east": 598935,
+    "north": 4095067,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1006
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 280,
+    "height": 160,
+    "minElevation": 0,
+    "maxElevation": 51.55,
+    "asset": "/terrain/assets/carboneras-barquicos-cocones-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 598167.6,
+      "z": 4094567.9
+    },
+    "end": {
+      "x": 598674.5,
+      "z": 4094926.8
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.932322,
+      "south": 36.985775,
+      "east": -1.884692,
+      "north": 37.001923
+    },
+    "projectedBounds": {
+      "west": 595017,
+      "south": 4093827,
+      "east": 599235,
+      "north": 4095667,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 281,
+      "height": 123,
+      "minElevation": 0,
+      "maxElevation": 184.28,
+      "asset": "/terrain/assets/carboneras-barquicos-cocones-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-barquicos-cocones-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-barquicos-cocones-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-barquicos-cocones-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

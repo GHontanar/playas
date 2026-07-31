@@ -2,9 +2,13 @@ import type { ObservedBeachStatus, ObservedStatusResponse } from "./types";
 
 const demoFlags = ["green", "green", "yellow", "green", "yellow", "green", "red"] as const;
 
-export async function loadObservedStatus(demo = false): Promise<ObservedBeachStatus[]> {
+export async function loadObservedStatus(demo = false, municipality = "mojacar"): Promise<ObservedBeachStatus[]> {
   if (demo) {
-    const ids = [
+    const ids = municipality === "carboneras" ? [
+      "carboneras-algarrobico", "carboneras-ancon", "carboneras-puntica",
+      "carboneras-barquicos-cocones", "carboneras-marinicas", "carboneras-corral",
+      "carboneras-los-muertos"
+    ] : [
       "marina-de-la-torre", "descargador", "piedra-villazar", "el-cantal",
       "lance-nuevo", "ventanicas", "venta-del-bancal"
     ];
@@ -14,10 +18,10 @@ export async function loadObservedStatus(demo = false): Promise<ObservedBeachSta
       lifeguardService: "active",
       jellyfish: index === 4,
       observedAtLocal: "modo de demostración",
-      source: "gestiondeplayas"
+      source: municipality === "carboneras" ? "proteccion-civil-carboneras" : "gestiondeplayas"
     }));
   }
-  const response = await fetch("/api/status", { headers: { Accept: "application/json" } });
+  const response = await fetch(`/api/status?municipality=${encodeURIComponent(municipality)}`, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`Estado oficial no disponible (${response.status})`);
   const payload = await response.json() as ObservedStatusResponse;
   return payload.beaches;

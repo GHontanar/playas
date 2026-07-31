@@ -4,6 +4,8 @@ import {
   normaliseLifeguardServiceSource,
   lifeguardServiceAt,
   normaliseJellyfishSource
+  , parseCarbonerasStations,
+  carbonerasServiceAt
 } from "../worker/playas-mojacar-proxy.js";
 
 describe("normalización semántica de banners", () => {
@@ -52,5 +54,23 @@ describe("normalización semántica de banners", () => {
 
   it("no inventa el calendario de futuras temporadas", () => {
     expect(lifeguardServiceAt(new Date("2027-07-31T10:00:00Z"), "01")).toBe("unknown");
+  });
+});
+
+describe("estado de Protección Civil Carboneras", () => {
+  it("extrae puestos, bandera y ausencia explícita de socorrismo", () => {
+    const rows = parseCarbonerasStations(`const beaches = [
+      ["Playa El Ancón", 37.00589, -1.889062, 3, 'Baño libre'],
+      ["Playa de Los Muertos", 36.952892, -1.898686, 2, 'Baño con precaución' + "<br>(SIN SERVICIO DE SOCORRISMO)"]
+    ];`);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({ name: "Playa El Ancón", level: 3, noService: false });
+    expect(rows[1]).toMatchObject({ name: "Playa de Los Muertos", level: 2, noService: true });
+  });
+
+  it("aplica el horario municipal 11:00–20:00", () => {
+    expect(carbonerasServiceAt(new Date("2026-07-31T09:00:00Z"))).toBe("active");
+    expect(carbonerasServiceAt(new Date("2026-07-31T18:00:00Z"))).toBe("inactive");
+    expect(carbonerasServiceAt(new Date("2027-07-31T10:00:00Z"))).toBe("unknown");
   });
 });

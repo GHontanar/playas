@@ -77,7 +77,7 @@ def buildings(source: Path, bounds: tuple[float, float, float, float], name: str
     return feature_collection(
         f"{name}-buildings",
         features,
-        "Dirección General del Catastro, INSPIRE BU, municipio 04064",
+        "Dirección General del Catastro, INSPIRE BU",
     )
 
 

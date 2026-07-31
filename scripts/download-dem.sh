@@ -24,3 +24,8 @@ download 11275511 "MDT02-ETRS89-HU30-1031-2-COB2.TIF"
 download 11275514 "MDT02-ETRS89-HU30-1032-1-COB2.TIF"
 # Marina de la Torre continúa al norte de la hoja 1032-1.
 download 11275463 "MDT02-ETRS89-HU30-1015-3-COB2.TIF"
+# Carboneras: mitad oriental de la hoja 1046, norte y sur, más el borde
+# septentrional que entra en 1031-4 (Ancón y Algarrobico).
+download 11275513 "MDT02-ETRS89-HU30-1031-4-COB2.TIF"
+download 11275563 "MDT02-ETRS89-HU30-1046-2-COB2.TIF"
+download 11275565 "MDT02-ETRS89-HU30-1046-4-COB2.TIF"

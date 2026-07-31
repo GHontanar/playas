@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-corral",
+  "name": "El Corral",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 36.962393,
+    "lon": -1.89934
+  },
+  "bounds": {
+    "west": -1.903589,
+    "south": 36.960058,
+    "east": -1.896108,
+    "north": 36.964739
+  },
+  "projectedBounds": {
+    "west": 597607,
+    "south": 4091003,
+    "east": 598267,
+    "north": 4091530,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 594
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 165,
+    "height": 132,
+    "minElevation": 0,
+    "maxElevation": 60.65,
+    "asset": "/terrain/assets/carboneras-corral-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 597957.6,
+      "z": 4091143.3
+    },
+    "end": {
+      "x": 598007,
+      "z": 4091389.7
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.935112,
+      "south": 36.954936,
+      "east": -1.89266,
+      "north": 36.970115
+    },
+    "projectedBounds": {
+      "west": 594807,
+      "south": 4090403,
+      "east": 598567,
+      "north": 4092130,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 251,
+      "height": 115,
+      "minElevation": 0,
+      "maxElevation": 125.27,
+      "asset": "/terrain/assets/carboneras-corral-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-corral-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-corral-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-corral-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

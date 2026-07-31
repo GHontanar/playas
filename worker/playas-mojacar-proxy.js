@@ -52,7 +52,9 @@ export default {
       return new Response(null, { headers: cors() });
     }
     if (url.pathname.endsWith("/api/status")) {
-      return observedStatus();
+      return url.searchParams.get("municipality") === "carboneras"
+        ? observedCarbonerasStatus()
+        : observedStatus();
     }
 
     const playa = url.searchParams.get("playa");
@@ -195,6 +197,77 @@ async function observedStatus() {
   } catch (error) {
     return fail(502, "No se pudo normalizar el estado oficial: " + error.message);
   }
+}
+
+const CARBONERAS_STATUS_URL = "https://www.proteccioncivilcarboneras.es/playaszenkra/salvamento_playas_banderas_2026.php";
+const CARBONERAS_NAMES = {
+  "Playa El Ancón": "carboneras-ancon",
+  "Playa Los Barquicos": "carboneras-barquicos-cocones",
+  "Playa Los Cocones": "carboneras-barquicos-cocones",
+  "Playa Las Marinicas": "carboneras-marinicas",
+  "Playa La Puntica": "carboneras-puntica",
+  "Playa de Los Muertos": "carboneras-los-muertos",
+  "Playa El Algarrobico": "carboneras-algarrobico",
+  "Playa El Corral": "carboneras-corral",
+};
+
+async function observedCarbonerasStatus() {
+  try {
+    const response = await fetch(CARBONERAS_STATUS_URL, {
+      headers: { "User-Agent": "Mozilla/5.0 (playas-carboneras-status)", "Accept": "text/html" },
+      cf: { cacheTtl: 0, cacheEverything: false },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const html = await response.text();
+    const stations = parseCarbonerasStations(html);
+    const grouped = new Map();
+    for (const station of stations) {
+      const beachId = CARBONERAS_NAMES[station.name];
+      if (!beachId) continue;
+      const current = grouped.get(beachId);
+      if (!current) grouped.set(beachId, { ...station, beachId });
+      else {
+        // La condición más restrictiva manda si una playa tiene varias torres.
+        current.level = Math.min(current.level, station.level);
+        current.noService ||= station.noService;
+      }
+    }
+    const activeHours = carbonerasServiceAt(new Date());
+    const beaches = Object.values(CARBONERAS_NAMES).filter((id, index, all) => all.indexOf(id) === index).map(beachId => {
+      const item = grouped.get(beachId);
+      return {
+        beachId,
+        flag: item ? ({ 1: "red", 2: "yellow", 3: "green" })[item.level] || "unknown" : "unknown",
+        lifeguardService: item?.noService ? "inactive" : activeHours,
+        jellyfish: item ? /medusa/i.test(item.note) : null,
+        observedAtLocal: null,
+        source: "proteccion-civil-carboneras",
+      };
+    });
+    return new Response(JSON.stringify({ fetchedAt: new Date().toISOString(), beaches }), {
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=30, s-maxage=60", ...cors() },
+    });
+  } catch (error) {
+    return fail(502, "No se pudo normalizar Protección Civil Carboneras: " + error.message);
+  }
+}
+
+export function parseCarbonerasStations(html) {
+  const stations = [];
+  const pattern = /\[\s*["']([^"']+)["']\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*([123])\s*,\s*([^\]]+)\]/g;
+  for (const match of html.matchAll(pattern)) {
+    const note = match[5].replace(/\+\s*/g, " ").replace(/["']/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    stations.push({ name: match[1], lat: Number(match[2]), lon: Number(match[3]), level: Number(match[4]), note, noService: /SIN SERVICIO/i.test(note) });
+  }
+  return stations;
+}
+
+export function carbonerasServiceAt(date) {
+  const local = madridParts(date);
+  // La web municipal publica el servicio como “Verano 2026”; fuera de ese año
+  // no inferimos temporada. Dentro del horario publicado, 11:00–20:00.
+  if (local.year !== 2026) return "unknown";
+  return local.hour >= 11 && local.hour < 20 ? "active" : "inactive";
 }
 
 async function fetchFragment(playa, evento) {

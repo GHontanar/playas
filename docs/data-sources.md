@@ -13,15 +13,21 @@ terreno desnudo interpolado a partir de puntos LiDAR clasificados como suelo.
 | Cobertura local | vuelo/derivado de 2020 |
 | Formato original | COG GeoTIFF, Float32 |
 | CRS | ETRS89 / UTM 30N (EPSG:25830), alturas ortométricas |
-| Hojas | `1015-3`, `1031-2` y `1032-1` |
+| Hojas | Mojácar: `1015-3`, `1031-2`, `1032-1`; Carboneras: `1031-4`, `1046-2`, `1046-4` |
 | Ficheros | `MDT02-ETRS89-HU30-{1015-3,1031-2,1032-1}-COB2.TIF` |
 | Tamaños descargados | 35.089.768 B, 108.911.204 B y 13.108.768 B |
 | Identificadores CNIG | `11275463`, `11275511`, `11275514` |
 | Descarga | Centro de Descargas CNIG; automatizada por `scripts/download-dem.sh` |
 
-Las siete playas y sus casters cruzan tres hojas. La hoja `1015-3` completa el
+Las hojas adicionales de Carboneras son `1031-4`, `1046-2` y `1046-4`, con
+identificadores CNIG `11275513`, `11275563` y `11275565` y tamaños
+104.074.255 B, 67.717.991 B y 20.969.021 B respectivamente.
+
+Las playas de cada municipio y sus casters cruzan tres hojas. La hoja `1015-3` completa el
 extremo norte de Marina de la Torre; `1031-2` conserva los cerros occidentales
-relevantes para el horizonte de tarde.
+relevantes para el horizonte de tarde. En Carboneras, `1031-4` evita cortar
+Ancón y Algarrobico al norte de 37°; las dos mitades orientales de `1046`
+cubren el casco urbano, Los Muertos y el litoral meridional.
 
 Página oficial:
 <https://centrodedescargas.cnig.es/CentroDescargas/catalogo.do?Serie=MDT02>.
@@ -64,13 +70,15 @@ una geometría desde un visor o recurrir a OSM.
 ## Edificios
 
 Se usa el servicio ATOM INSPIRE Buildings de la Dirección General del Catastro,
-municipio `04064-MOJACAR`, actualización 20-02-2026. El fichero
+municipios `04064-MOJACAR` y `04032-CARBONERAS`. El fichero
 `A.ES.SDGC.BU.04064.buildingpart.gml` contiene polígonos EPSG:25830 y
 `numberOfFloorsAboveGround`. Cada recorte contiene únicamente las partes que
 intersectan su chunk.
 
 Descarga:
 <https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04064-MOJACAR/A.ES.SDGC.BU.04064.zip>.
+Para Carboneras se usa
+<https://www.catastro.hacienda.gob.es/INSPIRE/Buildings/04/04032-CARBONERAS/A.ES.SDGC.BU.04032.zip>.
 El servicio permite el uso gratuito mencionando a la Dirección General del
 Catastro como autora y propietaria.
 

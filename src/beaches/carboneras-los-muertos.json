@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-los-muertos",
+  "name": "Los Muertos",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 36.953469,
+    "lon": -1.898324
+  },
+  "bounds": {
+    "west": -1.903259,
+    "south": 36.948643,
+    "east": -1.894393,
+    "north": 36.958305
+  },
+  "projectedBounds": {
+    "west": 597651,
+    "south": 4089737,
+    "east": 598428,
+    "north": 4090818,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 973
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 194,
+    "height": 270,
+    "minElevation": 0,
+    "maxElevation": 133.96,
+    "asset": "/terrain/assets/carboneras-los-muertos-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 598167.3,
+      "z": 4089877
+    },
+    "end": {
+      "x": 598001,
+      "z": 4090677.9
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.934776,
+      "south": 36.943521,
+      "east": -1.890945,
+      "north": 36.963681
+    },
+    "projectedBounds": {
+      "west": 594851,
+      "south": 4089137,
+      "east": 598728,
+      "north": 4091418,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 258,
+      "height": 152,
+      "minElevation": 0,
+      "maxElevation": 223.53,
+      "asset": "/terrain/assets/carboneras-los-muertos-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-los-muertos-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-los-muertos-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-los-muertos-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

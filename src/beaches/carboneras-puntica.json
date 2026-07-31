@@ -1,0 +1,92 @@
+{
+  "id": "carboneras-puntica",
+  "name": "La Puntica",
+  "municipalityId": "carboneras",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 36.99585,
+    "lon": -1.890214
+  },
+  "bounds": {
+    "west": -1.894988,
+    "south": 36.99406,
+    "east": -1.886451,
+    "north": 36.997649
+  },
+  "projectedBounds": {
+    "west": 598329,
+    "south": 4094784,
+    "east": 599084,
+    "north": 4095191,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 680
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 189,
+    "height": 102,
+    "minElevation": 0,
+    "maxElevation": 12.26,
+    "asset": "/terrain/assets/carboneras-puntica-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "shoreline": {
+    "start": {
+      "x": 598679,
+      "z": 4094924
+    },
+    "end": {
+      "x": 598824,
+      "z": 4095051
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.926525,
+      "south": 36.988941,
+      "east": -1.883001,
+      "north": 37.003025
+    },
+    "projectedBounds": {
+      "west": 595529,
+      "south": 4094184,
+      "east": 599384,
+      "north": 4095791,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 257,
+      "height": 107,
+      "minElevation": 0,
+      "maxElevation": 184.61,
+      "asset": "/terrain/assets/carboneras-puntica-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/carboneras-puntica-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/carboneras-puntica-buildings.geojson",
+  "roadsAsset": "/terrain/assets/carboneras-puntica-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2020 CC-BY 4.0 scne.es",
+    "Línea de costa DERA (IECA), CC BY 4.0",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ]
+}

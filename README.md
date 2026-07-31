@@ -1,4 +1,4 @@
-# Estado de las playas · Mojácar
+# Estado de las playas · Mojácar y Carboneras
 
 Página estática de una sola vista con el estado de las banderas (verde / amarilla / roja)
 y el aviso de medusas de las playas de Mojácar.
@@ -103,16 +103,20 @@ La entrada topográfica general está en `/` (y se conserva el alias `/coast/`);
 las fichas están en `/terrain/`. La portada histórica de banderas permanece
 archivada en `/flags/`, sin enlaces desde la aplicación. Se puede probar la
 maqueta con colores ficticios mediante `/?demo=1`. Para probar también la
-Pages Function localmente sobre el build:
+maqueta de Carboneras se usa `/coast/?municipality=carboneras`; sus fichas se
+resuelven con los identificadores `carboneras-*`. La futura vista provincial
+podrá seleccionar el catálogo municipal sin duplicar el motor de escena. Para
+probar también la Pages Function localmente sobre el build:
 
 ```sh
 npm run build
 npx wrangler pages dev dist
 ```
 
-## Maquetas topográficas de las siete playas
+## Maquetas topográficas por municipio
 
-La ruta `/terrain/` permite elegir Marina de la Torre, Descargador, Piedra
+La ruta `/terrain/` permite elegir las siete playas de Mojácar y las siete
+unidades operativas de Carboneras. En Mojácar incluye Marina de la Torre, Descargador, Piedra
 Villazar, El Cantal, Lance Nuevo, Ventanicas y Venta del Bancal. Cada playa
 tiene recorte, cámara, tramo litoral y caster orográfico propios, pero comparte
 la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
@@ -179,12 +183,15 @@ El chunk general usa el mismo pipeline:
 
 ```sh
 npm run data:beach -- mojacar-coast
+npm run data:beach -- carboneras-coast
 ```
 
 Los originales se guardan en `data/source/`, ignorado por Git. Véanse
 [`docs/data-sources.md`](docs/data-sources.md),
 [`docs/terrain-pipeline.md`](docs/terrain-pipeline.md) y
-[`docs/validation.md`](docs/validation.md).
+[`docs/validation.md`](docs/validation.md). La correspondencia entre el catálogo
+oficial y los puestos de Carboneras está en
+[`docs/carboneras-scope.md`](docs/carboneras-scope.md).
 
 ## Despliegue
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import config from "../src/beaches/ventanicas.json";
-import { beaches, coastOverview } from "../src/beaches/catalog";
+import { beaches, coastOverview, municipalities } from "../src/beaches/catalog";
 import { clampExaggeration, parseBeachConfig } from "../src/beaches/types";
 
 describe("configuración declarativa de playa", () => {
@@ -11,10 +11,11 @@ describe("configuración declarativa de playa", () => {
     expect(parsed.terrain.sourceResolutionMeters).toBe(2);
   });
 
-  it("valida las siete playas sin identificadores duplicados", () => {
+  it("valida las siete playas de cada municipio sin identificadores duplicados", () => {
     const parsed = beaches.map(parseBeachConfig);
-    expect(parsed).toHaveLength(7);
-    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(7);
+    expect(parsed).toHaveLength(14);
+    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(14);
+    expect(municipalities.every((municipality) => municipality.beaches.length === 7)).toBe(true);
     for (const beach of parsed) {
       expect(beach.shoreline.start.x).toBeGreaterThanOrEqual(beach.projectedBounds.west);
       expect(beach.shoreline.start.x).toBeLessThanOrEqual(beach.projectedBounds.east);
@@ -29,6 +30,10 @@ describe("configuración declarativa de playa", () => {
     expect(coastOverview.terrain.webResolutionMeters).toBe(20);
     expect(coastOverview.projectedBounds.north - coastOverview.projectedBounds.south)
       .toBeGreaterThan(8_000);
+    const carboneras = municipalities.find((item) => item.id === "carboneras")!;
+    expect(carboneras.overview.id).toBe("carboneras-coast");
+    expect(carboneras.overview.projectedBounds.north - carboneras.overview.projectedBounds.south)
+      .toBeGreaterThan(11_000);
   });
 
   it("declara los espigones oficiales sin aplicarlos a las demás playas", () => {

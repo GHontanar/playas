@@ -26,6 +26,7 @@ const terrainSchema = z.object({
 export const beachConfigSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
+  municipalityId: z.enum(["mojacar", "carboneras"]).default("mojacar"),
   timezone: z.literal("Europe/Madrid"),
   center: z.object({ lat: z.number(), lon: z.number() }),
   bounds: boundsSchema,

@@ -23,8 +23,8 @@ npm run verify:assets
 ```
 
 `download-dem.sh` usa los identificadores estables del Centro de Descargas.
-`prepare-all-beaches.ts` lee los siete ficheros de playa y la configuración del
-overview, y orquesta todos los derivados. `prepare_dem.py` comprueba EPSG:25830 y resolución 2 m, une las hojas,
+`prepare-all-beaches.ts` lee los catálogos de Mojácar y Carboneras y las dos
+configuraciones overview, y orquesta todos los derivados. `prepare_dem.py` comprueba EPSG:25830 y resolución 2 m, une las hojas,
 recorta el rectángulo métrico y remuestrea bilinealmente. El derivado visible
 usa 2,5 m y una pasada de suavizado gaussiano 3×3; el caster usa 15 m sin
 suavizado. Si la alineación de rejillas deja una costura, se rellena dentro de
@@ -35,10 +35,10 @@ nodata. Produce:
 - `<id>-dem.json`: trazabilidad, transformada, dimensiones y min/max;
 - `<id>-dem-preview.pgm`: inspección 2D sin depender de QGIS.
 
-`mojacar-coast` es un octavo recorte panorámico a 20 m. Su capa urbana usa
+`mojacar-coast` y `carboneras-coast` son recortes panorámicos a 20 m. Su capa urbana usa
 `urbanDetail: overview`: agrega las huellas de Catastro en masas simplificadas
 y conserva solo las clases viarias legibles a escala municipal. Se regenera
-con `npm run data:beach -- mojacar-coast`.
+con `npm run data:beach -- <municipio>-coast`.
 
 `prepare_coastline.py` abre `T01_07_LineaCostaAndalucia`, comprueba el CRS,
 intersecta geometrías reales con el chunk y escribe GeoJSON EPSG:25830.
