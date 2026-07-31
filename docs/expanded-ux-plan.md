@@ -94,11 +94,11 @@ causa puede no ser marina.
 
 ### Fase B — previsión puntual
 
-- [ ] spike de Open-Meteo Weather y Marine;
+- [x] spike de Open-Meteo Weather y Marine;
 - [ ] selección y validación de puntos terrestre y marino;
-- [ ] contrato de previsión, unidades y tiempos;
+- [x] contrato mínimo de previsión, unidades y tiempos;
 - [ ] caché y estados de error;
-- [ ] presentación separada de la observación.
+- [x] presentación separada de la observación.
 
 ### Fase C — adaptación por playa
 

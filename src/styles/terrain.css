@@ -57,12 +57,12 @@ button, input, select { font: inherit; }
 .scene-error { color: #8d2f28; }
 .scene-error[hidden] { display: none; }
 
-.solar-card {
+.forecast-card {
   position: absolute;
   z-index: 3;
   right: 18px;
   top: 18px;
-  width: min(265px, calc(100% - 36px));
+  width: min(310px, calc(100% - 36px));
   padding: 12px;
   border: 1px solid #e9e7de4d;
   border-radius: 12px;
@@ -70,8 +70,15 @@ button, input, select { font: inherit; }
   background: #152f35dc;
   backdrop-filter: blur(8px);
 }
-.solar-card strong { display: block; margin: 6px 0 10px; font: 500 24px Georgia, serif; }
-.sun-state { font-size: 11px; letter-spacing: .025em; text-transform: uppercase; }
+.forecast-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: #abc1bf; font-size: 9px; text-transform: uppercase; }
+.forecast-heading strong { color: #edf0e7; font: 500 16px Georgia, serif; text-transform: none; }
+.beach-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.beach-metrics > div { min-height: 58px; padding: 8px; border: 1px solid #edf0e724; border-radius: 7px; }
+.beach-metrics span { display: block; color: #abc1bf; font-size: 9px; text-transform: uppercase; }
+.beach-metrics strong { display: block; margin-top: 3px; color: #edf0e7; font: 500 19px Georgia, serif; }
+.beach-metrics small { display: block; margin-top: 2px; color: #abc1bf; font-size: 8px; }
+.forecast-secondary { margin: 9px 0; color: #d2ddda; font-size: 9px; line-height: 1.45; }
+.sun-state { margin: 8px 0; font-size: 10px; letter-spacing: .025em; text-transform: uppercase; }
 .sun-state::before { content: "●"; margin-right: 7px; color: #4ac0b5; }
 .sun-state[data-state="hidden"]::before { color: #e3a95d; }
 .sun-state[data-state="night"]::before { color: #7e8e9b; }
@@ -79,6 +86,10 @@ dl { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 16px; margin: 0; }
 dl div { border-top: 1px solid #edf0e729; padding-top: 7px; }
 dt { color: #abc1bf; font-size: 9px; text-transform: uppercase; }
 dd { margin: 3px 0 0; font-size: 13px; }
+.technical-solar { margin-top: 8px; padding-top: 8px; border-top-color: #edf0e729; }
+.technical-solar summary { color: #abc1bf; }
+.technical-solar dl { margin-top: 9px; }
+.forecast-source { display: block; margin-top: 9px; color: #89a4a1; font-size: 7px; line-height: 1.4; }
 
 .controls {
   display: grid;
@@ -112,11 +123,11 @@ footer a { color: #496f70; text-underline-offset: 2px; }
   .scene-shell {
     height: 44vh;
     min-height: 340px;
-    margin-top: 176px;
+    margin-bottom: 330px;
     overflow: visible;
     border-radius: 12px;
   }
-  .solar-card { top: -166px; right: 0; width: 100%; padding: 12px; }
+  .forecast-card { top: calc(100% + 12px); right: 0; width: 100%; padding: 12px; }
   .controls { grid-template-columns: 1fr; gap: 13px; }
   .controls button { width: 100%; }
   .debug-grid { grid-template-columns: 1fr; gap: 8px; }

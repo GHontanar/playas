@@ -10,6 +10,7 @@ import type { SeaState } from "./map/sea";
 import type { WaterMode } from "./map/sea";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 import type { ObservedBeachStatus } from "./status/types";
+import { forecastKey, loadBeachForecast, windName, type BeachForecastPoint } from "./forecast/openMeteo";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -38,15 +39,26 @@ app.innerHTML = `
     <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de ${config.name}">
       <div id="scene" class="scene"><div id="loading" class="loading">Preparando el relieve…</div></div>
       <div id="scene-error" class="scene-error" hidden></div>
-      <aside class="solar-card" aria-live="polite">
-        <span id="sun-state" class="sun-state">Calculando Sol…</span>
-        <strong id="time-readout">—</strong>
-        <dl>
-          <div><dt>Azimut</dt><dd id="azimuth">—</dd></div>
-          <div><dt>Elevación</dt><dd id="altitude">—</dd></div>
-          <div><dt>Horizonte</dt><dd id="horizon">—</dd></div>
-          <div><dt>Salida / puesta</dt><dd id="sun-times">—</dd></div>
-        </dl>
+      <aside class="forecast-card" aria-live="polite">
+        <div class="forecast-heading"><span>Previsión para</span><strong id="time-readout">—</strong></div>
+        <div class="beach-metrics">
+          <div><span>Agua</span><strong id="sea-temperature">—</strong></div>
+          <div><span>Aire</span><strong id="air-temperature">—</strong><small id="feels-like"></small></div>
+          <div><span>Oleaje</span><strong id="wave-height">—</strong><small id="wave-period"></small></div>
+          <div><span>Viento</span><strong id="wind-speed">—</strong><small id="wind-direction"></small></div>
+        </div>
+        <p id="forecast-secondary" class="forecast-secondary">Cargando previsión de modelo…</p>
+        <p id="sun-state" class="sun-state">Calculando Sol…</p>
+        <details class="technical-solar">
+          <summary>Datos solares y técnicos</summary>
+          <dl>
+            <div><dt>Azimut</dt><dd id="azimuth">—</dd></div>
+            <div><dt>Elevación</dt><dd id="altitude">—</dd></div>
+            <div><dt>Horizonte</dt><dd id="horizon">—</dd></div>
+            <div><dt>Salida / puesta</dt><dd id="sun-times">—</dd></div>
+          </dl>
+        </details>
+        <small class="forecast-source">Open-Meteo · previsión de modelo, no medición local</small>
       </aside>
     </section>
     <section class="controls" aria-label="Controles solares">
@@ -120,7 +132,20 @@ if (!window.WebGLRenderingContext) {
 
 async function initialise() {
   const controller = await createScene(sceneElement, config);
+  let forecast = new Map<string, BeachForecastPoint>();
+  let forecastFailed = false;
+  void loadBeachForecast(config.center.lat, config.center.lon).then((values) => {
+    forecast = values;
+    updateForecast();
+  }).catch(() => {
+    forecastFailed = true;
+    updateForecast();
+  });
   document.querySelector("#loading")?.remove();
+  const updateForecast = () => {
+    const point = forecast.get(forecastKey(dateInput.value, Number(timeInput.value)));
+    renderForecast(point, forecastFailed);
+  };
   const update = () => {
     const minutes = Number(timeInput.value);
     const solar = getSolarPosition(dateInput.value, minutes, config.center.lat, config.center.lon);
@@ -140,7 +165,7 @@ async function initialise() {
     controller.renderer.shadowMap.enabled = shadowsInput.checked;
     controller.setSeaSun(solar.vector, solar.aboveHorizon);
     controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
-    text("#time-readout", `${formatMinutes(minutes)} · Europe/Madrid`);
+    text("#time-readout", formatMinutes(minutes));
     text("#slider-output", formatMinutes(minutes));
     text("#azimuth", `${solar.azimuthDegrees.toFixed(1)}°`);
     text("#altitude", `${solar.altitudeDegrees.toFixed(1)}°`);
@@ -152,6 +177,7 @@ async function initialise() {
     const stateEl = document.querySelector<HTMLElement>("#sun-state")!;
     stateEl.textContent = state;
     stateEl.dataset.state = !solar.aboveHorizon ? "night" : terrainHidden ? "hidden" : "visible";
+    updateForecast();
   };
   dateInput.addEventListener("input", update);
   timeInput.addEventListener("input", update);
@@ -179,6 +205,24 @@ async function initialise() {
   });
   window.addEventListener("resize", controller.resize);
   update();
+}
+
+function renderForecast(point: BeachForecastPoint | undefined, failed: boolean) {
+  text("#sea-temperature", metric(point?.seaTemperature, "°C", 0));
+  text("#air-temperature", metric(point?.airTemperature, "°C", 0));
+  text("#feels-like", point?.apparentTemperature == null ? "" : `Sensación ${Math.round(point.apparentTemperature)}°`);
+  text("#wave-height", metric(point?.waveHeight, "m", 1));
+  text("#wave-period", point?.wavePeriod == null ? "" : `Periodo ${point.wavePeriod.toFixed(0)} s`);
+  text("#wind-speed", metric(point?.windSpeed, "km/h", 0));
+  text("#wind-direction", point?.windDirection == null ? "" : windName(point.windDirection));
+  const secondary = document.querySelector<HTMLElement>("#forecast-secondary")!;
+  secondary.textContent = point
+    ? `UV ${point.uvIndex?.toFixed(0) ?? "—"} · Lluvia ${point.precipitationProbability?.toFixed(0) ?? "—"}% · Racha ${point.windGust?.toFixed(0) ?? "—"} km/h`
+    : failed ? "Previsión temporalmente no disponible" : "Sin previsión para la fecha seleccionada";
+}
+
+function metric(value: number | null | undefined, unit: string, decimals: number) {
+  return value == null ? "—" : `${value.toFixed(decimals)} ${unit}`;
 }
 
 function formatMinutes(minutes: number): string {

@@ -117,12 +117,15 @@ tiene recorte, cámara, tramo litoral y caster orográfico propios, pero compart
 la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
 sombra física horaria. Cada ficha muestra la bandera oficial normalizada, la
-disponibilidad del servicio de socorrismo y la hora observada; todavía no añade
-meteorología.
+disponibilidad del servicio de socorrismo y la hora observada.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
 agitado— dentro de los controles de depuración. La bandera es una observación y
 no modifica ese estado artístico, que continúa separado de cualquier dato o
 predicción marina.
+La tarjeta principal consulta Open-Meteo Weather y Marine para la hora elegida
+y presenta aire, sensación térmica, viento, UV, lluvia, temperatura superficial
+del mar y oleaje. Son valores de modelo; agua y olas pueden compartir celda
+entre varias playas y no equivalen a una medición en la orilla.
 La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 
