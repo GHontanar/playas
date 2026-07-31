@@ -115,7 +115,7 @@ más cercano: no existe un estado persistente con zoom arbitrario entre escenas.
 
 ## MVP de viento
 
-Marina de la Torre valida un glifo 3D flotante y separado del chunk.
+Las siete playas comparten un glifo 3D flotante y separado del chunk.
 Open-Meteo expresa la dirección meteorológica de procedencia; el render
 invierte ese azimut para orientar el símbolo hacia el destino geográfico. La
 orientación de la costa clasifica el resultado como `de mar`, `de tierra` o

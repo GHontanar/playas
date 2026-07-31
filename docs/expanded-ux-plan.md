@@ -105,7 +105,7 @@ causa puede no ser marina.
 
 - [ ] orientación derivada y auditada;
 - [ ] viento onshore/offshore;
-  MVP visual y clasificación implementados en Marina de la Torre; pendiente
+  MVP visual y clasificación implementados en las siete playas; pendiente
   auditar y extender a las otras seis playas.
 - [ ] alineación y exposición al swell;
 - [ ] apantallamiento aproximado por cabos;

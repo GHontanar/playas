@@ -42,7 +42,7 @@ app.innerHTML = `
     <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de ${config.name}">
       <div id="scene" class="scene"><div id="loading" class="loading">Preparando el relieve…</div></div>
       <div id="scene-error" class="scene-error" hidden></div>
-      ${config.id === "marina-de-la-torre" ? `<div id="wind-glyph" class="wind-glyph" hidden aria-hidden="true"></div>` : ""}
+      <div id="wind-glyph" class="wind-glyph" hidden aria-hidden="true"></div>
       <aside class="forecast-card" aria-live="polite">
         <div class="forecast-heading"><span>Previsión para</span><strong id="time-readout">—</strong></div>
         <div class="beach-metrics">
@@ -99,9 +99,7 @@ app.innerHTML = `
           </label>
           <label class="check"><input id="shadows" type="checkbox" checked> Sombras físicas</label>
           <label class="check"><input id="wireframe" type="checkbox"> Mostrar malla</label>
-          ${config.id === "marina-de-la-torre"
-            ? `<label class="check"><input id="wind-field" type="checkbox" checked> Glifo de viento</label>`
-            : ""}
+          <label class="check"><input id="wind-field" type="checkbox" checked> Glifo de viento</label>
           <p>${config.terrain.width * config.terrain.height} vértices · ${(config.terrain.width - 1) * (config.terrain.height - 1) * 2} triángulos · ${config.terrain.webResolutionMeters} m</p>
         </div>
       </details>
@@ -147,7 +145,7 @@ if (!window.WebGLRenderingContext) {
 
 async function initialise() {
   const controller = await createScene(sceneElement, config);
-  const windField = config.id === "marina-de-la-torre" && windGlyphElement
+  const windField = windGlyphElement
     ? createWindGlyph(config, windGlyphElement)
     : undefined;
   if (windField) {

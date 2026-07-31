@@ -122,8 +122,8 @@ disponibilidad del servicio de socorrismo y la hora observada.
 También calcula para la fecha seleccionada el primer minuto de sombra
 orográfica en el centro de la playa y cuánto se adelanta respecto a la puesta
 astronómica estándar.
-Marina de la Torre incluye además un MVP gráfico de viento: un glifo 3D
-independiente de la maqueta gira según el vector meteorológico real y la tarjeta
+Las siete playas incluyen además un glifo 3D de viento independiente de la
+maqueta, orientado según el vector meteorológico real, y la tarjeta
 lo clasifica como viento de mar, de tierra o lateral. Esta capa no simula desviaciones locales por relieve
 o edificios y permanece aislada de la dirección del oleaje.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
