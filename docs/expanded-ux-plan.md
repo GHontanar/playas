@@ -108,6 +108,8 @@ causa puede no ser marina.
   MVP visual y clasificación implementados en las siete playas; pendiente
   auditar y extender a las otras seis playas.
 - [ ] alineación y exposición al swell;
+  MVP direccional activo en Marina de la Torre y Lance Nuevo; el segundo añade
+  abrigo visual dinámico a sotavento del espigón antes de generalizar.
 - [ ] apantallamiento aproximado por cabos;
 - [ ] potencia de oleaje etiquetada como estimación;
 - [x] traducción genérica de Hs y periodo a los tres estados artísticos del agua;

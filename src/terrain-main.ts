@@ -259,7 +259,10 @@ function renderForecast(
   text("#feels-like", point?.apparentTemperature == null ? "" : `Sensación ${Math.round(point.apparentTemperature)}°`);
   text("#wave-height", metric(point?.waveHeight, "m", 1));
   const seaState = seaStateForWaveHeight(point?.waveHeight);
-  text("#wave-period", point?.wavePeriod == null ? "" : `${seaStateLabel(seaState)} · ${point.wavePeriod.toFixed(0)} s`);
+  const waveDirection = ["marina-de-la-torre", "lance-nuevo"].includes(config.id) && point?.waveDirection != null
+    ? ` · ${Math.round(point.waveDirection)}°`
+    : "";
+  text("#wave-period", point?.wavePeriod == null ? "" : `${seaStateLabel(seaState)} · ${point.wavePeriod.toFixed(0)} s${waveDirection}`);
   text("#wind-speed", metric(point?.windSpeed, "km/h", 0));
   text("#wind-direction", point?.windDirection == null
     ? ""

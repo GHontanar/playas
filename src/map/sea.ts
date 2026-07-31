@@ -11,6 +11,7 @@ import {
 } from "./coastalOrientation";
 import type { Vector3Like } from "../solar/sunVector";
 import { loadJson, loadTexture } from "./assets";
+import { waveTravelVector } from "../waves/waveDirection";
 
 export const SEA_STATES = ["calm", "moderate", "rough"] as const;
 export type SeaState = typeof SEA_STATES[number];
@@ -78,6 +79,7 @@ export async function createSea(
   const coastlineRecords = await loadLocalCoastlines(config);
   const coastlines = coastlineRecords.map(({ line }) => line);
   const structureIds = new Set(config.coastalStructures.map(({ featureId }) => featureId));
+  const structureTip = findSeawardStructureTip(coastlineRecords, structureIds, config.seaSide);
   const breakerCoastlines = structureIds.size
     ? coastlineRecords.filter(({ featureId }) => !featureId || !structureIds.has(featureId)).map(({ line }) => line)
     : [createBreakerCoastline(coastlines, config)];
@@ -118,7 +120,11 @@ export async function createSea(
     waterMode: { value: config.visualStyle === "mediterranean-illustrated" ? 1 : 0 },
     illustratedStyle: { value: config.visualStyle === "mediterranean-illustrated" ? 1 : 0 },
     sunVector: { value: new THREE.Vector3(0, 1, 0) },
-    sunVisible: { value: 1 }
+    sunVisible: { value: 1 },
+    waveDirection: { value: new THREE.Vector2(-1, 0) },
+    directionalWaves: { value: ["marina-de-la-torre", "lance-nuevo"].includes(config.id) ? 1 : 0 },
+    structureTip: { value: new THREE.Vector2(structureTip?.[0] ?? 0, -(structureTip?.[1] ?? 0)) },
+    structureShelter: { value: config.id === "lance-nuevo" && structureTip ? 1 : 0 }
   };
   const material = new THREE.MeshPhysicalMaterial({
     color: config.visualStyle === "mediterranean-illustrated" ? "#279b9c" : "#55a9aa",
@@ -151,7 +157,21 @@ export async function createSea(
         uniform float waveSpeed;
         uniform float crestHeight;
         uniform float waterMode;
-        uniform float illustratedStyle;`
+        uniform float illustratedStyle;
+        uniform vec2 waveDirection;
+        uniform float directionalWaves;
+        uniform vec2 structureTip;
+        uniform float structureShelter;
+        float breakwaterShelter(vec2 point, vec2 flow, vec2 tip) {
+          vec2 relative = point - tip;
+          float downstream = dot(relative, flow);
+          float crossFlow = abs(dot(relative, vec2(-flow.y, flow.x)));
+          float wakeWidth = 14.0 + max(0.0, downstream) * .42;
+          float lateral = 1.0 - smoothstep(wakeWidth * .38, wakeWidth, crossFlow);
+          float begins = smoothstep(2.0, 24.0, downstream);
+          float fades = 1.0 - smoothstep(190.0, 330.0, downstream);
+          return structureShelter * lateral * begins * fades;
+        }`
       )
       .replace(
         "#include <beginnormal_vertex>",
@@ -160,8 +180,14 @@ export async function createSea(
         float normalPhase = shoreDistance * 6.2831853 / max(18.0, waveLength)
           + waveTime * waveSpeed * .13
           + sin(position.y * .026) * .58;
-        float waveSlope = cos(normalPhase) * normalSurfZone * crestHeight * .075 * waterMode;
-        vec3 objectNormal = normalize(vec3(-waveSlope, 0.0, 1.0));`
+        float normalDirectionalCoordinate = dot(position.xy, waveDirection);
+        float directionalNormalPhase = normalDirectionalCoordinate * 6.2831853 / max(18.0, waveLength)
+          - waveTime * waveSpeed * .13;
+        normalPhase = mix(normalPhase, directionalNormalPhase, directionalWaves);
+        float normalShelter = breakwaterShelter(position.xy, waveDirection, structureTip);
+        float waveSlope = cos(normalPhase) * normalSurfZone * crestHeight * .075 * waterMode * (1.0 - normalShelter * .68);
+        vec2 slopeDirection = mix(vec2(1.0, 0.0), waveDirection, directionalWaves);
+        vec3 objectNormal = normalize(vec3(-waveSlope * slopeDirection.x, -waveSlope * slopeDirection.y, 1.0));`
       )
       .replace(
         "#include <begin_vertex>",
@@ -171,8 +197,14 @@ export async function createSea(
         vSeaCoordinates = position.xy;
         vWaveCrest = 0.0;
         float wavePhase = waveTime * waveSpeed;
+        float directionalCoordinate = dot(position.xy, waveDirection);
+        float localShelter = breakwaterShelter(position.xy, waveDirection, structureTip);
+        float localWaveStrength = 1.0 - localShelter * .68;
+        float directionalSeaWave = sin((directionalCoordinate - wavePhase) * 6.2831853 / waveLength);
+        directionalSeaWave += .34 * sin((dot(position.xy, vec2(-waveDirection.y, waveDirection.x)) * .5 - wavePhase * .71) * 6.2831853 / (waveLength * .62));
         float seaWave = sin((position.x + wavePhase) * 6.2831853 / waveLength);
         seaWave += 0.42 * sin((position.y * 0.72 - wavePhase * 0.63) * 6.2831853 / (waveLength * 0.57));
+        seaWave = mix(seaWave, directionalSeaWave, directionalWaves);
         // La ola crece sobre el nivel del mar. Evita que una exageración
         // artística abra huecos y deje ver el DEM bajo la superficie.
         float shoreDamping = smoothstep(7.0, 52.0, vShoreDistance);
@@ -183,20 +215,24 @@ export async function createSea(
         float coastalPhase = vShoreDistance * 6.2831853 / max(18.0, waveLength)
           + waveTime * waveSpeed * .13
           + sin(position.y * .026) * .58;
+        float directionalCoastalPhase = directionalCoordinate * 6.2831853 / max(18.0, waveLength)
+          - waveTime * waveSpeed * .13;
+        coastalPhase = mix(coastalPhase, directionalCoastalPhase, directionalWaves);
         float coastalWave = sin(coastalPhase);
         float crest = pow(max(0.0, coastalWave), 4.0);
         float openWaterPattern = (
           sin(position.x * .027 + waveTime * .31)
           * sin(position.y * .021 - waveTime * .23)
         );
-        float openWater = (openWaterPattern * .45 + .55) * waveAmplitude;
+        float openWater = (openWaterPattern * .45 + .55) * waveAmplitude * mix(1.0, .48, localShelter);
         // El volumen nunca baja del plano marino: el seno modifica el hombro
         // de la ola, mientras la cresta aporta toda la elevación principal.
         float breakingProfile = max(0.0, coastalWave * .13 + .14)
           + crest * .86;
-        float volumeHeight = openWater + surfZone * breakingProfile * crestHeight;
-        vWaveCrest = crest * surfZone * waterMode;
-        transformed.x -= crest * surfZone * crestHeight * .22 * waterMode;
+        float volumeHeight = openWater + surfZone * breakingProfile * crestHeight * localWaveStrength;
+        vWaveCrest = crest * surfZone * waterMode * localWaveStrength;
+        vec2 crestAdvance = mix(vec2(-1.0, 0.0), waveDirection, directionalWaves);
+        transformed.xy += crestAdvance * crest * surfZone * crestHeight * .22 * waterMode * localWaveStrength;
         transformed.z += mix(legacyHeight, volumeHeight, waterMode);`
       );
     shader.fragmentShader = shader.fragmentShader
@@ -270,6 +306,8 @@ export async function createSea(
   let lastElapsedSeconds = 0;
   let currentSettings: SeaSettings = { ...settings.moderate };
   let targetSettings: SeaSettings = { ...settings.moderate };
+  const currentWaveDirection = new THREE.Vector2(-1, 0);
+  const targetWaveDirection = new THREE.Vector2(-1, 0);
   let mode: WaterMode = config.visualStyle === "mediterranean-illustrated"
     ? "volumetric"
     : "legacy";
@@ -280,6 +318,12 @@ export async function createSea(
     targetSettings = conditions.source === "marine-data"
       ? settingsForMarineData(setting, conditions)
       : { ...setting };
+    if (["marina-de-la-torre", "lance-nuevo"].includes(config.id) && conditions.directionDegrees != null && Number.isFinite(conditions.directionDegrees)) {
+      const direction = waveTravelVector(conditions.directionDegrees);
+      // PlaneGeometry usa Y local hacia el sur; el segundo componente se
+      // invierte antes de llegar al shader.
+      targetWaveDirection.set(direction.x, -direction.z);
+    }
     breakers.forEach((breaker, index) => {
       breaker.mesh.visible = config.visualStyle !== "mediterranean-illustrated"
         && index < setting.breakerCount;
@@ -301,6 +345,8 @@ export async function createSea(
       lastElapsedSeconds = elapsedSeconds;
       const blend = reducedMotion ? 1 : 1 - Math.exp(-delta * 3.2);
       interpolateSettings(currentSettings, targetSettings, blend);
+      currentWaveDirection.lerp(targetWaveDirection, blend).normalize();
+      uniforms.waveDirection.value.copy(currentWaveDirection);
       uniforms.waveAmplitude.value = currentSettings.amplitude;
       uniforms.waveLength.value = currentSettings.wavelength;
       uniforms.waveSpeed.value = currentSettings.speed;
@@ -700,5 +746,20 @@ async function loadLocalCoastlines(config: BeachConfig): Promise<LocalCoastline[
       featureId: feature.properties?.id_dera,
       line: line.map(([x, z]) => [x - centerX, z - centerZ] as [number, number])
     }));
+  });
+}
+
+function findSeawardStructureTip(
+  records: LocalCoastline[],
+  structureIds: Set<number>,
+  seaSide: BeachConfig["seaSide"]
+): [number, number] | undefined {
+  const points = records
+    .filter(({ featureId }) => featureId != null && structureIds.has(featureId))
+    .flatMap(({ line }) => line);
+  if (!points.length) return undefined;
+  return points.reduce((tip, point) => {
+    const fartherSeaward = seaSide === "east" ? point[0] > tip[0] : point[0] < tip[0];
+    return fartherSeaward ? point : tip;
   });
 }
