@@ -41,6 +41,7 @@
   "seaSide": "east",
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
   "seaLevelMeters": 1.5,
   "coastalStructures": [],
   "shoreline": {
@@ -55,26 +56,26 @@
   },
   "shadowTerrain": {
     "bounds": {
-      "west": -1.848046,
-      "south": 37.128875,
-      "east": -1.819168,
-      "north": 37.150765
+      "west": -1.896569,
+      "south": 37.100746,
+      "east": -1.818923,
+      "north": 37.167276
     },
     "projectedBounds": {
-      "west": 602325,
-      "south": 4109790,
+      "west": 598050,
+      "south": 4106700,
       "east": 604860,
-      "north": 4112250,
+      "north": 4114000,
       "crs": "EPSG:25830"
     },
     "terrain": {
       "verticalExaggeration": 1.5,
       "sourceResolutionMeters": 2,
       "webResolutionMeters": 15,
-      "width": 169,
-      "height": 164,
+      "width": 454,
+      "height": 487,
       "minElevation": 0,
-      "maxElevation": 177.6,
+      "maxElevation": 749.55,
       "asset": "/terrain/assets/descargador-horizon.f32"
     }
   },

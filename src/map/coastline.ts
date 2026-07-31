@@ -7,6 +7,7 @@ import {
 } from "./coastalOrientation";
 import { sampleTerrainElevation } from "./terrain";
 import { toonMaterial } from "../styles/toonMaterial";
+import { loadJson } from "./assets";
 
 type GeoJSON = {
   features: Array<{
@@ -20,9 +21,7 @@ export async function loadCoastline(
   heights: Float32Array,
   exaggeration: number
 ): Promise<THREE.Group> {
-  const response = await fetch(config.coastlineAsset);
-  if (!response.ok) throw new Error(`No se pudo cargar la costa (${response.status})`);
-  const data = await response.json() as GeoJSON;
+  const data = await loadJson<GeoJSON>(config.coastlineAsset);
   const group = new THREE.Group();
   const material = new THREE.LineBasicMaterial({ color: "#f5df9c" });
   const structureIds = new Set(config.coastalStructures.map(({ featureId }) => featureId));

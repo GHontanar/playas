@@ -41,6 +41,7 @@
   "seaSide": "east",
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
   "seaLevelMeters": 0.15,
   "coastalStructures": [
     {
@@ -60,26 +61,26 @@
   },
   "shadowTerrain": {
     "bounds": {
-      "west": -1.857289,
-      "south": 37.10936,
-      "east": -1.827836,
-      "north": 37.125432
+      "west": -1.882707,
+      "south": 37.102315,
+      "east": -1.827731,
+      "north": 37.132718
     },
     "projectedBounds": {
-      "west": 601530,
-      "south": 4107615,
+      "west": 599280,
+      "south": 4106865,
       "east": 604125,
-      "north": 4109430,
+      "north": 4110180,
       "crs": "EPSG:25830"
     },
     "terrain": {
       "verticalExaggeration": 1.5,
       "sourceResolutionMeters": 2,
       "webResolutionMeters": 15,
-      "width": 173,
-      "height": 121,
+      "width": 323,
+      "height": 221,
       "minElevation": 0,
-      "maxElevation": 347.68,
+      "maxElevation": 750.3,
       "asset": "/terrain/assets/lance-nuevo-horizon.f32"
     }
   },

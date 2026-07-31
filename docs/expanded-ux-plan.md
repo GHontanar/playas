@@ -114,7 +114,7 @@ causa puede no ser marina.
 ### Fase D — contraste y producto
 
 - [ ] contraste opcional con boya de Puertos del Estado;
-- [ ] validación física playa por playa;
+- [x] validación física de perfil y cobertura playa por playa;
 - [ ] rendimiento en móvil real;
 - [ ] accesibilidad y estados fuera de temporada;
 - [ ] decisión final de portada y transición visual.

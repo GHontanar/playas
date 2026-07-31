@@ -143,8 +143,9 @@ npm run build
 
 Estado validado: configuración y assets de las siete playas, pruebas unitarias,
 regeneración desde originales locales y smoke tests WebGL de escritorio y
-móvil. El contraste independiente de horizonte se realizó en Ventanicas; la
-medición de FPS/memoria GPU queda reservada para un móvil físico.
+móvil. Los siete perfiles de horizonte se contrastaron con PVGIS y conservan
+margen después de sus obstáculos críticos. La navegación se comprobó en un
+Nothing Phone 3 y un Redmi 14; queda pendiente registrar FPS y memoria GPU.
 
 Regeneración geográfica desde las fuentes oficiales:
 

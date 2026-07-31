@@ -3,6 +3,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type { BeachConfig } from "../beaches/types";
 import { sampleTerrainElevation } from "./terrain";
 import { toonMaterial } from "../styles/toonMaterial";
+import { loadJson } from "./assets";
 
 type Ring = number[][];
 type PolygonCoordinates = Ring[];
@@ -44,9 +45,7 @@ function shapeFromPolygon(
 }
 
 async function fetchGeoJSON(url: string): Promise<FeatureCollection> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`No se pudo cargar la capa urbana (${response.status})`);
-  return response.json() as Promise<FeatureCollection>;
+  return loadJson<FeatureCollection>(url);
 }
 
 export async function createUrbanLayer(

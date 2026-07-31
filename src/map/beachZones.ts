@@ -4,6 +4,7 @@ import type { BeachConfig } from "../beaches/types";
 import type { ObservedBeachStatus, FlagState } from "../status/types";
 import { coastlineEnvelope, coastXAt, seawardNormal, type CoastLine } from "./coastalOrientation";
 import { sampleTerrainElevation } from "./terrain";
+import { loadJson } from "./assets";
 
 type CoastGeoJSON = {
   features: Array<{ geometry: { type: string; coordinates: number[][] | number[][][] } }>;
@@ -28,9 +29,7 @@ export async function createBeachZones(
   overview: BeachConfig,
   heights: Float32Array
 ): Promise<BeachZoneLayer> {
-  const response = await fetch(overview.coastlineAsset);
-  if (!response.ok) throw new Error(`No se pudo cargar la costa general (${response.status})`);
-  const data = await response.json() as CoastGeoJSON;
+  const data = await loadJson<CoastGeoJSON>(overview.coastlineAsset);
   const centerX = (overview.projectedBounds.west + overview.projectedBounds.east) / 2;
   const centerZ = (overview.projectedBounds.south + overview.projectedBounds.north) / 2;
   const lines = data.features.flatMap((feature) => {

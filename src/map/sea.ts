@@ -10,6 +10,7 @@ import {
   type CoastLine
 } from "./coastalOrientation";
 import type { Vector3Like } from "../solar/sunVector";
+import { loadJson, loadTexture } from "./assets";
 
 export const SEA_STATES = ["calm", "moderate", "rough"] as const;
 export type SeaState = typeof SEA_STATES[number];
@@ -100,7 +101,7 @@ export async function createSea(
       1
     )
   );
-  const normalMap = await new THREE.TextureLoader().loadAsync(
+  const normalMap = await loadTexture(
     "/terrain/textures/mediterranean-waves-normal.webp"
   );
   normalMap.wrapS = THREE.RepeatWrapping;
@@ -688,9 +689,7 @@ function updateBreaker(
 }
 
 async function loadLocalCoastlines(config: BeachConfig): Promise<LocalCoastline[]> {
-  const response = await fetch(config.coastlineAsset);
-  if (!response.ok) throw new Error(`No se pudo cargar la costa para el oleaje (${response.status})`);
-  const data = await response.json() as GeoJSON;
+  const data = await loadJson<GeoJSON>(config.coastlineAsset);
   const centerX = (config.projectedBounds.west + config.projectedBounds.east) / 2;
   const centerZ = (config.projectedBounds.south + config.projectedBounds.north) / 2;
   return data.features.flatMap((feature) => {

@@ -55,8 +55,12 @@ for (const id of selected) {
 
   const terrainMetadata = JSON.parse(await readFile(`${metadataDir}/${id}-dem.json`, "utf8"));
   const horizonMetadata = JSON.parse(await readFile(`${metadataDir}/${id}-horizon.json`, "utf8"));
+  config.terrain.width = terrainMetadata.width;
+  config.terrain.height = terrainMetadata.height;
   config.terrain.minElevation = round(terrainMetadata.minElevation);
   config.terrain.maxElevation = round(terrainMetadata.maxElevation);
+  config.shadowTerrain.terrain.width = horizonMetadata.width;
+  config.shadowTerrain.terrain.height = horizonMetadata.height;
   config.shadowTerrain.terrain.minElevation = round(horizonMetadata.minElevation);
   config.shadowTerrain.terrain.maxElevation = round(horizonMetadata.maxElevation);
   await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);

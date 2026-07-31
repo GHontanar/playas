@@ -1,12 +1,17 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
-import { loadTerrain, type TerrainModel } from "./terrain";
+import { loadShadowTerrain, loadTerrain, type TerrainModel } from "./terrain";
 import { loadCoastline } from "./coastline";
 import { createSunLight } from "./shadows";
 import { createChunkBase } from "./chunkBase";
 import { createUrbanLayer } from "./urban";
-import { createSea, type SeaConditions, type WaterMode } from "./sea";
+import { createSea, type SeaConditions, type SeaController, type WaterMode } from "./sea";
 import type { Vector3Like } from "../solar/sunVector";
+import { loadFloat32, prefetchJson, prefetchTexture } from "./assets";
+
+export type SceneLoadOptions = {
+  onFirstFrame?: () => void;
+};
 
 export interface SceneController {
   terrain: TerrainModel;
@@ -25,7 +30,11 @@ export interface SceneController {
   dispose(): void;
 }
 
-export async function createScene(container: HTMLElement, config: BeachConfig): Promise<SceneController> {
+export async function createScene(
+  container: HTMLElement,
+  config: BeachConfig,
+  options: SceneLoadOptions = {}
+): Promise<SceneController> {
   const renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio <= 1.5, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
   renderer.setSize(container.clientWidth, container.clientHeight);
@@ -67,47 +76,12 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   const cameraUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
   let currentExaggeration = config.terrain.verticalExaggeration;
 
-  const terrain = await loadTerrain(config);
-  terrain.mesh.scale.y = config.terrain.verticalExaggeration;
-  world.add(terrain.mesh);
-  const chunkBase = createChunkBase(terrain.heights, config);
-  world.add(chunkBase.group);
-  const urban = await createUrbanLayer(
-    config,
-    terrain.heights,
-    config.terrain.verticalExaggeration
-  );
-  world.add(urban.group);
-  const shadowTerrain = await loadTerrain(config, config.shadowTerrain);
   const visibleCenterX = (b.west + b.east) / 2;
   const visibleCenterZ = (b.south + b.north) / 2;
   const shadowBounds = config.shadowTerrain.projectedBounds;
-  shadowTerrain.mesh.position.set(
-    (shadowBounds.west + shadowBounds.east) / 2 - visibleCenterX,
-    0,
-    (shadowBounds.south + shadowBounds.north) / 2 - visibleCenterZ
-  );
-  shadowTerrain.mesh.scale.y = config.terrain.verticalExaggeration;
-  shadowTerrain.mesh.material.colorWrite = false;
-  shadowTerrain.mesh.material.depthWrite = false;
-  shadowTerrain.mesh.receiveShadow = false;
-  shadowTerrain.mesh.castShadow = true;
-  world.add(shadowTerrain.mesh);
-  const coastline = await loadCoastline(
-    config,
-    terrain.heights,
-    config.terrain.verticalExaggeration
-  );
-  world.add(coastline);
-
-  const sea = await createSea(sizeX, sizeZ, config);
-  world.add(sea.group);
-
   const hemisphere = new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35);
   const ambient = new THREE.AmbientLight("#637987", 0);
   const fill = new THREE.DirectionalLight("#8ba6b8", 0);
-  // Luz de relleno desde el lado de cámara: evita masas negras cuando el
-  // relieve oculta el Sol, sin proyectar una segunda sombra.
   fill.position.set(2600, 4200, 2600);
   scene.add(hemisphere, ambient, fill);
   const shadowWidth = shadowBounds.east - shadowBounds.west;
@@ -116,22 +90,66 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
     (shadowBounds.west + shadowBounds.east) / 2 - visibleCenterX,
     (shadowBounds.south + shadowBounds.north) / 2 - visibleCenterZ
   );
-  // Diagonal del caster más su desplazamiento respecto al chunk visible:
-  // garantiza que el frustum no recorte los cerros occidentales al rotar la luz.
   const shadowSceneSize = Math.hypot(shadowWidth, shadowDepth) + shadowOffset * 2;
   const light = createSunLight(shadowSceneSize, window.innerWidth <= 650 ? 1024 : 1536);
   scene.add(light, light.target);
 
+  // Empieza todas las transferencias en paralelo. La construcción CPU del
+  // caster y de la ciudad se retrasa hasta después de la primera maqueta.
+  const terrainPromise = loadTerrain(config);
+  void loadFloat32(config.shadowTerrain.terrain.asset).catch(() => undefined);
+  prefetchJson(config.buildingsAsset);
+  prefetchJson(config.roadsAsset);
+  prefetchJson(config.coastlineAsset);
+  prefetchTexture("/terrain/textures/mediterranean-waves-normal.webp");
+
+  let sea: SeaController | undefined;
   let frame = 0;
   const clock = new THREE.Clock();
   const render = () => {
     frame = requestAnimationFrame(render);
-    sea.update(clock.getElapsedTime());
+    sea?.update(clock.getElapsedTime());
     renderer.render(scene, camera);
   };
   render();
 
-  const resize = () => {
+  const terrain = await terrainPromise;
+  terrain.mesh.scale.y = config.terrain.verticalExaggeration;
+  world.add(terrain.mesh);
+  const chunkBase = createChunkBase(terrain.heights, config);
+  world.add(chunkBase.group);
+  resize();
+
+  const [coastline, loadedSea] = await Promise.all([
+    loadCoastline(config, terrain.heights, config.terrain.verticalExaggeration),
+    createSea(sizeX, sizeZ, config)
+  ]);
+  world.add(coastline);
+  sea = loadedSea;
+  world.add(sea.group);
+  renderer.render(scene, camera);
+  if (options.onFirstFrame) {
+    await nextFrame();
+    options.onFirstFrame();
+    // Permite que el navegador pinte la maqueta básica antes de triangular la
+    // ciudad y preparar el mapa de sombras.
+    await nextFrame();
+  }
+
+  const [urban, shadowTerrain] = await Promise.all([
+    createUrbanLayer(config, terrain.heights, config.terrain.verticalExaggeration),
+    loadShadowTerrain(config)
+  ]);
+  world.add(urban.group);
+  shadowTerrain.mesh.position.set(
+    (shadowBounds.west + shadowBounds.east) / 2 - visibleCenterX,
+    0,
+    (shadowBounds.south + shadowBounds.north) / 2 - visibleCenterZ
+  );
+  shadowTerrain.mesh.scale.y = config.terrain.verticalExaggeration;
+  world.add(shadowTerrain.mesh);
+
+  function resize() {
     const width = container.clientWidth;
     const height = container.clientHeight;
     const aspect = width / Math.max(1, height);
@@ -159,7 +177,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
     camera.bottom = -viewHeight / 2;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
-  };
+  }
   resize();
   return {
     terrain,
@@ -177,10 +195,10 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       shadowTerrain.mesh.scale.y = value;
       resize();
     },
-    setWireframe(value) { terrain.mesh.material.wireframe = value; },
-    setSeaConditions(value) { sea.setConditions(value); },
-    setWaterMode(value) { sea.setMode(value); },
-    setSeaSun(vector, visible) { sea.setSun(vector, visible); },
+    setWireframe(value) { (terrain.mesh.material as THREE.MeshToonMaterial).wireframe = value; },
+    setSeaConditions(value) { sea!.setConditions(value); },
+    setWaterMode(value) { sea!.setMode(value); },
+    setSeaSun(vector, visible) { sea!.setSun(vector, visible); },
     setSolarAppearance(altitudeDegrees, aboveHorizon) {
       if (config.visualStyle !== "mediterranean-illustrated") return;
       const daylight = aboveHorizon
@@ -214,11 +232,15 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       terrain.mesh.material.dispose();
       chunkBase.dispose();
       urban.dispose();
-      sea.dispose();
+      sea?.dispose();
       shadowTerrain.geometry.dispose();
       shadowTerrain.mesh.material.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     }
   };
+}
+
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
 }

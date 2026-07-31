@@ -36,7 +36,16 @@ if (!window.WebGLRenderingContext) {
 }
 
 async function initialise() {
-  const controller = await createScene(container, coastOverview);
+  performance.mark("coast-initialise");
+  const controller = await createScene(container, coastOverview, {
+    onFirstFrame: () => {
+      performance.mark("coast-first-frame");
+      performance.measure("coast-time-to-model", "coast-initialise", "coast-first-frame");
+      document.querySelector("#loading")?.remove();
+    }
+  });
+  performance.mark("coast-scene-complete");
+  performance.measure("coast-time-to-complete-scene", "coast-initialise", "coast-scene-complete");
   controller.setSeaConditions({ state: "calm", source: "fallback" });
   const zones = await createBeachZones(coastOverview, controller.terrain.heights);
   controller.world.add(zones.group);

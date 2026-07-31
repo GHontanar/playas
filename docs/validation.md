@@ -15,15 +15,16 @@ inversión, desplazamiento de hoja y CRS erróneo. La cota máxima del chunk es
 329,95 m.
 
 La regeneración de los siete recortes desde los originales locales se ejecutó
-el 30-07-2026. Resumen automatizado:
+el 30-07-2026 y los tres casters ampliados se regeneraron el 31-07-2026.
+Resumen automatizado:
 
 | Playa | DEM visible máx. | Caster máx. | Edificios |
 |---|---:|---:|---:|
 | Marina de la Torre | 21,45 m | 157,85 m | 193 |
-| Descargador | 22,78 m | 177,60 m | 845 |
+| Descargador | 22,78 m | 749,55 m | 845 |
 | Piedra Villazar | 20,56 m | 207,65 m | 324 |
-| El Cantal | 28,82 m | 269,08 m | 484 |
-| Lance Nuevo | 47,84 m | 347,68 m | 222 |
+| El Cantal | 28,82 m | 703,22 m | 484 |
+| Lance Nuevo | 47,84 m | 750,30 m | 222 |
 | Ventanicas | 42,97 m | 329,95 m | 160 |
 | Venta del Bancal | 60,02 m | 426,73 m | 340 |
 
@@ -112,6 +113,56 @@ diferencia de 3° al NO es compatible con resolución, punto de observación y
 extensión distintos. En los solsticios, SunCalc dio 76,2° y 29,4° de elevación
 cerca del mediodía; PVGIS dio 76,3° y 29,4°.
 
+### Contraste de las siete playas
+
+El 31-07-2026 se repitió el contraste para los siete centros configurados. Se
+muestreó el perfil MDT02 local cada 7,5° y se comparó con el perfil de PVGIS en
+la misma posición. La columna occidental cubre 225–315° en azimut norte
+horario, que contiene las direcciones solares relevantes antes de la puesta.
+
+| Playa | Error medio oeste | Error medio 360° | Diferencia máxima | Resultado |
+|---|---:|---:|---:|---|
+| Marina de la Torre | 0,6° | 0,5° | 2,7° | conforme |
+| Descargador | 0,4° | 0,2° | 1,1° | conforme |
+| Piedra Villazar | 2,1° | 0,7° | 4,4° | conforme |
+| El Cantal | 0,6° | 0,3° | 2,4° | conforme |
+| Lance Nuevo | 0,5° | 0,4° | 2,3° | conforme |
+| Ventanicas | 1,1° | 0,6° | 3,0° | conforme |
+| Venta del Bancal | 2,1° | 0,7° | 4,7° | conforme |
+
+Como comprobación de impacto se calculó el último minuto con el Sol por encima
+del perfil el 21 de junio, 23 de septiembre y 21 de diciembre de 2026. Se
+muestra `MDT02/PVGIS`, en hora local `Europe/Madrid`:
+
+| Playa | 21 junio | 23 septiembre | 21 diciembre |
+|---|---:|---:|---:|
+| Marina de la Torre | 21:02/21:02 | 19:34/19:32 | 17:13/17:20 |
+| Descargador | 21:00/21:06 | 19:32/19:31 | 17:06/17:10 |
+| Piedra Villazar | 21:06/21:04 | 19:36/19:20 | 17:33/17:12 |
+| El Cantal | 20:41/20:46 | 19:07/19:08 | 17:30/17:15 |
+| Lance Nuevo | 20:28/20:27 | 19:07/19:11 | 17:17/17:13 |
+| Ventanicas | 20:22/20:16 | 18:58/19:05 | 16:48/16:50 |
+| Venta del Bancal | 19:54/19:48 | 18:32/18:45 | 16:54/17:06 |
+
+La diferencia absoluta máxima es 21 minutos. Es coherente con la diferencia de
+resolución entre MDT02 y el DEM de unos 90 m de PVGIS, y con la sensibilidad
+del cruce solar cuando el perfil tiene varias crestas próximas. Estos valores
+validan el orden de magnitud y la progresión norte-sur; no deben publicarse aún
+como una hora garantizada para toda la extensión de una playa.
+
+También se midió la distancia entre el obstáculo que determina el perfil y el
+borde del caster. Los recortes de Descargador, El Cantal y Lance Nuevo se
+ampliaron y regeneraron hasta dejar respectivamente 960, 555 y 765 m después
+del obstáculo crítico. Descargador cubre el corredor occidental completo de
+6 km empleado por el algoritmo porque su horizonte invernal depende de una
+cresta continua de Sierra Cabrera situada a unos 5 km. En el conjunto de las
+siete playas el margen mínimo es 465 m en Piedra Villazar.
+
+La validación de cobertura queda aprobada para las siete playas. La ampliación
+redujo además el error medio occidental de Descargador, El Cantal y Lance Nuevo
+a 0,4–0,6° frente a PVGIS. No se detectan inversiones, orientaciones
+incorrectas ni máximos truncados por los nuevos bordes.
+
 El estado “potencialmente oculto” recorre el caster desde el centro configurado
 de cada playa en el azimut solar y compara elevación del Sol con el máximo
 ángulo del perfil. La sombra visible procede del shadow map de Three.js, no de
@@ -146,8 +197,7 @@ el espigón; su escala y cadencia están exageradas intencionadamente.
   muros ni sombrillas.
 - La estimación de horizonte usa el centro de cada playa a 1,5 m; distintos
   puntos de una playa pueden perder el Sol en minutos diferentes.
-- El contraste PVGIS detallado solo se ha realizado en Ventanicas; en las
-  otras seis se validan automáticamente orientación, bounds y progresión, pero
-  queda pendiente el contraste independiente playa por playa.
+- El contraste PVGIS y la cobertura del caster se han validado en las siete
+  playas. El menor margen después de un obstáculo crítico es 465 m.
 - La atmósfera, nubosidad y refracción local no se modelan.
 - La validación fotográfica o mediante observación local sigue pendiente.

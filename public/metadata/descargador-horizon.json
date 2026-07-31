@@ -8,29 +8,29 @@
   "sourceCRS": "EPSG:25830",
   "sourceResolutionMeters": 2,
   "bounds": [
-    602325.0,
-    4109790.0,
+    598050.0,
+    4106700.0,
     604860.0,
-    4112250.0
+    4114000.0
   ],
   "webResolutionMeters": 15.0,
   "smoothingPasses": 0,
-  "width": 169,
-  "height": 164,
+  "width": 454,
+  "height": 487,
   "nodataCells": 0,
   "filledSeamCells": 0,
   "minElevation": 0.0,
-  "maxElevation": 177.604248046875,
-  "minLandElevation": 0.5113822221755981,
+  "maxElevation": 749.5518798828125,
+  "minLandElevation": 0.5033062100410461,
   "byteOrder": "little-endian",
   "dataType": "float32",
-  "assetBytes": 110864,
+  "assetBytes": 884392,
   "transform": [
     15.0,
     0.0,
-    602325.0,
+    598050.0,
     0.0,
     -15.0,
-    4112250.0
+    4114000.0
   ]
 }

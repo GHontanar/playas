@@ -41,6 +41,7 @@
   "seaSide": "east",
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
   "seaLevelMeters": 1.5,
   "coastalStructures": [],
   "shoreline": {
@@ -55,26 +56,26 @@
   },
   "shadowTerrain": {
     "bounds": {
-      "west": -1.851619,
-      "south": 37.11593,
-      "east": -1.823433,
-      "north": 37.137151
+      "west": -1.87694,
+      "south": 37.115657,
+      "east": -1.823363,
+      "north": 37.142174
     },
     "projectedBounds": {
-      "west": 602025,
+      "west": 599775,
       "south": 4108350,
       "east": 604500,
-      "north": 4110735,
+      "north": 4111235,
       "crs": "EPSG:25830"
     },
     "terrain": {
       "verticalExaggeration": 1.5,
       "sourceResolutionMeters": 2,
       "webResolutionMeters": 15,
-      "width": 165,
-      "height": 159,
+      "width": 315,
+      "height": 192,
       "minElevation": 0,
-      "maxElevation": 269.08,
+      "maxElevation": 703.22,
       "asset": "/terrain/assets/el-cantal-horizon.f32"
     }
   },

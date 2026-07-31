@@ -1,12 +1,13 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import { toonMaterial } from "../styles/toonMaterial";
+import { loadFloat32 } from "./assets";
 
 type TerrainSpec = BeachConfig["terrain"];
 type ProjectedBounds = BeachConfig["projectedBounds"];
 
 export interface TerrainModel {
-  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshToonMaterial>;
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
   heights: Float32Array;
   geometry: THREE.BufferGeometry;
 }
@@ -15,9 +16,7 @@ export async function loadTerrain(
   config: BeachConfig,
   source: { terrain: TerrainSpec; projectedBounds: ProjectedBounds } = config
 ): Promise<TerrainModel> {
-  const response = await fetch(source.terrain.asset);
-  if (!response.ok) throw new Error(`No se pudo cargar el terreno (${response.status})`);
-  const heights = new Float32Array(await response.arrayBuffer());
+  const heights = await loadFloat32(source.terrain.asset);
   const { width, height } = source.terrain;
   if (heights.length !== width * height) {
     throw new Error(`DEM inválido: ${heights.length} muestras; esperadas ${width * height}`);
@@ -85,6 +84,36 @@ export async function loadTerrain(
   const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
+  return { mesh, heights, geometry };
+}
+
+export async function loadShadowTerrain(config: BeachConfig): Promise<TerrainModel> {
+  const source = config.shadowTerrain;
+  const heights = await loadFloat32(source.terrain.asset);
+  const { width, height } = source.terrain;
+  if (heights.length !== width * height) {
+    throw new Error(`Caster inválido: ${heights.length} muestras; esperadas ${width * height}`);
+  }
+  const bounds = source.projectedBounds;
+  const geometry = new THREE.PlaneGeometry(
+    bounds.east - bounds.west,
+    bounds.north - bounds.south,
+    width - 1,
+    height - 1
+  );
+  geometry.rotateX(-Math.PI / 2);
+  const positions = geometry.attributes.position;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      positions.setY(row * width + col, Math.max(0, heights[(height - 1 - row) * width + col]));
+    }
+  }
+  geometry.deleteAttribute("normal");
+  geometry.deleteAttribute("uv");
+  const material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = false;
   return { mesh, heights, geometry };
 }
 
