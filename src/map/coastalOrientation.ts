@@ -72,6 +72,12 @@ export function isPointInPolygon(point: CoastPoint, polygon: CoastLine): boolean
   return inside;
 }
 
+export interface EnclosedWater {
+  /** Alturas del MDT en el orden del asset: la fila 0 es la del norte. */
+  heightsNorthToSouth: Float32Array;
+  maximumElevation?: number;
+}
+
 export function coastalFloodMask(
   coastlines: CoastLine[],
   side: SeaSide,
@@ -79,7 +85,7 @@ export function coastalFloodMask(
   height: number,
   halfWidth: number,
   halfDepth: number,
-  extraSeeds: number[] = []
+  enclosedWater?: EnclosedWater
 ): number[] {
   const barrier = new Uint8Array(width * height);
   const cellX = halfWidth * 2 / Math.max(1, width - 1);
@@ -109,12 +115,6 @@ export function coastalFloodMask(
     const index = row * width + seedColumn;
     if (!barrier[index]) { water[index] = 1; queue.push(index); }
   }
-  for (const index of extraSeeds) {
-    if (index >= 0 && index < water.length && !barrier[index] && !water[index]) {
-      water[index] = 1;
-      queue.push(index);
-    }
-  }
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const index = queue[cursor];
     const row = Math.floor(index / width);
@@ -127,31 +127,53 @@ export function coastalFloodMask(
       queue.push(next);
     }
   }
+  if (enclosedWater) floodEnclosedWater(water, barrier, width, height, enclosedWater);
   return Array.from(water);
 }
 
-export function lowElevationBoundarySeeds(
-  heightsNorthToSouth: Float32Array,
+/**
+ * Un recorte que empieza dentro de un puerto no contiene la bocana: la dársena
+ * queda encerrada entre los muelles y no se alcanza desde el borde de mar. Cada
+ * componente que la costa deja sin resolver se decide por separado y es agua si
+ * toca el borde del recorte —entra desde fuera— y su cota mediana está al nivel
+ * del mar. La mediana es lo que separa la dársena del continente: sembrar por
+ * cotas bajas de borde inundaba la playa y el casco urbano de Playazo Garrucha,
+ * que son llanos pero cuelgan del componente terrestre.
+ */
+function floodEnclosedWater(
+  water: Uint8Array,
+  barrier: Uint8Array,
   width: number,
   height: number,
-  maximumElevation = 2.5
-): number[] {
-  const seeds: number[] = [];
-  const add = (col: number, maskRow: number, sourceRow: number) => {
-    if (heightsNorthToSouth[sourceRow * width + col] <= maximumElevation) {
-      seeds.push(maskRow * width + col);
+  { heightsNorthToSouth, maximumElevation = 2.5 }: EnclosedWater
+): void {
+  const visited = new Uint8Array(water);
+  for (let start = 0; start < water.length; start++) {
+    if (barrier[start] || visited[start]) continue;
+    visited[start] = 1;
+    const component = [start];
+    let touchesBoundary = false;
+    for (let cursor = 0; cursor < component.length; cursor++) {
+      const index = component[cursor];
+      const row = Math.floor(index / width);
+      const col = index % width;
+      if (!row || !col || row === height - 1 || col === width - 1) touchesBoundary = true;
+      for (const [nextCol, nextRow] of [[col - 1, row], [col + 1, row], [col, row - 1], [col, row + 1]]) {
+        if (nextCol < 0 || nextCol >= width || nextRow < 0 || nextRow >= height) continue;
+        const next = nextRow * width + nextCol;
+        if (barrier[next] || visited[next]) continue;
+        visited[next] = 1;
+        component.push(next);
+      }
     }
-  };
-  for (let col = 0; col < width; col++) {
-    add(col, 0, height - 1);
-    add(col, height - 1, 0);
+    if (!touchesBoundary) continue;
+    // La máscara va de sur a norte y el MDT al revés.
+    const elevations = component
+      .map((index) => heightsNorthToSouth[(height - 1 - Math.floor(index / width)) * width + index % width])
+      .sort((a, b) => a - b);
+    if (elevations[elevations.length >> 1] > maximumElevation) continue;
+    for (const index of component) water[index] = 1;
   }
-  for (let maskRow = 1; maskRow < height - 1; maskRow++) {
-    const sourceRow = height - 1 - maskRow;
-    add(0, maskRow, sourceRow);
-    add(width - 1, maskRow, sourceRow);
-  }
-  return seeds;
 }
 
 export function isSeaPoint(

@@ -3,7 +3,6 @@ import type { BeachConfig } from "../beaches/types";
 import {
   coastlineEnvelope,
   coastalFloodMask,
-  lowElevationBoundarySeeds,
   coastXAt,
   isPointInPolygon,
   isSeaPoint,
@@ -494,9 +493,7 @@ function createCoastMask(
       config.terrain.height,
       (config.projectedBounds.east - config.projectedBounds.west) / 2,
       (config.projectedBounds.north - config.projectedBounds.south) / 2,
-      config.coastalWaterEdgeSeeding
-        ? lowElevationBoundarySeeds(terrainHeights, config.terrain.width, config.terrain.height)
-        : []
+      config.coastalWaterEdgeSeeding ? { heightsNorthToSouth: terrainHeights } : undefined
     );
   }
   const coast = coastlineEnvelope(coastlines, config.seaSide);

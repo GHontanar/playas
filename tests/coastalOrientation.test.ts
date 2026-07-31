@@ -60,4 +60,43 @@ describe("orientación costa-mar de Ventanicas", () => {
     expect(at(-4, 3)).toBe(0);
     expect(at(3, 3)).toBe(1);
   });
+
+  it("inunda la dársena encerrada sin invadir la playa llana", () => {
+    // Recorte tipo Playazo Garrucha: costa abierta al este, muelles que
+    // encierran una dársena abierta por el borde sur y una franja de arena
+    // llana pegada a la costa que sigue siendo tierra.
+    const size = 21;
+    const heights = new Float32Array(size * size);
+    for (let demRow = 0; demRow < size; demRow++) {
+      for (let col = 0; col < size; col++) {
+        const x = col - 10;
+        const z = 10 - demRow;
+        const basin = x > -6 && x < -2 && z < -3;
+        const beach = x >= 3 && x < 5;
+        heights[demRow * size + col] = basin ? .4 : beach ? .5 : x > 5 ? 0 : 8;
+      }
+    }
+    const mask = coastalFloodMask(
+      [
+        [[5, -10], [5, 10]],
+        [[-6, -10], [-6, -3], [-2, -3], [-2, -10]]
+      ],
+      "east",
+      size,
+      size,
+      10,
+      10,
+      { heightsNorthToSouth: heights }
+    );
+    const at = (x: number, z: number) => {
+      const col = Math.round((x + 10) / 20 * (size - 1));
+      const row = Math.round((z + 10) / 20 * (size - 1));
+      return mask[row * size + col];
+    };
+    expect(at(7, 0)).toBe(1);
+    expect(at(-4, -6)).toBe(1);
+    expect(at(4, 0)).toBe(0);
+    expect(at(-8, 0)).toBe(0);
+    expect(at(-4, 5)).toBe(0);
+  });
 });

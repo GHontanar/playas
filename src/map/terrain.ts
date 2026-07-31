@@ -3,7 +3,7 @@ import type { BeachConfig } from "../beaches/types";
 import { toonMaterial } from "../styles/toonMaterial";
 import { loadFloat32 } from "./assets";
 import { loadJson } from "./assets";
-import { coastalFloodMask, coastlineEnvelope, isSeaPoint, lowElevationBoundarySeeds, type CoastLine } from "./coastalOrientation";
+import { coastalFloodMask, coastlineEnvelope, isSeaPoint, type CoastLine } from "./coastalOrientation";
 
 type TerrainSpec = BeachConfig["terrain"];
 type ProjectedBounds = BeachConfig["projectedBounds"];
@@ -52,7 +52,7 @@ export async function loadTerrain(
       height,
       sizeX / 2,
       sizeZ / 2,
-      config.coastalWaterEdgeSeeding ? lowElevationBoundarySeeds(heights, width, height) : []
+      config.coastalWaterEdgeSeeding ? { heightsNorthToSouth: heights } : undefined
     )
     : undefined;
 
