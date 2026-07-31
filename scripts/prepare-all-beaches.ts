@@ -79,7 +79,7 @@ function prepareDem(config: BeachConfig, horizon: boolean) {
     "--north", String(projected.north),
     "--resolution", String(spec.webResolutionMeters),
     ...(horizon ? [] : ["--smooth-passes", "1"]),
-    "--output", `${assetDir}/${id}-${suffix}.f32`,
+    "--output", `public${spec.asset}`,
     "--metadata", `${metadataDir}/${id}-${suffix}.json`,
     "--preview", `${assetDir}/${id}-${suffix}-preview.pgm`,
     ...demSources

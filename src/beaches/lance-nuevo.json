@@ -81,7 +81,7 @@
       "height": 221,
       "minElevation": 0,
       "maxElevation": 750.3,
-      "asset": "/terrain/assets/lance-nuevo-horizon.f32"
+      "asset": "/terrain/assets/lance-nuevo-horizon-20260731.f32"
     }
   },
   "coastlineAsset": "/terrain/assets/lance-nuevo-coastline.geojson",

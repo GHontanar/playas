@@ -76,7 +76,7 @@
       "height": 192,
       "minElevation": 0,
       "maxElevation": 703.22,
-      "asset": "/terrain/assets/el-cantal-horizon.f32"
+      "asset": "/terrain/assets/el-cantal-horizon-20260731.f32"
     }
   },
   "coastlineAsset": "/terrain/assets/el-cantal-coastline.geojson",

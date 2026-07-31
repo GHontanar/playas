@@ -65,10 +65,13 @@ El HTML de producción respondió desde Madrid con unos 64–68 ms hasta complet
 la respuesta en una conexión caliente de desarrollo. Este valor solo comprueba
 CDN y servidor; no representa una red móvil.
 
-Los DEM, casters, bundles con hash y la textura WebP se sirven con
-`max-age=31536000, immutable`. El HTML y la API revalidan correctamente; la API
-usa 30 s en navegador y 60 s en caché compartida. La textura mide 512 × 512 y
-60 KB transferidos.
+Los bundles con hash y la textura WebP se sirven con
+`max-age=31536000, immutable`. Los derivados geográficos usan 24 h y una semana
+de `stale-while-revalidate`; los casters que cambian de extensión reciben
+además un nombre versionado. Esto evita que un navegador conserve durante un
+año un DEM regenerado bajo una URL estable. El HTML y la API revalidan
+correctamente; la API usa 30 s en navegador y 60 s en caché compartida. La
+textura mide 512 × 512 y 60 KB transferidos.
 
 La portada inicia en paralelo DEM, caster, costa, ciudad y textura, pero su
 primera pintura solo espera terreno visible, costa y mar. El indicador de carga
