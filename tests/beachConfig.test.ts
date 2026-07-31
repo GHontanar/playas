@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import config from "../src/beaches/ventanicas.json";
-import { beaches } from "../src/beaches/catalog";
+import { beaches, coastOverview } from "../src/beaches/catalog";
 import { clampExaggeration, parseBeachConfig } from "../src/beaches/types";
 
 describe("configuración declarativa de playa", () => {
@@ -21,6 +21,14 @@ describe("configuración declarativa de playa", () => {
       expect(beach.shoreline.end.z).toBeGreaterThanOrEqual(beach.projectedBounds.south);
       expect(beach.shoreline.end.z).toBeLessThanOrEqual(beach.projectedBounds.north);
     }
+  });
+
+  it("declara un overview municipal ligero y separado", () => {
+    expect(coastOverview.id).toBe("mojacar-coast");
+    expect(coastOverview.urbanDetail).toBe("overview");
+    expect(coastOverview.terrain.webResolutionMeters).toBe(20);
+    expect(coastOverview.projectedBounds.north - coastOverview.projectedBounds.south)
+      .toBeGreaterThan(8_000);
   });
 
   it("declara los espigones oficiales sin aplicarlos a las demás playas", () => {

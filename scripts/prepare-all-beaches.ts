@@ -4,6 +4,7 @@ import path from "node:path";
 import { beachConfigSchema, type BeachConfig } from "../src/beaches/types";
 
 const beachIds = [
+  "mojacar-coast",
   "marina-de-la-torre",
   "descargador",
   "piedra-villazar",
@@ -48,7 +49,8 @@ for (const id of selected) {
     `${assetDir}/${id}-buildings.geojson`,
     `${assetDir}/${id}-roads.geojson`,
     "--name", id,
-    "--bounds", ...bounds(config.projectedBounds)
+    "--bounds", ...bounds(config.projectedBounds),
+    ...(config.urbanDetail === "overview" ? ["--overview"] : [])
   ]);
 
   const terrainMetadata = JSON.parse(await readFile(`${metadataDir}/${id}-dem.json`, "utf8"));

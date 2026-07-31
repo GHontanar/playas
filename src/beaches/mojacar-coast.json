@@ -1,0 +1,100 @@
+{
+  "id": "mojacar-coast",
+  "name": "Costa de Mojácar",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 37.135667,
+    "lon": -1.837529
+  },
+  "bounds": {
+    "west": -1.856679,
+    "south": 37.097587,
+    "east": -1.81836,
+    "north": 37.173741
+  },
+  "projectedBounds": {
+    "west": 601600,
+    "south": 4106300,
+    "east": 604900,
+    "north": 4114800,
+    "crs": "EPSG:25830"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 32,
+    "roll": 0,
+    "distance": 12000
+  },
+  "terrain": {
+    "verticalExaggeration": 1.7,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 20,
+    "width": 165,
+    "height": 425,
+    "minElevation": 0,
+    "maxElevation": 338.88,
+    "asset": "/terrain/assets/mojacar-coast-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "east",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "overview",
+  "seaLevelMeters": 0.15,
+  "coastalStructures": [
+    {
+      "featureId": 10125300000520,
+      "kind": "breakwater"
+    },
+    {
+      "featureId": 10125300000519,
+      "kind": "breakwater"
+    }
+  ],
+  "shoreline": {
+    "start": {
+      "x": 602500,
+      "z": 4106500
+    },
+    "end": {
+      "x": 604650,
+      "z": 4114600
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -1.856679,
+      "south": 37.097587,
+      "east": -1.81836,
+      "north": 37.173741
+    },
+    "projectedBounds": {
+      "west": 601600,
+      "south": 4106300,
+      "east": 604900,
+      "north": 4114800,
+      "crs": "EPSG:25830"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.7,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 40,
+      "width": 82,
+      "height": 212,
+      "minElevation": 0,
+      "maxElevation": 337.04,
+      "asset": "/terrain/assets/mojacar-coast-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/mojacar-coast-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/mojacar-coast-buildings.geojson",
+  "roadsAsset": "/terrain/assets/mojacar-coast-roads.geojson",
+  "attribution": [
+    "© Instituto Geográfico Nacional de España · MDT02",
+    "Costa: DERA/IECA 2023",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors"
+  ]
+}

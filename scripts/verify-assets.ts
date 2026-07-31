@@ -1,11 +1,12 @@
 import { readFile, stat } from "node:fs/promises";
-import { beaches } from "../src/beaches/catalog";
+import { beaches, coastOverview } from "../src/beaches/catalog";
 import { isSeaPoint, type CoastLine } from "../src/map/coastalOrientation";
 
 const failures: string[] = [];
 let totalBytes = 0;
 
-for (const config of beaches) {
+const scenes = [coastOverview, ...beaches];
+for (const config of scenes) {
   const id = config.id;
   const metadata = await json(`public/metadata/${id}-dem.json`);
   const horizonMetadata = await json(`public/metadata/${id}-horizon.json`);
@@ -69,7 +70,7 @@ if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log(`Assets válidos: ${beaches.length} playas, ${(totalBytes / 1_000_000).toFixed(2)} MB de terreno sin comprimir.`);
+console.log(`Assets válidos: overview + ${beaches.length} playas, ${(totalBytes / 1_000_000).toFixed(2)} MB de terreno sin comprimir.`);
 
 type GeoFeature = { geometry: { type: string; coordinates: number[][] | number[][][] } };
 

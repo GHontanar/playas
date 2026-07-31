@@ -33,6 +33,15 @@ const ALLOWED_EVENTOS = ["bandera", "medusas", "fecha"];
 const ALLOWED_TAMANOS = ["mini", "normal", "grande"];
 const UPSTREAM_HOST = "www.gestiondeplayas.com";
 const SPOOF_REFERER = "https://www.mojacar.es/mojacar-disfruta/estado-de-las-playas/";
+const BEACH_IDS = {
+  "01": "marina-de-la-torre",
+  "04": "descargador",
+  "05": "piedra-villazar",
+  "07": "el-cantal",
+  "09": "lance-nuevo",
+  "12": "ventanicas",
+  "13": "venta-del-bancal",
+};
 
 export default {
   async fetch(request) {
@@ -41,6 +50,9 @@ export default {
     // Preflight CORS (por si algún día haces fetch() en vez de <img>)
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: cors() });
+    }
+    if (url.pathname.endsWith("/api/status")) {
+      return observedStatus();
     }
 
     const playa = url.searchParams.get("playa");
@@ -147,6 +159,71 @@ export default {
     });
   },
 };
+
+async function observedStatus() {
+  try {
+    const beaches = await Promise.all(ALLOWED_PLAYAS.map(async playa => {
+      const [flagFragment, jellyfishFragment, dateFragment] = await Promise.all([
+        fetchFragment(playa, "bandera"),
+        fetchFragment(playa, "medusas"),
+        fetchFragment(playa, "fecha"),
+      ]);
+      const flagSrc = imageSource(flagFragment);
+      const jellyfishSrc = imageSource(jellyfishFragment);
+      return {
+        beachId: BEACH_IDS[playa],
+        flag: normaliseFlagSource(flagSrc),
+        jellyfish: normaliseJellyfishSource(jellyfishSrc),
+        observedAtLocal: stripTags(dateFragment) || null,
+        source: "gestiondeplayas",
+      };
+    }));
+    return new Response(JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      beaches,
+    }), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=60, s-maxage=300",
+        ...cors(),
+      },
+    });
+  } catch (error) {
+    return fail(502, "No se pudo normalizar el estado oficial: " + error.message);
+  }
+}
+
+async function fetchFragment(playa, evento) {
+  const upstream = `https://${UPSTREAM_HOST}/api/` +
+    `?localidad=mojacar&playa=${playa}&evento=${evento}` +
+    `&tipo=banner&tamano=mini&clave_api=${KEY}`;
+  const response = await fetch(upstream, {
+    headers: {
+      "Referer": SPOOF_REFERER,
+      "User-Agent": "Mozilla/5.0 (proxy-playas-mojacar)",
+      "Accept": "text/html,image/*,*/*;q=0.8",
+    },
+    cf: { cacheTtl: 0, cacheEverything: false },
+  });
+  if (!response.ok) throw new Error(`${evento}/${playa}: HTTP ${response.status}`);
+  return response.text();
+}
+
+function imageSource(fragment) {
+  return (fragment.match(/<img[^>]+src=["']([^"']+)["']/i) || [])[1] || "";
+}
+
+export function normaliseFlagSource(src) {
+  const match = src.match(/-(verde|amarilla|roja)\.[a-z0-9]+(?:[?#].*)?$/i);
+  return match
+    ? ({ verde: "green", amarilla: "yellow", roja: "red" })[match[1].toLowerCase()]
+    : "unknown";
+}
+
+export function normaliseJellyfishSource(src) {
+  if (!src) return null;
+  return /-medusas\.[a-z0-9]+(?:[?#].*)?$/i.test(src);
+}
 
 function stripTags(html) {
   return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();

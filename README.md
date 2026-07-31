@@ -100,7 +100,9 @@ npm run dev
 ```
 
 La vista de banderas sigue en `/`; el prototipo topográfico está en
-`/terrain/`. Para probar también la Pages Function localmente sobre el build:
+`/terrain/`. La entrada panorámica experimental está en `/coast/`; se puede
+probar con colores ficticios mediante `/coast/?demo=1`. Para probar también la
+Pages Function localmente sobre el build:
 
 ```sh
 npm run build
@@ -151,6 +153,12 @@ Con las fuentes ya descargadas, se puede regenerar solo una playa:
 
 ```sh
 npm run data:beach -- el-cantal
+```
+
+El chunk general usa el mismo pipeline:
+
+```sh
+npm run data:beach -- mojacar-coast
 ```
 
 Los originales se guardan en `data/source/`, ignorado por Git. Véanse

@@ -34,11 +34,17 @@ sola vez al crear el plano marino.
 
 El cambio horario actualiza una luz y el shadow map; no cambia la geometría ni
 genera peticiones. Los assets son estáticos y cacheables por Cloudflare.
-El modo volumétrico de Lance Nuevo desplaza el plano marino y calcula las
+El modo volumétrico desplaza el plano marino y calcula las
 normales en el vertex shader; la espuma se deriva en el fragment shader. Cada
 frame actualiza únicamente el tiempo. No recalcula geometría en CPU, no añade
 draw calls y no genera peticiones. El modo anterior permanece disponible en
 Depuración para comparación.
+
+El overview municipal carga aproximadamente 755 KB de derivados sin comprimir:
+281 KB de DEM, 70 KB de caster, 150 KB de masas catastrales generalizadas,
+149 KB de viario simplificado y 37 KB de costa. No descarga los siete chunks
+detallados. En el build, Three.js se comparte entre las entradas y el código
+específico de `/coast/` añade unos 7 KB (3,2 KB gzip).
 
 Se realizó un smoke test headless Chromium a 1280 × 900 y 390 × 844: carga,
 WebGL, controles y layout sin errores de página. No se publica un dato de FPS

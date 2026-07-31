@@ -43,6 +43,7 @@ export const beachConfigSchema = z.object({
   seaSide: z.enum(["east", "west"]),
   worldAxes: z.enum(["north-positive", "south-positive"]).default("north-positive"),
   visualStyle: z.enum(["classic", "mediterranean-illustrated"]).default("classic"),
+  urbanDetail: z.enum(["detailed", "overview"]).default("detailed"),
   seaLevelMeters: z.number().min(0).max(3).default(1.5),
   coastalStructures: z.array(z.object({
     featureId: z.number(),

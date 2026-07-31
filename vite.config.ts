@@ -9,6 +9,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(root, "index.html"),
+        coast: resolve(root, "coast/index.html"),
         terrain: resolve(root, "terrain/index.html")
       }
     }

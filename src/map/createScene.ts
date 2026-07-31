@@ -13,6 +13,8 @@ export interface SceneController {
   shadowTerrain: TerrainModel;
   light: THREE.DirectionalLight;
   renderer: THREE.WebGLRenderer;
+  camera: THREE.OrthographicCamera;
+  world: THREE.Group;
   setExaggeration(value: number): void;
   setWireframe(value: boolean): void;
   setSeaConditions(value: SeaConditions): void;
@@ -52,6 +54,11 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   const bearing = config.camera.bearing * Math.PI / 180;
   const pitch = config.camera.pitch * Math.PI / 180;
   const d = config.camera.distance;
+  if (d > 8000) {
+    // En el overview municipal la cámara está mucho más lejos que en los
+    // chunks de playa; el fog fijo borraría el extremo norte de la costa.
+    scene.fog = new THREE.Fog("#eadfd7", d * .86, d + sceneSize * 1.35);
+  }
   camera.position.set(Math.sin(bearing) * Math.cos(pitch) * d, Math.sin(pitch) * d, Math.cos(bearing) * Math.cos(pitch) * d);
   camera.lookAt(0, 0, 0);
   camera.rotateZ(config.camera.roll * Math.PI / 180);
@@ -159,6 +166,8 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
     shadowTerrain,
     light,
     renderer,
+    camera,
+    world,
     setExaggeration(value) {
       currentExaggeration = value;
       terrain.mesh.scale.y = value;

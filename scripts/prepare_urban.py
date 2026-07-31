@@ -5,7 +5,7 @@ from pathlib import Path
 
 import fiona
 from pyproj import Transformer
-from shapely.geometry import LineString, box, mapping, shape
+from shapely.geometry import LineString, MultiPolygon, Polygon, box, mapping, shape
 from shapely.ops import unary_union
 
 ROAD_WIDTHS = {
@@ -33,7 +33,7 @@ def feature_collection(name: str, features: list[dict], source: str) -> dict:
     }
 
 
-def buildings(source: Path, bounds: tuple[float, float, float, float], name: str) -> dict:
+def buildings(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool) -> dict:
     clip = box(*bounds)
     features = []
     with fiona.open(source, layer="BuildingPart") as collection:
@@ -54,6 +54,26 @@ def buildings(source: Path, bounds: tuple[float, float, float, float], name: str
                 },
                 "geometry": mapping(geometry),
             })
+    if overview and features:
+        # A escala municipal los edificios individuales serían ruido visual y
+        # miles de extrusiones. Se conserva la huella catastral agregada como
+        # masas urbanas simplificadas, no como geometría inventada.
+        merged = unary_union([shape(feature["geometry"]) for feature in features])
+        merged = merged.buffer(12).buffer(-8).simplify(7, preserve_topology=True)
+        parts = list(merged.geoms) if isinstance(merged, MultiPolygon) else [merged]
+        merged = MultiPolygon([
+            part for part in parts if isinstance(part, Polygon) and part.area >= 500
+        ])
+        features = [{
+            "type": "Feature",
+            "properties": {
+                "id": "urban-mass",
+                "floors": 2,
+                "height": 6.2,
+                "heightSource": "overview-generalisation",
+            },
+            "geometry": mapping(merged),
+        }]
     return feature_collection(
         f"{name}-buildings",
         features,
@@ -61,13 +81,17 @@ def buildings(source: Path, bounds: tuple[float, float, float, float], name: str
     )
 
 
-def roads(source: Path, bounds: tuple[float, float, float, float], name: str) -> dict:
+def roads(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool) -> dict:
     clip = box(*bounds)
     payload = json.loads(source.read_text(encoding="utf-8"))
     transformer = Transformer.from_crs(4326, 25830, always_xy=True)
     buffered_by_class: dict[str, list] = {}
     for element in payload.get("elements", []):
         road_class = element.get("tags", {}).get("highway")
+        if overview and road_class not in {
+            "tertiary", "secondary", "residential", "living_street"
+        }:
+            continue
         width = ROAD_WIDTHS.get(road_class)
         coordinates = element.get("geometry", [])
         if not width or len(coordinates) < 2:
@@ -82,6 +106,8 @@ def roads(source: Path, bounds: tuple[float, float, float, float], name: str) ->
     features = []
     for road_class, geometries in sorted(buffered_by_class.items()):
         merged = unary_union(geometries)
+        if overview:
+            merged = merged.simplify(4, preserve_topology=True)
         if merged.is_empty:
             continue
         features.append({
@@ -108,7 +134,8 @@ if __name__ == "__main__":
     parser.add_argument("roads_output", type=Path)
     parser.add_argument("--name", required=True)
     parser.add_argument("--bounds", nargs=4, required=True, type=float, metavar=("W", "S", "E", "N"))
+    parser.add_argument("--overview", action="store_true")
     args = parser.parse_args()
     bounds = tuple(args.bounds)
-    write(args.buildings_output, buildings(args.buildings_source, bounds, args.name))
-    write(args.roads_output, roads(args.roads_source, bounds, args.name))
+    write(args.buildings_output, buildings(args.buildings_source, bounds, args.name, args.overview))
+    write(args.roads_output, roads(args.roads_source, bounds, args.name, args.overview))

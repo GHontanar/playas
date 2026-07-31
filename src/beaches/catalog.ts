@@ -5,6 +5,7 @@ import elCantal from "./el-cantal.json";
 import lanceNuevo from "./lance-nuevo.json";
 import ventanicas from "./ventanicas.json";
 import ventaDelBancal from "./venta-del-bancal.json";
+import mojacarCoast from "./mojacar-coast.json";
 import { parseBeachConfig, type BeachConfig } from "./types";
 
 export const beaches: BeachConfig[] = [
@@ -16,6 +17,8 @@ export const beaches: BeachConfig[] = [
   ventanicas,
   ventaDelBancal
 ].map(parseBeachConfig);
+
+export const coastOverview = parseBeachConfig(mojacarCoast);
 
 export function getBeach(id: string | null): BeachConfig {
   return beaches.find((beach) => beach.id === id) ??

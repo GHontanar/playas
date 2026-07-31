@@ -73,8 +73,7 @@ configuración, sin duplicar lógica de escena.
 La variante incorpora:
 
 - gradiente litoral de menta a azul petróleo calculado por distancia a DERA;
-- dos escalas del normal map y una franja de reflejo orientada por el azimut
-  solar real;
+- agua volumétrica y una franja de reflejo orientada por el azimut solar real;
 - arena húmeda irregular de 13 m como máximo, siempre hacia tierra;
 - paleta mineral dependiente de elevación, pendiente y ruido determinista;
 - bloques del espigón con variación pétrea por vértice;
@@ -88,3 +87,28 @@ La variante incorpora:
 No se utiliza ortofotografía ni una textura terrestre fotorrealista. El ruido,
 los colores y el brillo se generan en cliente de forma determinista; el normal
 map del agua sigue siendo el único bitmap artístico.
+
+## Overview de la costa
+
+La ruta `/coast/` usa el mismo lenguaje como una maqueta municipal continua.
+El terreno y las masas urbanas se generalizan para que la costa completa siga
+siendo legible. Las franjas de selección conservan centro y longitud derivados
+de DERA, pero exageran su anchura; su tinte expresa estado observado, no área
+legal de baño. Las juntas transversales oscuras son una separación gráfica
+deliberada entre playas contiguas, no límites administrativos. El modo
+`?demo=1` solo sirve para revisar la paleta.
+
+El overview se presenta deliberadamente más cerca que un encuadre de mapa. Se
+puede recorrer mediante arrastre y ampliar con rueda o gesto de pinza, pero la
+rotación permanece bloqueada para conservar la composición isométrica. Los
+rótulos se anclan ligeramente mar adentro y miran siempre a cámara.
+
+La entrada usa el scroll como línea de tiempo de cámara y elimina toda interfaz
+superpuesta salvo los rótulos integrados en la propia maqueta. Parte del conjunto,
+aproxima hasta Marina de la Torre y recorre las siete playas hasta Venta del
+Bancal en unas tres pantallas de desplazamiento. Solo existen cuatro encuadres
+editoriales: general, norte, centro y sur. La cámara interpola tanto entre esos
+keyframes como entre los impulsos de scroll; el movimiento es reversible.
+En dispositivos que solicitan movimiento reducido cambia entre encuadres discretos.
+El documento usa paradas de scroll obligatorias y redondea siempre al keyframe
+más cercano: no existe un estado persistente con zoom arbitrario entre escenas.
