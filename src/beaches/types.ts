@@ -41,6 +41,12 @@ export const beachConfigSchema = z.object({
     depthMeters: z.number().min(10).max(300)
   }),
   seaSide: z.enum(["east", "west"]),
+  worldAxes: z.enum(["north-positive", "south-positive"]).default("north-positive"),
+  seaLevelMeters: z.number().min(0).max(3).default(1.5),
+  coastalStructures: z.array(z.object({
+    featureId: z.number(),
+    kind: z.literal("breakwater")
+  })).default([]),
   shoreline: z.object({
     start: z.object({ x: z.number(), z: z.number() }),
     end: z.object({ x: z.number(), z: z.number() })

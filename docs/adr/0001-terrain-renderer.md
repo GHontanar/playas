@@ -47,9 +47,11 @@ El frustum se dimensiona con la diagonal del caster, su desplazamiento respecto
 a la pieza visible y la distancia de 8 km de la luz; no con el tamaño del chunk
 visible.
 
-La cámara es ortográfica con elevación isométrica exacta de 35,264° y azimut
-diagonal de 45° (135° desde el norte, lado opuesto al encuadre inicial). El roll es cero para que la vertical de
-pantalla coincida con la vertical 3D y la superficie se lea como horizontal.
+La cámara es ortográfica con elevación isométrica exacta de 35,264° y bearing
+visual de 45°. El giro se realiza alrededor del eje vertical Y; el roll es cero
+para que la vertical de pantalla coincida con la vertical 3D y la superficie se
+lea como horizontal. La escena usa `X+=este`, `Y+=arriba`, `Z+=sur`, respetando
+el sistema dextrógiro de Three.js sin reflexión geográfica.
 La pieza incorpora cuatro caras perimetrales que siguen las alturas del MDT y
 una base a 90 m de profundidad; al cambiar la exageración se actualiza el borde
 superior sin desplazar el fondo.

@@ -23,6 +23,26 @@ describe("configuración declarativa de playa", () => {
     }
   });
 
+  it("declara el espigón de Lance Nuevo sin aplicarlo a las demás playas", () => {
+    const lance = beaches.map(parseBeachConfig).find((beach) => beach.id === "lance-nuevo")!;
+    expect(lance.coastalStructures).toEqual([
+      { featureId: 10125300000520, kind: "breakwater" }
+    ]);
+    expect(lance.seaLevelMeters).toBe(0.15);
+    expect(lance.worldAxes).toBe("south-positive");
+    expect(lance.camera.bearing).toBe(45);
+    expect(lance.camera.roll).toBe(0);
+    const parsed = beaches.map(parseBeachConfig);
+    expect(parsed.every((beach) =>
+      beach.worldAxes === "south-positive"
+      && beach.camera.bearing === 45
+      && beach.camera.roll === 0
+    )).toBe(true);
+    expect(parsed
+      .filter((beach) => beach.id !== "lance-nuevo")
+      .every((beach) => beach.coastalStructures.length === 0)).toBe(true);
+  });
+
   it("rechaza bounds invertidos", () => {
     expect(() => parseBeachConfig({
       ...config,

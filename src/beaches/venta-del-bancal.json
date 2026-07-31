@@ -20,7 +20,7 @@
     "crs": "EPSG:25830"
   },
   "camera": {
-    "bearing": 135,
+    "bearing": 45,
     "pitch": 35.264,
     "roll": 0,
     "distance": 1250
@@ -39,6 +39,7 @@
     "depthMeters": 90
   },
   "seaSide": "east",
+  "worldAxes": "south-positive",
   "shoreline": {
     "start": {
       "x": 602500,

@@ -44,6 +44,30 @@ export function coastlineEnvelope(
   });
 }
 
+export function landPolygonFromCoastlines(
+  coastlines: CoastLine[],
+  side: SeaSide,
+  halfWidth: number,
+  halfDepth: number
+): CoastLine {
+  const joined = coastlines.flatMap((line, index) => index ? line.slice(1) : line);
+  if (joined[0][1] > joined.at(-1)![1]) joined.reverse();
+  const landX = side === "east" ? -halfWidth : halfWidth;
+  return [...joined, [landX, halfDepth], [landX, -halfDepth]];
+}
+
+export function isPointInPolygon(point: CoastPoint, polygon: CoastLine): boolean {
+  let inside = false;
+  for (let current = 0, previous = polygon.length - 1; current < polygon.length; previous = current++) {
+    const [xi, zi] = polygon[current];
+    const [xj, zj] = polygon[previous];
+    const intersects = zi > point[1] !== zj > point[1]
+      && point[0] < (xj - xi) * (point[1] - zi) / (zj - zi) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
 export function isSeaPoint(
   coast: CoastLine,
   x: number,

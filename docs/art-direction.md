@@ -46,3 +46,8 @@ La superficie se recorta en el shader con la envolvente marina de la línea
 DERA. Las rompientes se limitan mediante los extremos oficiales de cada playa,
 se suavizan a partir de puntos DERA y conservan un margen mar adentro antes de
 disiparse. Así, puertos y ramales vecinos no crean espuma cruzada sobre arena.
+
+En costas no monótonas, como el espigón de Lance Nuevo, se conserva la
+topología DERA mediante una máscara poligonal. Las obras litorales se muestran
+como prismas minerales simplificados y las rompientes se dividen a ambos lados;
+no se fuerza el litoral a una única coordenada X por cada Y.

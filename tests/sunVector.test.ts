@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { sunCalcAnglesToVector, sunCalcAzimuthToBearing } from "../src/solar/sunVector";
+import {
+  sunCalcAnglesToVector,
+  sunCalcAzimuthToBearing,
+  sunVectorForWorldAxes
+} from "../src/solar/sunVector";
 
 describe("transformación solar a ejes Three.js", () => {
   it("convierte el sur de SunCalc en bearing norte", () => {
@@ -21,5 +25,12 @@ describe("transformación solar a ejes Three.js", () => {
     expect(vector.x).toBeCloseTo(0);
     expect(vector.y).toBeCloseTo(1);
     expect(vector.z).toBeCloseTo(0);
+  });
+
+  it("invierte norte-sur al usar el sistema dextrógiro este-arriba-sur", () => {
+    expect(sunVectorForWorldAxes({ x: 1, y: 2, z: 3 }, "south-positive"))
+      .toEqual({ x: 1, y: 2, z: -3 });
+    expect(sunVectorForWorldAxes({ x: 1, y: 2, z: 3 }, "north-positive"))
+      .toEqual({ x: 1, y: 2, z: 3 });
   });
 });

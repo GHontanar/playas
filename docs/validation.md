@@ -31,6 +31,45 @@ Se inspeccionaron las siete escenas a 900 × 700 y los recortes largos en móvil
 a 390 px. Marina de la Torre exigió separar la costa usada por la máscara del
 tramo oficial usado por la espuma, para no convertir el puerto en rompiente.
 
+## Validación específica de Lance Nuevo
+
+Se contrastó Lance Nuevo contra el WMS oficial PNOA Máxima Actualidad. La
+ortofoto consultada corresponde a julio de 2022 y tiene 0,25 m de resolución.
+La geometría DERA `10125300000520` sigue los dos laterales y el extremo del
+espigón visible en la imagen; su trazado mide 176,44 m y queda íntegramente
+dentro del chunk. El extremo más próximo conserva 43 m de margen hasta el borde
+sur del recorte.
+
+El muestreo cada 2 m sobre el MDT02 original dio 0,22 m de mínimo, 0,61 m de
+mediana, 0,82 m de media y 1,65 m de máximo. Solo el 38 % de las muestras
+supera 1 m. Esto confirmó que una superficie marina visual a 1,5 m ocultaba
+gran parte de la estructura aun cuando su planimetría era correcta.
+
+Los puntos Inicio/Centro/Fin de `T05_10_Playa` están respectivamente a 42,26,
+61,58 y 17,33 m de la costa DERA. Se consideran referencias del ámbito de
+playa, no vértices de la línea de agua.
+
+Para este chunk se usa por ello una máscara poligonal construida con la
+topología completa de DERA, un nivel marino base de 0,15 m y una malla
+simplificada del espigón. La malla toma la elevación del MDT y aplica solo
+0,35 m de separación visual, con un mínimo de 0,18 m sobre el plano marino
+para evitar z-fighting; esa separación no se presenta como altura medida. Las
+rompientes excluyen la geometría del espigón y se generan por separado en los
+dos tramos de costa.
+
+La auditoría detectó además una inversión de handedness: usar simultáneamente
+`X+=este`, `Y+=arriba` y `Z+=norte` en el sistema dextrógiro de Three.js
+reflejaba la geografía. Las siete playas usan ahora `Z+=sur` mediante
+`worldAxes: south-positive`; la misma transformación se aplica al terreno,
+costa, capas urbanas, caster y mar, y el vector solar invierte su componente Z.
+
+Las siete cámaras mantienen `roll = 0`, para que el suelo siga siendo
+horizontal, y giran alrededor del eje vertical Y mediante un bearing visual de
+45°. No se usa el roll para orientar la geografía. La rotación antihoraria de
+90° respecto al encuadre anterior deja oeste arriba-izquierda, norte
+arriba-derecha, sur abajo-izquierda y este abajo-derecha, conservando el orden
+N-E-S-O.
+
 ## Contraste solar y de horizonte
 
 Usar el panel con estas fechas de 2026:

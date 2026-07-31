@@ -31,6 +31,11 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#eadfd7");
   scene.fog = new THREE.Fog("#eadfd7", 8000, 15000);
+  const world = new THREE.Group();
+  // Three.js es dextrógiro: con X=este e Y=arriba, Z+ debe ser sur.
+  // La opción north-positive solo permite abrir configuraciones antiguas.
+  world.scale.z = config.worldAxes === "south-positive" ? -1 : 1;
+  scene.add(world);
   const b = config.projectedBounds;
   const sizeX = b.east - b.west;
   const sizeZ = b.north - b.south;
@@ -49,15 +54,15 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
 
   const terrain = await loadTerrain(config);
   terrain.mesh.scale.y = config.terrain.verticalExaggeration;
-  scene.add(terrain.mesh);
+  world.add(terrain.mesh);
   const chunkBase = createChunkBase(terrain.heights, config);
-  scene.add(chunkBase.group);
+  world.add(chunkBase.group);
   const urban = await createUrbanLayer(
     config,
     terrain.heights,
     config.terrain.verticalExaggeration
   );
-  scene.add(urban.group);
+  world.add(urban.group);
   const shadowTerrain = await loadTerrain(config, config.shadowTerrain);
   const visibleCenterX = (b.west + b.east) / 2;
   const visibleCenterZ = (b.south + b.north) / 2;
@@ -72,11 +77,16 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
   shadowTerrain.mesh.material.depthWrite = false;
   shadowTerrain.mesh.receiveShadow = false;
   shadowTerrain.mesh.castShadow = true;
-  scene.add(shadowTerrain.mesh);
-  scene.add(await loadCoastline(config));
+  world.add(shadowTerrain.mesh);
+  const coastline = await loadCoastline(
+    config,
+    terrain.heights,
+    config.terrain.verticalExaggeration
+  );
+  world.add(coastline);
 
   const sea = await createSea(sizeX, sizeZ, config);
-  scene.add(sea.group);
+  world.add(sea.group);
 
   scene.add(new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35));
   const shadowWidth = shadowBounds.east - shadowBounds.west;
@@ -140,6 +150,7 @@ export async function createScene(container: HTMLElement, config: BeachConfig): 
       terrain.mesh.scale.y = value;
       chunkBase.setExaggeration(value);
       urban.group.scale.y = value / config.terrain.verticalExaggeration;
+      coastline.scale.y = value / config.terrain.verticalExaggeration;
       shadowTerrain.mesh.scale.y = value;
       resize();
     },

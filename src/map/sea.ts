@@ -3,7 +3,9 @@ import type { BeachConfig } from "../beaches/types";
 import {
   coastlineEnvelope,
   coastXAt,
+  isPointInPolygon,
   isSeaPoint,
+  landPolygonFromCoastlines,
   seawardNormal,
   type CoastLine
 } from "./coastalOrientation";
@@ -31,8 +33,12 @@ const SETTINGS: Record<SeaState, SeaSettings> = {
 };
 
 type GeoJSON = {
-  features: Array<{ geometry: { type: string; coordinates: number[][] | number[][][] } }>;
+  features: Array<{
+    properties?: { id_dera?: number };
+    geometry: { type: string; coordinates: number[][] | number[][][] };
+  }>;
 };
+type LocalCoastline = { featureId?: number; line: CoastLine };
 
 export interface SeaController {
   group: THREE.Group;
@@ -47,12 +53,21 @@ export async function createSea(
   config: BeachConfig
 ): Promise<SeaController> {
   const group = new THREE.Group();
-  const coastlines = await loadLocalCoastlines(config);
-  const breakerCoastline = createBreakerCoastline(coastlines, config);
-  const geometry = new THREE.PlaneGeometry(sizeX, sizeZ, 96, 180);
+  const coastlineRecords = await loadLocalCoastlines(config);
+  const coastlines = coastlineRecords.map(({ line }) => line);
+  const structureIds = new Set(config.coastalStructures.map(({ featureId }) => featureId));
+  const breakerCoastlines = structureIds.size
+    ? coastlineRecords.filter(({ featureId }) => !featureId || !structureIds.has(featureId)).map(({ line }) => line)
+    : [createBreakerCoastline(coastlines, config)];
+  const geometry = new THREE.PlaneGeometry(
+    sizeX,
+    sizeZ,
+    structureIds.size ? config.terrain.width - 1 : 96,
+    structureIds.size ? config.terrain.height - 1 : 180
+  );
   geometry.setAttribute(
     "coastMask",
-    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines, config.seaSide), 1)
+    new THREE.Float32BufferAttribute(createCoastMask(geometry, coastlines, config), 1)
   );
   const normalMap = await new THREE.TextureLoader().loadAsync(
     "/terrain/textures/mediterranean-waves-normal.webp"
@@ -129,12 +144,12 @@ export async function createSea(
   };
   const surface = new THREE.Mesh(geometry, material);
   surface.rotateX(-Math.PI / 2);
-  surface.position.y = 1.5;
+  surface.position.y = config.seaLevelMeters;
   surface.receiveShadow = true;
   group.add(surface);
 
   const breakers = Array.from({ length: SETTINGS.rough.breakerCount }, (_, index) =>
-    createBreaker([breakerCoastline], index, config)
+    createBreaker(breakerCoastlines, index, config)
   );
   for (const breaker of breakers) group.add(breaker.mesh);
 
@@ -218,9 +233,17 @@ function createBreakerCoastline(coastlines: CoastLine[], config: BeachConfig): C
 function createCoastMask(
   geometry: THREE.PlaneGeometry,
   coastlines: CoastLine[],
-  seaSide: BeachConfig["seaSide"]
+  config: BeachConfig
 ): number[] {
-  const coast = coastlineEnvelope(coastlines, seaSide);
+  const coast = coastlineEnvelope(coastlines, config.seaSide);
+  const landPolygon = config.coastalStructures.length
+    ? landPolygonFromCoastlines(
+      coastlines,
+      config.seaSide,
+      (config.projectedBounds.east - config.projectedBounds.west) / 2,
+      (config.projectedBounds.north - config.projectedBounds.south) / 2
+    )
+    : undefined;
   const positions = geometry.attributes.position;
   const mask: number[] = [];
   for (let index = 0; index < positions.count; index++) {
@@ -228,7 +251,10 @@ function createCoastMask(
     // PlaneGeometry se rota después -90°: su Y local positivo apunta al sur.
     const z = -positions.getY(index);
     // En la costa oriental de Mojácar, el mar queda al este (X UTM mayor).
-    mask.push(isSeaPoint(coast, x, z, seaSide, 1.5) ? 1 : 0);
+    const isSea = landPolygon
+      ? !isPointInPolygon([x, z], landPolygon)
+      : isSeaPoint(coast, x, z, config.seaSide, 1.5);
+    mask.push(isSea ? 1 : 0);
   }
   return mask;
 }
@@ -240,6 +266,7 @@ type Breaker = {
   coast: Array<{ x: number; z: number; nx: number; nz: number }>;
   halfWidth: number;
   halfDepth: number;
+  seaLevel: number;
 };
 
 function createBreaker(coastlines: CoastLine[], index: number, config: BeachConfig): Breaker {
@@ -270,7 +297,8 @@ function createBreaker(coastlines: CoastLine[], index: number, config: BeachConf
     material,
     coast,
     halfWidth: (config.projectedBounds.east - config.projectedBounds.west) / 2,
-    halfDepth: (config.projectedBounds.north - config.projectedBounds.south) / 2
+    halfDepth: (config.projectedBounds.north - config.projectedBounds.south) / 2,
+    seaLevel: config.seaLevelMeters
   };
   updateBreaker(breaker, 20 + index * 15, 2);
   return breaker;
@@ -298,7 +326,8 @@ function updateBreaker(breaker: Breaker, offshoreDistance: number, width: number
         -breaker.halfWidth,
         breaker.halfWidth
       );
-      positions[offset + 1] = 3.35 + Math.sin(index * .72 + offshoreDistance * .12) * .32;
+      positions[offset + 1] = breaker.seaLevel + 1.85
+        + Math.sin(index * .72 + offshoreDistance * .12) * .32;
       positions[offset + 2] = THREE.MathUtils.clamp(
         point.z + point.nz * distance,
         -breaker.halfDepth,
@@ -310,7 +339,7 @@ function updateBreaker(breaker: Breaker, offshoreDistance: number, width: number
   breaker.geometry.computeBoundingSphere();
 }
 
-async function loadLocalCoastlines(config: BeachConfig): Promise<CoastLine[]> {
+async function loadLocalCoastlines(config: BeachConfig): Promise<LocalCoastline[]> {
   const response = await fetch(config.coastlineAsset);
   if (!response.ok) throw new Error(`No se pudo cargar la costa para el oleaje (${response.status})`);
   const data = await response.json() as GeoJSON;
@@ -320,6 +349,9 @@ async function loadLocalCoastlines(config: BeachConfig): Promise<CoastLine[]> {
     const lines = feature.geometry.type === "MultiLineString"
       ? feature.geometry.coordinates as number[][][]
       : [feature.geometry.coordinates as number[][]];
-    return lines.map((line) => line.map(([x, z]) => [x - centerX, z - centerZ] as [number, number]));
+    return lines.map((line) => ({
+      featureId: feature.properties?.id_dera,
+      line: line.map(([x, z]) => [x - centerX, z - centerZ] as [number, number])
+    }));
   });
 }

@@ -5,6 +5,7 @@ import { createScene } from "./map/createScene";
 import { estimateTerrainHorizon } from "./map/terrain";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
+import { sunVectorForWorldAxes } from "./solar/sunVector";
 import type { SeaState } from "./map/sea";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
@@ -114,7 +115,7 @@ async function initialise() {
     const terrainHidden = solar.aboveHorizon && solar.altitudeDegrees <= horizon;
     updateSunLight(
       controller.light,
-      solar.vector,
+      sunVectorForWorldAxes(solar.vector, config.worldAxes),
       solar.aboveHorizon,
       shadowsInput.checked,
       SUN_LIGHT_RADIUS

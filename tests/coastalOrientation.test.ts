@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   coastlineEnvelope,
   coastXAt,
+  isPointInPolygon,
   isSeaPoint,
+  landPolygonFromCoastlines,
   seawardNormal
 } from "../src/map/coastalOrientation";
 
@@ -31,5 +33,16 @@ describe("orientación costa-mar de Ventanicas", () => {
       [[0, 0], [2, 10]],
       [[5, 0], [3, 10]]
     ], "east", 1)).toEqual([[5, 0], [3, 10]]);
+  });
+
+  it("conserva un espigón que vuelve sobre sí mismo en la máscara poligonal", () => {
+    const polygon = landPolygonFromCoastlines([
+      [[0, -10], [0, -2]],
+      [[0, -2], [6, -2], [6, 2], [0, 2]],
+      [[0, 2], [0, 10]]
+    ], "east", 10, 10);
+    expect(isPointInPolygon([4, 0], polygon)).toBe(true);
+    expect(isPointInPolygon([8, 0], polygon)).toBe(false);
+    expect(isPointInPolygon([-4, 0], polygon)).toBe(true);
   });
 });

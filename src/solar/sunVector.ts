@@ -4,6 +4,15 @@ export interface Vector3Like {
   z: number;
 }
 
+export function sunVectorForWorldAxes(
+  vector: Vector3Like,
+  worldAxes: "north-positive" | "south-positive"
+): Vector3Like {
+  return worldAxes === "south-positive"
+    ? { ...vector, z: -vector.z }
+    : vector;
+}
+
 /**
  * Convierte los ángulos de SunCalc al sistema local de la escena:
  * x=este, y=arriba, z=norte. SunCalc mide el azimut desde el sur,
