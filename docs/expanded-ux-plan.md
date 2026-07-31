@@ -9,7 +9,8 @@ La aplicación tendrá dos niveles coherentes, ambos con estética de maqueta:
 2. `/terrain/?beach=<id>`: drill-in topográfico de cada playa, con Sol, sombra,
    edificios, calles, agua volumétrica y controles de depuración.
 
-La portada histórica `/` se conserva mientras se valida el nuevo acceso.
+La maqueta general ocupa `/`; la portada histórica se conserva sin enlaces en
+`/flags/` como archivo recuperable.
 
 ## Estado observado: dependencia inicial
 
@@ -90,7 +91,7 @@ causa puede no ser marina.
 - [x] servicio activo/inactivo/desconocido separado del color de bandera;
 - [x] bandera y hora observada en las siete fichas topográficas;
 - [x] sombreado de las franjas del overview solo con bandera activa;
-- [ ] sustituir `/` por el nuevo acceso tras validación de producto.
+- [x] sustituir `/` por el nuevo acceso y archivar la portada anterior.
 
 ### Fase B — previsión puntual
 
