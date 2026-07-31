@@ -70,6 +70,12 @@ horizontal, y giran alrededor del eje vertical Y mediante un bearing visual de
 arriba-derecha, sur abajo-izquierda y este abajo-derecha, conservando el orden
 N-E-S-O.
 
+En Venta del Bancal se verificó asimismo la entidad DERA
+`10125300000519`. Su trazado estrecho sale de la costa, gira en cabeza y
+regresa, con unos 103 m de alcance norte-sur dentro del recorte. Se declara
+como `breakwater`, por lo que comparte con Lance Nuevo la máscara marina
+poligonal, la representación mineral y la exclusión de las rompientes.
+
 ## Contraste solar y de horizonte
 
 Usar el panel con estas fechas de 2026:

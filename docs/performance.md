@@ -28,9 +28,9 @@ llamadas de dibujo principales, no una por edificio.
 
 La variante ilustrada añade por playa tres mallas de cubiertas, un contorno
 viario, cintas de arena húmeda, un borde de zócalo y una sombra de contacto.
-Lance Nuevo suma además la malla del espigón. No añade descargas ni texturas
-nuevas. El cálculo de distancia a costa se realiza una sola vez al crear el
-plano marino.
+Lance Nuevo y Venta del Bancal suman además una malla de espigón. No añade
+descargas ni texturas nuevas. El cálculo de distancia a costa se realiza una
+sola vez al crear el plano marino.
 
 El cambio horario actualiza una luz y el shadow map; no cambia la geometría ni
 genera peticiones. Los assets son estáticos y cacheables por Cloudflare.

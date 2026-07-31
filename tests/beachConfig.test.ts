@@ -23,8 +23,9 @@ describe("configuración declarativa de playa", () => {
     }
   });
 
-  it("declara el espigón de Lance Nuevo sin aplicarlo a las demás playas", () => {
+  it("declara los espigones oficiales sin aplicarlos a las demás playas", () => {
     const lance = beaches.map(parseBeachConfig).find((beach) => beach.id === "lance-nuevo")!;
+    const bancal = beaches.map(parseBeachConfig).find((beach) => beach.id === "venta-del-bancal")!;
     expect(lance.coastalStructures).toEqual([
       { featureId: 10125300000520, kind: "breakwater" }
     ]);
@@ -33,6 +34,9 @@ describe("configuración declarativa de playa", () => {
     expect(lance.visualStyle).toBe("mediterranean-illustrated");
     expect(lance.camera.bearing).toBe(45);
     expect(lance.camera.roll).toBe(0);
+    expect(bancal.coastalStructures).toEqual([
+      { featureId: 10125300000519, kind: "breakwater" }
+    ]);
     const parsed = beaches.map(parseBeachConfig);
     expect(parsed.every((beach) =>
       beach.worldAxes === "south-positive"
@@ -43,7 +47,7 @@ describe("configuración declarativa de playa", () => {
       beach.visualStyle === "mediterranean-illustrated"
     )).toBe(true);
     expect(parsed
-      .filter((beach) => beach.id !== "lance-nuevo")
+      .filter((beach) => !["lance-nuevo", "venta-del-bancal"].includes(beach.id))
       .every((beach) => beach.coastalStructures.length === 0)).toBe(true);
   });
 

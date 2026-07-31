@@ -42,7 +42,12 @@
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
   "seaLevelMeters": 1.5,
-  "coastalStructures": [],
+  "coastalStructures": [
+    {
+      "featureId": 10125300000519,
+      "kind": "breakwater"
+    }
+  ],
   "shoreline": {
     "start": {
       "x": 602500,

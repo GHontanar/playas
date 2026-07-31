@@ -58,9 +58,9 @@ DERA. El volumen y la espuma se amortiguan antes de la costa. En el modo
 anterior, conservado solo para comparación, cada cúmulo se contrasta además con
 la máscara tierra-mar y los límites del chunk.
 
-En costas no monótonas, como el espigón de Lance Nuevo, se conserva la
-topología DERA mediante una máscara poligonal. Las obras litorales se muestran
-como prismas minerales simplificados y las rompientes se dividen a ambos lados;
+En costas no monótonas, como los espigones de Lance Nuevo y Venta del Bancal,
+se conserva la topología DERA mediante una máscara poligonal. Las obras
+litorales se muestran como prismas minerales simplificados y las rompientes se dividen a ambos lados;
 no se fuerza el litoral a una única coordenada X por cada Y.
 
 ## Variante Mediterráneo ilustrado
