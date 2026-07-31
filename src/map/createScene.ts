@@ -20,6 +20,7 @@ export interface SceneController {
   renderer: THREE.WebGLRenderer;
   camera: THREE.OrthographicCamera;
   world: THREE.Group;
+  addFrameListener(listener: (elapsedSeconds: number) => void): () => void;
   setExaggeration(value: number): void;
   setWireframe(value: boolean): void;
   setSeaConditions(value: SeaConditions): void;
@@ -104,11 +105,14 @@ export async function createScene(
   prefetchTexture("/terrain/textures/mediterranean-waves-normal.webp");
 
   let sea: SeaController | undefined;
+  const frameListeners = new Set<(elapsedSeconds: number) => void>();
   let frame = 0;
   const clock = new THREE.Clock();
   const render = () => {
     frame = requestAnimationFrame(render);
-    sea?.update(clock.getElapsedTime());
+    const elapsed = clock.getElapsedTime();
+    sea?.update(elapsed);
+    frameListeners.forEach((listener) => listener(elapsed));
     renderer.render(scene, camera);
   };
   render();
@@ -186,6 +190,10 @@ export async function createScene(
     renderer,
     camera,
     world,
+    addFrameListener(listener) {
+      frameListeners.add(listener);
+      return () => frameListeners.delete(listener);
+    },
     setExaggeration(value) {
       currentExaggeration = value;
       terrain.mesh.scale.y = value;
@@ -228,6 +236,7 @@ export async function createScene(
     resize,
     dispose() {
       cancelAnimationFrame(frame);
+      frameListeners.clear();
       terrain.geometry.dispose();
       terrain.mesh.material.dispose();
       chunkBase.dispose();

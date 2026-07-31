@@ -7,6 +7,8 @@ import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { calculateTerrainShadeTime, type TerrainShadeTime } from "./solar/terrainShade";
+import { createWindGlyph } from "./map/wind";
+import { windRelationLabel, type WindRelation } from "./wind/windDirection";
 import type { SeaState } from "./map/sea";
 import type { WaterMode } from "./map/sea";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
@@ -40,6 +42,7 @@ app.innerHTML = `
     <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de ${config.name}">
       <div id="scene" class="scene"><div id="loading" class="loading">Preparando el relieve…</div></div>
       <div id="scene-error" class="scene-error" hidden></div>
+      ${config.id === "marina-de-la-torre" ? `<div id="wind-glyph" class="wind-glyph" hidden aria-hidden="true"></div>` : ""}
       <aside class="forecast-card" aria-live="polite">
         <div class="forecast-heading"><span>Previsión para</span><strong id="time-readout">—</strong></div>
         <div class="beach-metrics">
@@ -96,6 +99,9 @@ app.innerHTML = `
           </label>
           <label class="check"><input id="shadows" type="checkbox" checked> Sombras físicas</label>
           <label class="check"><input id="wireframe" type="checkbox"> Mostrar malla</label>
+          ${config.id === "marina-de-la-torre"
+            ? `<label class="check"><input id="wind-field" type="checkbox" checked> Glifo de viento</label>`
+            : ""}
           <p>${config.terrain.width * config.terrain.height} vértices · ${(config.terrain.width - 1) * (config.terrain.height - 1) * 2} triángulos · ${config.terrain.webResolutionMeters} m</p>
         </div>
       </details>
@@ -120,6 +126,8 @@ const wireframeInput = document.querySelector<HTMLInputElement>("#wireframe")!;
 const exaggerationInput = document.querySelector<HTMLInputElement>("#exaggeration")!;
 const seaStateInput = document.querySelector<HTMLSelectElement>("#sea-state")!;
 const waterModeInput = document.querySelector<HTMLSelectElement>("#water-mode")!;
+const windFieldInput = document.querySelector<HTMLInputElement>("#wind-field");
+const windGlyphElement = document.querySelector<HTMLElement>("#wind-glyph");
 const beachInput = document.querySelector<HTMLSelectElement>("#beach")!;
 beachInput.addEventListener("change", () => {
   const url = new URL(window.location.href);
@@ -139,6 +147,12 @@ if (!window.WebGLRenderingContext) {
 
 async function initialise() {
   const controller = await createScene(sceneElement, config);
+  const windField = config.id === "marina-de-la-torre" && windGlyphElement
+    ? createWindGlyph(config, windGlyphElement)
+    : undefined;
+  if (windField) {
+    controller.addFrameListener(windField.update);
+  }
   let shadeCache: { date: string; value: TerrainShadeTime } | undefined;
   const terrainHorizon = (bearing: number) => estimateTerrainHorizon(
     controller.shadowTerrain.heights,
@@ -171,7 +185,12 @@ async function initialise() {
   document.querySelector("#loading")?.remove();
   const updateForecast = () => {
     const point = forecast.get(forecastKey(dateInput.value, Number(timeInput.value)));
-    renderForecast(point, forecastFailed);
+    const windRelation = windField?.setConditions(
+      point?.windSpeed,
+      point?.windDirection,
+      point?.windGust
+    );
+    renderForecast(point, forecastFailed, windRelation);
     applyForecastSea(controller, point, seaStateInput.value);
   };
   const update = () => {
@@ -190,6 +209,7 @@ async function initialise() {
     controller.renderer.shadowMap.enabled = shadowsInput.checked;
     controller.setSeaSun(solar.vector, solar.aboveHorizon);
     controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
+    windField?.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
     text("#time-readout", formatMinutes(minutes));
     text("#slider-output", formatMinutes(minutes));
     text("#azimuth", `${solar.azimuthDegrees.toFixed(1)}°`);
@@ -214,6 +234,7 @@ async function initialise() {
   waterModeInput.addEventListener("change", () => {
     controller.setWaterMode(waterModeInput.value as WaterMode);
   });
+  windFieldInput?.addEventListener("change", () => windField?.setVisible(windFieldInput.checked));
   wireframeInput.addEventListener("change", () => controller.setWireframe(wireframeInput.checked));
   exaggerationInput.addEventListener("input", () => {
     const value = clampExaggeration(Number(exaggerationInput.value));
@@ -230,7 +251,11 @@ async function initialise() {
   update();
 }
 
-function renderForecast(point: BeachForecastPoint | undefined, failed: boolean) {
+function renderForecast(
+  point: BeachForecastPoint | undefined,
+  failed: boolean,
+  windRelation?: WindRelation | null
+) {
   text("#sea-temperature", metric(point?.seaTemperature, "°C", 0));
   text("#air-temperature", metric(point?.airTemperature, "°C", 0));
   text("#feels-like", point?.apparentTemperature == null ? "" : `Sensación ${Math.round(point.apparentTemperature)}°`);
@@ -238,7 +263,11 @@ function renderForecast(point: BeachForecastPoint | undefined, failed: boolean) 
   const seaState = seaStateForWaveHeight(point?.waveHeight);
   text("#wave-period", point?.wavePeriod == null ? "" : `${seaStateLabel(seaState)} · ${point.wavePeriod.toFixed(0)} s`);
   text("#wind-speed", metric(point?.windSpeed, "km/h", 0));
-  text("#wind-direction", point?.windDirection == null ? "" : windName(point.windDirection));
+  text("#wind-direction", point?.windDirection == null
+    ? ""
+    : windRelation
+      ? `${windName(point.windDirection)} · ${windRelationLabel(windRelation)}`
+      : windName(point.windDirection));
   const secondary = document.querySelector<HTMLElement>("#forecast-secondary")!;
   secondary.textContent = point
     ? `UV ${point.uvIndex?.toFixed(0) ?? "—"} · Lluvia ${point.precipitationProbability?.toFixed(0) ?? "—"}% · Racha ${point.windGust?.toFixed(0) ?? "—"} km/h`

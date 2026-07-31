@@ -112,3 +112,22 @@ keyframes como entre los impulsos de scroll; el movimiento es reversible.
 En dispositivos que solicitan movimiento reducido cambia entre encuadres discretos.
 El documento usa paradas de scroll obligatorias y redondea siempre al keyframe
 más cercano: no existe un estado persistente con zoom arbitrario entre escenas.
+
+## MVP de viento
+
+Marina de la Torre valida un glifo 3D flotante y separado del chunk.
+Open-Meteo expresa la dirección meteorológica de procedencia; el render
+invierte ese azimut para orientar el símbolo hacia el destino geográfico. La
+orientación de la costa clasifica el resultado como `de mar`, `de tierra` o
+`lateral`.
+
+El glifo combina un pedestal cúbico de estética toon, una rosa pizarra de alta
+resolución y una manga de viento naranja volumétrica. Anillo, marcas y cardinales comparten una
+sola superficie horizontal para que las letras permanezcan integradas. El pedestal conserva la
+referencia espacial, adapta su paleta a la altura solar y solo gira la manga,
+que se extiende hacia el destino del flujo meteorológico. Su malla de alta densidad mantiene la silueta suave; el
+color diferencia la relación con la costa y un pulso leve expresa velocidad y rachas. Se renderiza en un canvas transparente
+pequeño anclado abajo a la derecha, por lo que no tapa la playa, conserva tamaño
+al cambiar la cámara y sigue siendo legible en móvil. No pretende modelar
+turbulencia, edificios ni canalización orográfica. Con movimiento reducido el
+glifo queda estático. El selector de depuración permite ocultarlo.
