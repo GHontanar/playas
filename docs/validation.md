@@ -111,10 +111,12 @@ de cada playa en el azimut solar y compara elevación del Sol con el máximo
 ángulo del perfil. La sombra visible procede del shadow map de Three.js, no de
 rotar un hillshade.
 
-## Validación de la variante artística de Lance Nuevo
+## Validación de la variante artística
 
-La variante `mediterranean-illustrated` se ha comprobado de forma aislada en
-Lance Nuevo a mediodía, con Sol bajo, de noche y a 390 px de ancho. La
+La variante `mediterranean-illustrated` se comprobó primero de forma aislada en
+Lance Nuevo a mediodía, con Sol bajo, de noche y a 390 px de ancho. Tras
+extenderla, se revisaron las siete playas en escritorio y Venta del Bancal a
+390 px como caso móvil adicional. La
 geometría geográfica, el vector solar y el shadow map no cambian: el tratamiento
 artístico afecta a materiales, paleta, luz de relleno, atmósfera, agua y
 acabado del pedestal.

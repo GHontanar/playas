@@ -40,6 +40,9 @@
   },
   "seaSide": "east",
   "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
   "shoreline": {
     "start": {
       "x": 604387.2948,

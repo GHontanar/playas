@@ -39,11 +39,12 @@ describe("configuración declarativa de playa", () => {
       && beach.camera.bearing === 45
       && beach.camera.roll === 0
     )).toBe(true);
+    expect(parsed.every((beach) =>
+      beach.visualStyle === "mediterranean-illustrated"
+    )).toBe(true);
     expect(parsed
       .filter((beach) => beach.id !== "lance-nuevo")
-      .every((beach) =>
-        beach.coastalStructures.length === 0 && beach.visualStyle === "classic"
-      )).toBe(true);
+      .every((beach) => beach.coastalStructures.length === 0)).toBe(true);
   });
 
   it("rechaza bounds invertidos", () => {

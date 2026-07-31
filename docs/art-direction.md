@@ -65,9 +65,10 @@ no se fuerza el litoral a una única coordenada X por cada Y.
 
 ## Variante Mediterráneo ilustrado
 
-Lance Nuevo funciona como banco de pruebas de una variante más expresiva,
-activada declarativamente con `visualStyle: mediterranean-illustrated`. Las
-otras seis playas conservan el acabado clásico hasta validar esta dirección.
+Lance Nuevo funcionó como banco de pruebas de una variante más expresiva,
+activada declarativamente con `visualStyle: mediterranean-illustrated`. Tras
+su validación, la misma variante se aplica a las siete playas mediante
+configuración, sin duplicar lógica de escena.
 
 La variante incorpora:
 
