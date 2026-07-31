@@ -130,6 +130,9 @@ El mar ofrece tres estados animados puramente artísticos —calma, marejadilla 
 agitado— dentro de los controles de depuración. La bandera es una observación y
 no modifica ese estado artístico, que continúa separado de cualquier dato o
 predicción marina.
+Las crestas se orientan con la dirección prevista del oleaje. Los espigones
+declarados en Lance Nuevo y Venta del Bancal generan además una zona visual de
+abrigo a sotavento, sin pretender sustituir una simulación hidrodinámica.
 La tarjeta principal consulta Open-Meteo Weather y Marine para la hora elegida
 y presenta aire, sensación térmica, viento, UV, lluvia, temperatura superficial
 del mar y oleaje. Son valores de modelo; agua y olas pueden compartir celda

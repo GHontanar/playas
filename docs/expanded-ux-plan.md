@@ -107,13 +107,13 @@ causa puede no ser marina.
 - [ ] viento onshore/offshore;
   MVP visual y clasificación implementados en las siete playas; pendiente
   auditar y extender a las otras seis playas.
-- [ ] alineación y exposición al swell;
-  MVP direccional activo en Marina de la Torre y Lance Nuevo; el segundo añade
-  abrigo visual dinámico a sotavento del espigón antes de generalizar.
+- [x] alineación visual al swell en las siete playas;
+  Lance Nuevo y Venta del Bancal añaden abrigo visual dinámico a sotavento de
+  sus espigones declarados.
 - [ ] apantallamiento aproximado por cabos;
 - [ ] potencia de oleaje etiquetada como estimación;
 - [x] traducción genérica de Hs y periodo a los tres estados artísticos del agua;
-- [ ] adaptación futura del oleaje por orientación y exposición de cada playa.
+- [ ] calibración futura de exposición y difracción específica por playa.
 
 ### Fase D — contraste y producto
 

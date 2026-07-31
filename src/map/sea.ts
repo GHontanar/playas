@@ -122,9 +122,9 @@ export async function createSea(
     sunVector: { value: new THREE.Vector3(0, 1, 0) },
     sunVisible: { value: 1 },
     waveDirection: { value: new THREE.Vector2(-1, 0) },
-    directionalWaves: { value: ["marina-de-la-torre", "lance-nuevo"].includes(config.id) ? 1 : 0 },
+    directionalWaves: { value: 1 },
     structureTip: { value: new THREE.Vector2(structureTip?.[0] ?? 0, -(structureTip?.[1] ?? 0)) },
-    structureShelter: { value: config.id === "lance-nuevo" && structureTip ? 1 : 0 }
+    structureShelter: { value: structureTip ? 1 : 0 }
   };
   const material = new THREE.MeshPhysicalMaterial({
     color: config.visualStyle === "mediterranean-illustrated" ? "#279b9c" : "#55a9aa",
@@ -318,7 +318,7 @@ export async function createSea(
     targetSettings = conditions.source === "marine-data"
       ? settingsForMarineData(setting, conditions)
       : { ...setting };
-    if (["marina-de-la-torre", "lance-nuevo"].includes(config.id) && conditions.directionDegrees != null && Number.isFinite(conditions.directionDegrees)) {
+    if (conditions.directionDegrees != null && Number.isFinite(conditions.directionDegrees)) {
       const direction = waveTravelVector(conditions.directionDegrees);
       // PlaneGeometry usa Y local hacia el sur; el segundo componente se
       // invierte antes de llegar al shader.

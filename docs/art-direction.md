@@ -134,15 +134,15 @@ glifo queda estático. El selector de depuración permite ocultarlo.
 
 ## MVP de oleaje direccional
 
-Marina de la Torre es el caso base por su tramo litoral prácticamente recto.
+Marina de la Torre fue el caso base por su tramo litoral prácticamente recto.
 La dirección de procedencia entregada por Open-Meteo se transforma en un vector
 geográfico de avance. Ese vector gobierna fase, pendiente y desplazamiento de
 las crestas volumétricas; la distancia a la costa sigue limitando la zona de
 rompiente y evita trasladar agua sobre la arena. La tarjeta muestra el rumbo
-usado para facilitar la validación al cambiar de hora. Las otras playas
-conservan temporalmente el movimiento genérico hasta validar estos dos casos.
-En Lance Nuevo, el extremo mar adentro se deriva de la geometría DERA del
-espigón. Desde ese punto se calcula una estela dinámica en la dirección de
-avance del oleaje: reduce progresivamente volumen y espuma a sotavento y se
-disipa con la distancia. Es una abstracción visual de apantallamiento, no un
-modelo de difracción o refracción.
+usado para facilitar la validación al cambiar de hora. Tras validar Marina y
+Lance Nuevo, el oleaje direccional se comparte entre las siete playas. En los
+chunks que declaran un espigón —Lance Nuevo y Venta del Bancal—, el extremo mar
+adentro se deriva de la geometría DERA. Desde ese punto se calcula una estela
+dinámica en la dirección de avance del oleaje: reduce progresivamente volumen y
+espuma a sotavento y se disipa con la distancia. Es una abstracción visual de
+apantallamiento, no un modelo de difracción o refracción.
