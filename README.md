@@ -119,6 +119,9 @@ la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
 sombra física horaria. Cada ficha muestra la bandera oficial normalizada, la
 disponibilidad del servicio de socorrismo y la hora observada.
+También calcula para la fecha seleccionada el primer minuto de sombra
+orográfica en el centro de la playa y cuánto se adelanta respecto a la puesta
+astronómica estándar.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
 agitado— dentro de los controles de depuración. La bandera es una observación y
 no modifica ese estado artístico, que continúa separado de cualquier dato o

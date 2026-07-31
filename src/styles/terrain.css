@@ -78,6 +78,10 @@ button, input, select { font: inherit; }
 .beach-metrics strong { display: block; margin-top: 3px; color: #edf0e7; font: 500 19px Georgia, serif; }
 .beach-metrics small { display: block; margin-top: 2px; color: #abc1bf; font-size: 8px; }
 .forecast-secondary { margin: 9px 0; color: #d2ddda; font-size: 9px; line-height: 1.45; }
+.terrain-shade { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin: 9px 0; padding: 9px 10px; border: 1px solid #e3a95d66; border-radius: 7px; background: #e3a95d14; }
+.terrain-shade span { align-self: center; color: #f0c681; font-size: 9px; text-transform: uppercase; }
+.terrain-shade strong { color: #fff1d5; font: 500 19px Georgia, serif; }
+.terrain-shade small { grid-column: 1 / -1; color: #cbd8d4; font-size: 8px; line-height: 1.4; }
 .sun-state { margin: 8px 0; font-size: 10px; letter-spacing: .025em; text-transform: uppercase; }
 .sun-state::before { content: "●"; margin-right: 7px; color: #4ac0b5; }
 .sun-state[data-state="hidden"]::before { color: #e3a95d; }
@@ -123,7 +127,7 @@ footer a { color: #496f70; text-underline-offset: 2px; }
   .scene-shell {
     height: 44vh;
     min-height: 340px;
-    margin-bottom: 330px;
+    margin-bottom: 390px;
     overflow: visible;
     border-radius: 12px;
   }

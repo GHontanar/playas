@@ -144,6 +144,25 @@ muestra `MDT02/PVGIS`, en hora local `Europe/Madrid`:
 | Ventanicas | 20:22/20:16 | 18:58/19:05 | 16:48/16:50 |
 | Venta del Bancal | 19:54/19:48 | 18:32/18:45 | 16:54/17:06 |
 
+La tabla anterior expresa el último minuto de Sol directo. La interfaz muestra
+como inicio aproximado de sombra el minuto siguiente. Tras ampliar los casters,
+los resultados mostrados por el producto son:
+
+| Playa | 21 junio | 23 septiembre | 21 diciembre |
+|---|---:|---:|---:|
+| Marina de la Torre | 21:03 · 28 min | 19:35 · 30 min | 17:14 · 40 min |
+| Descargador | 21:01 · 30 min | 19:33 · 32 min | 17:07 · 47 min |
+| Piedra Villazar | 21:07 · 24 min | 19:37 · 28 min | 17:34 · 20 min |
+| El Cantal | 20:42 · 49 min | 19:08 · 57 min | 17:31 · 23 min |
+| Lance Nuevo | 20:29 · 62 min | 19:08 · 57 min | 17:18 · 36 min |
+| Ventanicas | 20:23 · 68 min | 18:59 · 66 min | 16:49 · 65 min |
+| Venta del Bancal | 19:55 · 96 min | 18:33 · 92 min | 16:55 · 59 min |
+
+Cada celda contiene `inicio de sombra · adelanto respecto a puesta`. El cálculo
+recorre hacia atrás desde la puesta estándar de SunCalc hasta encontrar el
+último minuto cuya elevación supera el perfil MDT02 en el azimut correspondiente.
+Se cachea por fecha y no depende del estado del deslizador horario.
+
 La diferencia absoluta máxima es 21 minutos. Es coherente con la diferencia de
 resolución entre MDT02 y el DEM de unos 90 m de PVGIS, y con la sensibilidad
 del cruce solar cuando el perfil tiene varias crestas próximas. Estos valores

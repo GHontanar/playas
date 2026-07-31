@@ -6,6 +6,7 @@ import { estimateTerrainHorizon } from "./map/terrain";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
+import { calculateTerrainShadeTime, type TerrainShadeTime } from "./solar/terrainShade";
 import type { SeaState } from "./map/sea";
 import type { WaterMode } from "./map/sea";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
@@ -48,6 +49,11 @@ app.innerHTML = `
           <div><span>Viento</span><strong id="wind-speed">—</strong><small id="wind-direction"></small></div>
         </div>
         <p id="forecast-secondary" class="forecast-secondary">Cargando previsión de modelo…</p>
+        <div class="terrain-shade">
+          <span>Sombra orográfica</span>
+          <strong id="terrain-shade-time">—</strong>
+          <small id="terrain-shade-lead">Calculando perfil diario…</small>
+        </div>
         <p id="sun-state" class="sun-state">Calculando Sol…</p>
         <details class="technical-solar">
           <summary>Datos solares y técnicos</summary>
@@ -133,6 +139,26 @@ if (!window.WebGLRenderingContext) {
 
 async function initialise() {
   const controller = await createScene(sceneElement, config);
+  let shadeCache: { date: string; value: TerrainShadeTime } | undefined;
+  const terrainHorizon = (bearing: number) => estimateTerrainHorizon(
+    controller.shadowTerrain.heights,
+    { center: config.center, ...config.shadowTerrain },
+    bearing
+  );
+  const dailyShade = () => {
+    if (shadeCache?.date !== dateInput.value) {
+      shadeCache = {
+        date: dateInput.value,
+        value: calculateTerrainShadeTime(
+          dateInput.value,
+          config.center.lat,
+          config.center.lon,
+          terrainHorizon
+        )
+      };
+    }
+    return shadeCache.value;
+  };
   let forecast = new Map<string, BeachForecastPoint>();
   let forecastFailed = false;
   void loadBeachForecast(config.center.lat, config.center.lon).then((values) => {
@@ -151,11 +177,8 @@ async function initialise() {
   const update = () => {
     const minutes = Number(timeInput.value);
     const solar = getSolarPosition(dateInput.value, minutes, config.center.lat, config.center.lon);
-    const horizon = estimateTerrainHorizon(
-      controller.shadowTerrain.heights,
-      { center: config.center, ...config.shadowTerrain },
-      solar.azimuthDegrees
-    );
+    const horizon = terrainHorizon(solar.azimuthDegrees);
+    renderTerrainShade(dailyShade());
     const terrainHidden = solar.aboveHorizon && solar.altitudeDegrees <= horizon;
     updateSunLight(
       controller.light,
@@ -243,6 +266,27 @@ function applyForecastSea(
 
 function metric(value: number | null | undefined, unit: string, decimals: number) {
   return value == null ? "—" : `${value.toFixed(decimals)} ${unit}`;
+}
+
+function renderTerrainShade(value: TerrainShadeTime) {
+  const timeElement = document.querySelector<HTMLElement>("#terrain-shade-time")!;
+  const leadElement = document.querySelector<HTMLElement>("#terrain-shade-lead")!;
+  if (value.shadeStartMinutes == null || value.leadBeforeSunsetMinutes == null) {
+    timeElement.textContent = "Sin Sol directo";
+    leadElement.textContent = "El perfil bloquea el recorrido solar calculado";
+    return;
+  }
+  timeElement.textContent = `≈ ${formatMinutes(value.shadeStartMinutes)}`;
+  leadElement.textContent = value.leadBeforeSunsetMinutes < 10
+    ? `Prácticamente con la puesta · ${formatMinutes(value.sunsetMinutes)}`
+    : `${formatDuration(value.leadBeforeSunsetMinutes)} antes de la puesta · ${formatMinutes(value.sunsetMinutes)}`;
+}
+
+function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (!hours) return `${rest} min`;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
 }
 
 function formatMinutes(minutes: number): string {
