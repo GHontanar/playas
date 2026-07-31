@@ -266,6 +266,9 @@ export async function createSea(
   for (const breaker of breakers) group.add(breaker.mesh, breaker.foam);
 
   let state: SeaState = "moderate";
+  let lastElapsedSeconds = 0;
+  let currentSettings: SeaSettings = { ...settings.moderate };
+  let targetSettings: SeaSettings = { ...settings.moderate };
   let mode: WaterMode = config.visualStyle === "mediterranean-illustrated"
     ? "volumetric"
     : "legacy";
@@ -273,17 +276,13 @@ export async function createSea(
   const setConditions = (conditions: SeaConditions) => {
     state = conditions.state;
     const setting = settings[conditions.state];
-    uniforms.waveAmplitude.value = setting.amplitude;
-    uniforms.waveLength.value = setting.wavelength;
-    uniforms.waveSpeed.value = setting.speed;
-    uniforms.crestHeight.value = setting.crestHeight;
-    material.normalScale.setScalar(setting.textureStrength);
+    targetSettings = conditions.source === "marine-data"
+      ? settingsForMarineData(setting, conditions)
+      : { ...setting };
     breakers.forEach((breaker, index) => {
       breaker.mesh.visible = config.visualStyle !== "mediterranean-illustrated"
         && index < setting.breakerCount;
       breaker.foam.visible = mode === "legacy" && index < setting.breakerCount;
-      breaker.material.opacity = setting.breakerOpacity;
-      breaker.foamMaterial.uniforms.pointSize.value = 20 + setting.breakerWidth * .65;
     });
   };
   setConditions({ state, source: "fallback" });
@@ -297,8 +296,17 @@ export async function createSea(
     group,
     update(elapsedSeconds) {
       const time = reducedMotion ? 0 : elapsedSeconds;
+      const delta = Math.max(0, Math.min(.1, elapsedSeconds - lastElapsedSeconds));
+      lastElapsedSeconds = elapsedSeconds;
+      const blend = reducedMotion ? 1 : 1 - Math.exp(-delta * 3.2);
+      interpolateSettings(currentSettings, targetSettings, blend);
+      uniforms.waveAmplitude.value = currentSettings.amplitude;
+      uniforms.waveLength.value = currentSettings.wavelength;
+      uniforms.waveSpeed.value = currentSettings.speed;
+      uniforms.crestHeight.value = currentSettings.crestHeight;
+      material.normalScale.setScalar(currentSettings.textureStrength);
       uniforms.waveTime.value = time;
-      const setting = settings[state];
+      const setting = currentSettings;
       normalMap.offset.set(time * setting.textureSpeed * .37, -time * setting.textureSpeed);
       breakers.forEach((breaker, index) => {
         if (!breaker.mesh.visible && !breaker.foam.visible) return;
@@ -314,6 +322,8 @@ export async function createSea(
           setting.crestHeight * (.3 + (1 - progress) * .7),
           setting.breakerOpacity * Math.sin(Math.PI * (.06 + progress * .88))
         );
+        breaker.material.opacity = setting.breakerOpacity;
+        breaker.foamMaterial.uniforms.pointSize.value = 20 + setting.breakerWidth * .65;
       });
     },
     setConditions,
@@ -339,6 +349,33 @@ export async function createSea(
       });
     }
   };
+}
+
+function settingsForMarineData(base: SeaSettings, conditions: SeaConditions): SeaSettings {
+  const height = conditions.waveHeightMeters ?? representativeHeight(conditions.state);
+  const period = conditions.periodSeconds ?? 5;
+  const heightScale = THREE.MathUtils.clamp(height / representativeHeight(conditions.state), .72, 1.38);
+  const periodScale = THREE.MathUtils.clamp(period / 5, .72, 1.45);
+  return {
+    ...base,
+    amplitude: base.amplitude * (.72 + heightScale * .28),
+    crestHeight: base.crestHeight * (.68 + heightScale * .32),
+    breakerWidth: base.breakerWidth * (.8 + heightScale * .2),
+    wavelength: base.wavelength * periodScale,
+    speed: base.speed / periodScale,
+    textureStrength: base.textureStrength * (.8 + heightScale * .2),
+    textureSpeed: base.textureSpeed / periodScale
+  };
+}
+
+function representativeHeight(state: SeaState) {
+  return state === "calm" ? .25 : state === "moderate" ? .65 : 1.2;
+}
+
+function interpolateSettings(current: SeaSettings, target: SeaSettings, amount: number) {
+  for (const key of Object.keys(current) as Array<keyof SeaSettings>) {
+    current[key] = THREE.MathUtils.lerp(current[key], target[key], amount);
+  }
 }
 
 function createShoreDistance(

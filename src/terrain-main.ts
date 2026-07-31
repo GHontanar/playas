@@ -10,7 +10,7 @@ import type { SeaState } from "./map/sea";
 import type { WaterMode } from "./map/sea";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 import type { ObservedBeachStatus } from "./status/types";
-import { forecastKey, loadBeachForecast, windName, type BeachForecastPoint } from "./forecast/openMeteo";
+import { forecastKey, loadBeachForecast, seaStateForWaveHeight, seaStateLabel, windName, type BeachForecastPoint } from "./forecast/openMeteo";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -73,8 +73,9 @@ app.innerHTML = `
         <div class="debug-grid">
           <label>Estado artístico del mar
             <select id="sea-state">
+              <option value="auto" selected>Automático · previsión</option>
               <option value="calm">Calma</option>
-              <option value="moderate" selected>Marejadilla</option>
+              <option value="moderate">Marejadilla</option>
               <option value="rough">Agitado</option>
             </select>
           </label>
@@ -145,6 +146,7 @@ async function initialise() {
   const updateForecast = () => {
     const point = forecast.get(forecastKey(dateInput.value, Number(timeInput.value)));
     renderForecast(point, forecastFailed);
+    applyForecastSea(controller, point, seaStateInput.value);
   };
   const update = () => {
     const minutes = Number(timeInput.value);
@@ -183,10 +185,8 @@ async function initialise() {
   timeInput.addEventListener("input", update);
   shadowsInput.addEventListener("change", update);
   seaStateInput.addEventListener("change", () => {
-    controller.setSeaConditions({
-      state: seaStateInput.value as SeaState,
-      source: "debug"
-    });
+    const point = forecast.get(forecastKey(dateInput.value, Number(timeInput.value)));
+    applyForecastSea(controller, point, seaStateInput.value);
   });
   waterModeInput.addEventListener("change", () => {
     controller.setWaterMode(waterModeInput.value as WaterMode);
@@ -212,13 +212,33 @@ function renderForecast(point: BeachForecastPoint | undefined, failed: boolean) 
   text("#air-temperature", metric(point?.airTemperature, "°C", 0));
   text("#feels-like", point?.apparentTemperature == null ? "" : `Sensación ${Math.round(point.apparentTemperature)}°`);
   text("#wave-height", metric(point?.waveHeight, "m", 1));
-  text("#wave-period", point?.wavePeriod == null ? "" : `Periodo ${point.wavePeriod.toFixed(0)} s`);
+  const seaState = seaStateForWaveHeight(point?.waveHeight);
+  text("#wave-period", point?.wavePeriod == null ? "" : `${seaStateLabel(seaState)} · ${point.wavePeriod.toFixed(0)} s`);
   text("#wind-speed", metric(point?.windSpeed, "km/h", 0));
   text("#wind-direction", point?.windDirection == null ? "" : windName(point.windDirection));
   const secondary = document.querySelector<HTMLElement>("#forecast-secondary")!;
   secondary.textContent = point
     ? `UV ${point.uvIndex?.toFixed(0) ?? "—"} · Lluvia ${point.precipitationProbability?.toFixed(0) ?? "—"}% · Racha ${point.windGust?.toFixed(0) ?? "—"} km/h`
     : failed ? "Previsión temporalmente no disponible" : "Sin previsión para la fecha seleccionada";
+}
+
+function applyForecastSea(
+  controller: Awaited<ReturnType<typeof createScene>>,
+  point: BeachForecastPoint | undefined,
+  selection: string
+) {
+  if (selection !== "auto") {
+    controller.setSeaConditions({ state: selection as SeaState, source: "debug" });
+    return;
+  }
+  const state = seaStateForWaveHeight(point?.waveHeight);
+  controller.setSeaConditions(state ? {
+    state,
+    source: "marine-data",
+    waveHeightMeters: point?.waveHeight ?? undefined,
+    periodSeconds: point?.wavePeriod ?? undefined,
+    directionDegrees: point?.waveDirection ?? undefined
+  } : { state: "moderate", source: "fallback" });
 }
 
 function metric(value: number | null | undefined, unit: string, decimals: number) {

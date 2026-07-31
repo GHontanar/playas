@@ -107,7 +107,8 @@ causa puede no ser marina.
 - [ ] alineación y exposición al swell;
 - [ ] apantallamiento aproximado por cabos;
 - [ ] potencia de oleaje etiquetada como estimación;
-- [ ] traducción de la previsión a los tres estados artísticos del agua.
+- [x] traducción genérica de Hs y periodo a los tres estados artísticos del agua;
+- [ ] adaptación futura del oleaje por orientación y exposición de cada playa.
 
 ### Fase D — contraste y producto
 

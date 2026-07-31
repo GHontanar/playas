@@ -13,6 +13,21 @@ export interface BeachForecastPoint {
   waveDirection: number | null;
 }
 
+export type ForecastSeaState = "calm" | "moderate" | "rough";
+export const CALM_MAX_WAVE_HEIGHT = .45;
+export const ROUGH_MIN_WAVE_HEIGHT = .9;
+
+export function seaStateForWaveHeight(waveHeight: number | null | undefined): ForecastSeaState | null {
+  if (waveHeight == null || !Number.isFinite(waveHeight)) return null;
+  if (waveHeight < CALM_MAX_WAVE_HEIGHT) return "calm";
+  if (waveHeight < ROUGH_MIN_WAVE_HEIGHT) return "moderate";
+  return "rough";
+}
+
+export function seaStateLabel(state: ForecastSeaState | null): string {
+  return state === "calm" ? "Calma" : state === "moderate" ? "Marejadilla" : state === "rough" ? "Agitado" : "";
+}
+
 type HourlyPayload = { hourly?: Record<string, Array<string | number | null>> };
 
 export async function loadBeachForecast(lat: number, lon: number): Promise<Map<string, BeachForecastPoint>> {

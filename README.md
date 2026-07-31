@@ -126,6 +126,9 @@ La tarjeta principal consulta Open-Meteo Weather y Marine para la hora elegida
 y presenta aire, sensación térmica, viento, UV, lluvia, temperatura superficial
 del mar y oleaje. Son valores de modelo; agua y olas pueden compartir celda
 entre varias playas y no equivalen a una medición en la orilla.
+La altura significativa selecciona automáticamente calma, marejadilla o agitado
+con una calibración histórica común a toda la costa; el periodo ajusta el ritmo
+de la animación. Véase [`docs/wave-calibration.md`](docs/wave-calibration.md).
 La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 

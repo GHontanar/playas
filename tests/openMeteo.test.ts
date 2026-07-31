@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { forecastKey, mergeForecasts, windName } from "../src/forecast/openMeteo";
+import { forecastKey, mergeForecasts, seaStateForWaveHeight, windName } from "../src/forecast/openMeteo";
 
 describe("previsión de playa", () => {
   it("combina tiempo y mar por hora local", () => {
@@ -19,5 +19,13 @@ describe("previsión de playa", () => {
     expect(windName(90)).toBe("Levante");
     expect(windName(270)).toBe("Poniente");
     expect(windName(0)).toBe("Norte");
+  });
+
+  it("clasifica Hs con los umbrales calibrados para Mojácar", () => {
+    expect(seaStateForWaveHeight(.44)).toBe("calm");
+    expect(seaStateForWaveHeight(.45)).toBe("moderate");
+    expect(seaStateForWaveHeight(.89)).toBe("moderate");
+    expect(seaStateForWaveHeight(.9)).toBe("rough");
+    expect(seaStateForWaveHeight(null)).toBeNull();
   });
 });

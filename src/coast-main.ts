@@ -7,6 +7,7 @@ import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
+import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecast/openMeteo";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 app.innerHTML = `
@@ -42,6 +43,17 @@ async function initialise() {
   controller.world.updateMatrixWorld(true);
 
   const now = nowInMojacar();
+  void loadBeachForecast(coastOverview.center.lat, coastOverview.center.lon).then((forecast) => {
+    const point = forecast.get(forecastKey(now.dateISO, now.minutes));
+    const state = seaStateForWaveHeight(point?.waveHeight);
+    if (state) controller.setSeaConditions({
+      state,
+      source: "marine-data",
+      waveHeightMeters: point?.waveHeight ?? undefined,
+      periodSeconds: point?.wavePeriod ?? undefined,
+      directionDegrees: point?.waveDirection ?? undefined
+    });
+  });
   const solar = getSolarPosition(now.dateISO, now.minutes, coastOverview.center.lat, coastOverview.center.lon);
   updateSunLight(
     controller.light,
