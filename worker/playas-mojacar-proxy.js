@@ -170,9 +170,13 @@ async function observedStatus() {
       ]);
       const flagSrc = imageSource(flagFragment);
       const jellyfishSrc = imageSource(jellyfishFragment);
+      const reportedService = normaliseLifeguardServiceSource(flagSrc);
       return {
         beachId: BEACH_IDS[playa],
         flag: normaliseFlagSource(flagSrc),
+        lifeguardService: reportedService === "active"
+          ? lifeguardServiceAt(new Date(), playa)
+          : reportedService,
         jellyfish: normaliseJellyfishSource(jellyfishSrc),
         observedAtLocal: stripTags(dateFragment) || null,
         source: "gestiondeplayas",
@@ -184,7 +188,7 @@ async function observedStatus() {
     }), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=60, s-maxage=300",
+        "Cache-Control": "public, max-age=30, s-maxage=60",
         ...cors(),
       },
     });
@@ -218,6 +222,56 @@ export function normaliseFlagSource(src) {
   return match
     ? ({ verde: "green", amarilla: "yellow", roja: "red" })[match[1].toLowerCase()]
     : "unknown";
+}
+
+export function normaliseLifeguardServiceSource(src) {
+  if (/-(verde|amarilla|roja)\.[a-z0-9]+(?:[?#].*)?$/i.test(src)) return "active";
+  if (/-sin\.[a-z0-9]+(?:[?#].*)?$/i.test(src)) return "inactive";
+  return "unknown";
+}
+
+const CORE_SERVICE_BEACHES = new Set(["01", "09", "12", "13"]);
+
+// Calendario oficial de la temporada de baño 2026 publicado por Turismo Mojácar.
+// En julio y agosto abren las siete playas; el resto de periodos solo las cuatro
+// playas indicadas por el Ayuntamiento. La hora final es exclusiva.
+export function lifeguardServiceAt(date, playa) {
+  const local = madridParts(date);
+  if (local.year !== 2026) return "unknown";
+  const dayKey = local.month * 100 + local.day;
+  const allBeaches = dayKey >= 701 && dayKey <= 831;
+  const coreBeachDay = isCoreServiceDay(dayKey);
+  if (!allBeaches && !(coreBeachDay && CORE_SERVICE_BEACHES.has(playa))) return "inactive";
+  const closesAt = allBeaches && (local.weekday === "Sat" || local.weekday === "Sun") ? 20 : 19;
+  return local.hour >= 11 && local.hour < closesAt ? "active" : "inactive";
+}
+
+function isCoreServiceDay(dayKey) {
+  return (dayKey >= 328 && dayKey <= 405) ||
+    [516, 517, 523, 524, 530, 531, 606, 607, 613, 614].includes(dayKey) ||
+    (dayKey >= 901 && dayKey <= 913) ||
+    [919, 920, 926, 927, 1003, 1004, 1010, 1011, 1012, 1017, 1018,
+      1024, 1025, 1031, 1101].includes(dayKey);
+}
+
+function madridParts(date) {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Madrid",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+    weekday: "short",
+  });
+  const parts = Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    weekday: parts.weekday,
+  };
 }
 
 export function normaliseJellyfishSource(src) {

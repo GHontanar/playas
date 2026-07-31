@@ -46,7 +46,7 @@ export async function createBeachZones(
     const material = new THREE.MeshBasicMaterial({
       color: FLAG_COLOURS.unknown,
       transparent: true,
-      opacity: .46,
+      opacity: 0,
       depthWrite: false,
       side: THREE.DoubleSide
     });
@@ -87,13 +87,16 @@ export async function createBeachZones(
         const material = mesh.material as THREE.MeshBasicMaterial;
         material.color.set(FLAG_COLOURS[status?.flag ?? "unknown"]);
         mesh.userData.status = status;
+        material.opacity = status?.lifeguardService === "active" && status.flag !== "unknown" ? .46 : 0;
       }
     },
     setActive(beachId) {
       for (const mesh of meshes) {
         const active = mesh.userData.beachId === beachId;
         const material = mesh.material as THREE.MeshBasicMaterial;
-        material.opacity = active ? .82 : .46;
+        const status = mesh.userData.status as ObservedBeachStatus | undefined;
+        const coloured = status?.lifeguardService === "active" && status.flag !== "unknown";
+        material.opacity = coloured ? (active ? .82 : .46) : (active ? .14 : 0);
         mesh.position.y = active ? 3 : 0;
       }
     },

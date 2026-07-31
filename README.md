@@ -116,11 +116,13 @@ Villazar, El Cantal, Lance Nuevo, Ventanicas y Venta del Bancal. Cada playa
 tiene recorte, cámara, tramo litoral y caster orográfico propios, pero comparte
 la misma escena y controles. Usa MDT02 oficial, costa DERA, edificios INSPIRE de Catastro,
 calles OSM preparadas offline, malla Three.js, cámara ortográfica, SunCalc y
-sombra física horaria. No se ha integrado con banderas ni añade meteorología.
+sombra física horaria. Cada ficha muestra la bandera oficial normalizada, la
+disponibilidad del servicio de socorrismo y la hora observada; todavía no añade
+meteorología.
 El mar ofrece tres estados animados puramente artísticos —calma, marejadilla y
-agitado— dentro de los controles de depuración. La escena acepta también la
-procedencia del estado para conectarlo posteriormente a bandera o datos
-marinos, pero todavía no representa observaciones ni predicciones.
+agitado— dentro de los controles de depuración. La bandera es una observación y
+no modifica ese estado artístico, que continúa separado de cualquier dato o
+predicción marina.
 La decisión gráfica está en
 [`docs/adr/0001-terrain-renderer.md`](docs/adr/0001-terrain-renderer.md).
 
@@ -190,9 +192,13 @@ campos. El Worker independiente solo se despliega, si se desea, con
 
 ## Notas
 
-El estado oficial se actualiza una vez al día (aprox. 9 abr – 9 oct, franja 11:30–11:45),
-así que la página no auto-refresca: carga al abrir y vuelve a pedir los banners solo al
+La bandera publicada es una observación, no una prueba de que haya socorristas
+en ese instante. `/api/status` la cruza con el calendario oficial de 2026 en
+`Europe/Madrid`. Durante julio y agosto el horario es 11:00–19:00 de lunes a
+viernes y 11:00–20:00 sábados y domingos. Las vistas topográficas revalidan el
+estado tras cada cambio de hora; la portada histórica lo hace al recargar o al
 pulsar «Actualizar».
+Calendario: [Temporada de baño 2026 de Turismo Mojácar](https://www.mojacar.es/mojacar-disfruta/playas/).
 
 La `clave_api` es la misma que va embebida en el HTML público de mojacar.es; no es un
 secreto. Aun así, al vivir en el Worker deja de estar en el HTML de esta página.

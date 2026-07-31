@@ -19,10 +19,12 @@ lo normaliza mediante `/api/status`. Medusas es una dimensión independiente.
 
 ```ts
 type FlagState = "green" | "yellow" | "red" | "unknown";
+type LifeguardServiceState = "active" | "inactive" | "unknown";
 
 interface ObservedBeachStatus {
   beachId: string;
   flag: FlagState;
+  lifeguardService: LifeguardServiceState;
   jellyfish: boolean | null;
   observedAtLocal: string | null;
   source: "gestiondeplayas";
@@ -30,7 +32,10 @@ interface ObservedBeachStatus {
 ```
 
 `/api/banner` se mantiene para compatibilidad. El endpoint agregado usa caché
-de borde de cinco minutos y reduce el acoplamiento del frontend a los banners.
+de borde de un minuto y reduce el acoplamiento del frontend a los banners. El
+servicio activo se obtiene cruzando el banner con el calendario oficial 2026 en
+`Europe/Madrid`; un GIF verde retenido después del cierre no se presenta como
+socorrismo activo. Las vistas revalidan tras los cambios de hora.
 
 ## Chunk general
 
@@ -48,12 +53,14 @@ No combina los siete DEM detallados. Tiene derivados propios:
 Las franjas seleccionables siguen la costa y la longitud oficial de cada
 playa. Su anchura se exagera para ser visible y táctil; no representa una
 delimitación administrativa ni una distancia métrica. El color tenue expresa
-bandera observada y el símbolo de medusas se mantiene separado.
+bandera observada únicamente cuando el servicio está activo. `inactive` y
+`unknown` dejan visible el material original, sin inferir un color. El símbolo
+de medusas se mantiene separado.
 
 ## Drill-in
 
-Seleccionar una franja o un botón abre el chunk detallado existente. La ficha
-final separará visualmente:
+Seleccionar una franja abre el chunk detallado existente. La ficha separa
+visualmente:
 
 1. observado: bandera, medusas y hora;
 2. previsto: meteorología y mar con instante de validez y modelo;
@@ -80,6 +87,9 @@ causa puede no ser marina.
   de la Torre y trayectoria reversible hasta Venta del Bancal;
 - [x] recorrido condensado a unas tres pantallas de desplazamiento efectivo;
 - [x] cuatro únicos keyframes de cámara: general, norte, centro y sur;
+- [x] servicio activo/inactivo/desconocido separado del color de bandera;
+- [x] bandera y hora observada en las siete fichas topográficas;
+- [x] sombreado de las franjas del overview solo con bandera activa;
 - [ ] sustituir `/` por el nuevo acceso tras validación de producto.
 
 ### Fase B — previsión puntual

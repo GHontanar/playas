@@ -145,7 +145,7 @@
   <div class="list" id="list"></div>
 
   <div class="foot">
-    <p>Se lee directo del proveedor que alimenta la web del ayuntamiento, saltándose el widget roto de <a href="https://www.mojacar.es/mojacar-disfruta/estado-de-las-playas/" target="_blank" rel="noopener">mojacar.es</a>. El estado oficial solo cambia una vez al día (aprox. 9 abr – 9 oct, franja 11:30–11:45); fuera de eso el dato queda igual.</p>
+    <p>Se lee directo del proveedor que alimenta la web del ayuntamiento, saltándose el widget roto de <a href="https://www.mojacar.es/mojacar-disfruta/estado-de-las-playas/" target="_blank" rel="noopener">mojacar.es</a>. La bandera se publica durante el servicio y deja de estar vigente cuando finaliza el horario oficial.</p>
     <p>Emergencias: <span class="emg">112</span>.</p>
   </div>
 
@@ -264,7 +264,7 @@ function refresh(silent){
 }
 
 render();
-// Sin auto-refresco: el estado oficial solo cambia una vez al día (~11:30–11:45).
+// La vista topográfica revalida el servicio en los cambios de hora oficiales.
 // Se carga al abrir la página y solo se vuelve a pedir al pulsar «Actualizar».
 </script>
 </body>

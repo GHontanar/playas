@@ -6,7 +6,7 @@ import { createBeachZones } from "./map/beachZones";
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
-import { loadObservedStatus } from "./status/loadStatus";
+import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 app.innerHTML = `
@@ -165,12 +165,15 @@ async function initialise() {
   });
 
   const demo = new URLSearchParams(window.location.search).get("demo") === "1";
-  try {
-    const observed = await loadObservedStatus(demo);
-    zones.setStatuses(observed);
-  } catch {
-    // The neutral palette remains meaningful when the observed endpoint is unavailable.
-  }
+  const refreshStatus = async () => {
+    try {
+      zones.setStatuses(await loadObservedStatus(demo));
+    } catch {
+      zones.setStatuses([]);
+    }
+  };
+  await refreshStatus();
+  refreshStatusAfterHourChange(refreshStatus);
 }
 
 function smoothstep(value: number) {

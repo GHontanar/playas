@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   normaliseFlagSource,
+  normaliseLifeguardServiceSource,
+  lifeguardServiceAt,
   normaliseJellyfishSource
 } from "../worker/playas-mojacar-proxy.js";
 
@@ -20,5 +22,35 @@ describe("normalización semántica de banners", () => {
     expect(normaliseJellyfishSource("banner-mini-medusas.gif")).toBe(true);
     expect(normaliseJellyfishSource("banner-mini-blanca.gif")).toBe(false);
     expect(normaliseJellyfishSource("")).toBeNull();
+  });
+
+  it.each([
+    ["banner-mini-verde.gif", "active"],
+    ["banner-mini-amarilla.gif", "active"],
+    ["banner-mini-roja.gif", "active"],
+    ["https://example.test/banner-mini-sin.gif?v=2", "inactive"],
+    ["", "unknown"],
+    ["otro-formato.png", "unknown"]
+  ])("distingue el servicio de socorrismo de %s", (source, expected) => {
+    expect(normaliseLifeguardServiceSource(source)).toBe(expected);
+  });
+
+  it("cierra a las 19:00 entre semana en temporada alta", () => {
+    expect(lifeguardServiceAt(new Date("2026-07-31T16:59:00Z"), "01")).toBe("active");
+    expect(lifeguardServiceAt(new Date("2026-07-31T17:00:00Z"), "01")).toBe("inactive");
+  });
+
+  it("amplía hasta las 20:00 los fines de semana de julio y agosto", () => {
+    expect(lifeguardServiceAt(new Date("2026-08-01T17:59:00Z"), "04")).toBe("active");
+    expect(lifeguardServiceAt(new Date("2026-08-01T18:00:00Z"), "04")).toBe("inactive");
+  });
+
+  it("limita las fechas periféricas a las cuatro playas con servicio", () => {
+    expect(lifeguardServiceAt(new Date("2026-09-05T10:00:00Z"), "12")).toBe("active");
+    expect(lifeguardServiceAt(new Date("2026-09-05T10:00:00Z"), "04")).toBe("inactive");
+  });
+
+  it("no inventa el calendario de futuras temporadas", () => {
+    expect(lifeguardServiceAt(new Date("2027-07-31T10:00:00Z"), "01")).toBe("unknown");
   });
 });

@@ -8,6 +8,8 @@ import { formatLocalTime, getSolarPosition, nowInMojacar } from "./solar/sunPosi
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import type { SeaState } from "./map/sea";
 import type { WaterMode } from "./map/sea";
+import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
+import type { ObservedBeachStatus } from "./status/types";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -19,6 +21,11 @@ app.innerHTML = `
       <div>
         <a href="/" class="back">Mojácar / experimento topográfico</a>
         <h1>${config.name}</h1>
+        <div id="beach-status" class="beach-status" data-service="loading" aria-live="polite">
+          <i class="beach-status-colour" aria-hidden="true"></i>
+          <span>Consultando bandera…</span>
+          <small></small>
+        </div>
       </div>
       <label class="beach-picker">Playa
         <select id="beach">
@@ -100,6 +107,8 @@ beachInput.addEventListener("change", () => {
   url.searchParams.set("beach", beachInput.value);
   window.location.assign(url);
 });
+void loadBeachStatus();
+refreshStatusAfterHourChange(loadBeachStatus);
 
 if (!window.WebGLRenderingContext) {
   showError("Este dispositivo no ofrece WebGL, necesario para mostrar la maqueta 3D.");
@@ -174,6 +183,39 @@ async function initialise() {
 
 function formatMinutes(minutes: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
+async function loadBeachStatus() {
+  const element = document.querySelector<HTMLElement>("#beach-status")!;
+  try {
+    const demo = new URLSearchParams(window.location.search).get("demo") === "1";
+    const status = (await loadObservedStatus(demo)).find((candidate) => candidate.beachId === config.id);
+    renderBeachStatus(element, status);
+  } catch {
+    renderBeachStatus(element, undefined);
+  }
+}
+
+function renderBeachStatus(element: HTMLElement, status: ObservedBeachStatus | undefined) {
+  const label = element.querySelector<HTMLElement>("span")!;
+  const detail = element.querySelector<HTMLElement>("small")!;
+  const activeFlag = status?.lifeguardService === "active" && status.flag !== "unknown";
+  element.dataset.service = status?.lifeguardService ?? "unknown";
+  element.dataset.flag = activeFlag ? status.flag : "unknown";
+  label.textContent = activeFlag
+    ? `Bandera ${flagLabel(status.flag)}`
+    : status?.lifeguardService === "inactive"
+      ? "Sin servicio de socorrismo"
+      : "Bandera no disponible";
+  detail.textContent = activeFlag && status.observedAtLocal
+    ? `Observada ${status.observedAtLocal}`
+    : status?.lifeguardService === "inactive"
+      ? "Fuera del horario oficial"
+      : "No se pudo confirmar el servicio";
+}
+
+function flagLabel(flag: ObservedBeachStatus["flag"]) {
+  return ({ green: "verde", yellow: "amarilla", red: "roja", unknown: "desconocida" })[flag];
 }
 
 function text(selector: string, value: string) {
