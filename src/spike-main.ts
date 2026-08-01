@@ -24,6 +24,20 @@ const FLORA_COLOURS: Record<number, string> = {
   4: "#5f7048"   // Rissoella verruculosa, alga de fondo rocoso
 };
 
+// Ocho familias de CORINE nivel 3. La paleta se queda dentro de la del overview
+// municipal —ocres, olivas y el salmón urbano— para que el nivel comarcal no
+// estrene un vocabulario cromático propio.
+const LAND_COLOURS: Record<number, string> = {
+  1: "#e0bb80",  // suelo desnudo y roquedo
+  2: "#8f9459",  // matorral y pastizal
+  3: "#c9ab61",  // mosaico agrícola y secano
+  4: "#47603f",  // bosque
+  5: "#5f9448",  // regadío permanente
+  6: "#d3c3c4",  // humedal y salinas
+  7: "#3f8f96",  // agua continental
+  8: "#d98c74"   // urbano e industrial
+};
+
 // Escalones sobre profundidad logarítmica: los primeros cien metros son los que
 // se ven desde la orilla y merecen casi la mitad del recorrido de color.
 const DEPTH_STOPS: Array<[number, string]> = [
@@ -70,6 +84,7 @@ const shoreDistance = distanceToLand(sea);
 // Batimetría y praderas DERA rasterizadas a la misma rejilla: 5 bits de banda
 // batimétrica y 3 de clase de fondo vegetado por celda.
 const seaCover = new Uint8Array(await (await fetch("/terrain/assets/levante-sea.u8")).arrayBuffer());
+const landCover = new Uint8Array(await (await fetch("/terrain/assets/levante-land.u8")).arrayBuffer());
 const seaMetadata = await loadJson<{ depthBands: Record<string, string> }>("/metadata/levante-sea.json");
 const bandDepths = bandMidpoints(seaMetadata.depthBands);
 const waveNormals = await loadTexture("/terrain/textures/mediterranean-waves-normal.webp");
@@ -242,6 +257,7 @@ function buildTerrain() {
   const earth = new THREE.Color("#a69661");
   const rock = new THREE.Color("#666b70");
   const colour = new THREE.Color();
+  const landColour = new THREE.Color();
   let maxElevation = 0;
   for (let row = 0; row < HEIGHT; row++) {
     for (let col = 0; col < WIDTH; col++) {
@@ -276,6 +292,16 @@ function buildTerrain() {
       } else {
         const heightMix = Math.min(1, (elevation - 140) / 700);
         colour.copy(earth).lerp(rock, Math.min(1, slope * 1.4 + heightMix * .92));
+      }
+      // El uso del suelo pone el tono y la hipsometría sigue poniendo la luz:
+      // mezclada, no sustituida, la ladera y la cumbre se siguen leyendo.
+      const cover = landCover[source];
+      if (cover) {
+        landColour.set(LAND_COLOURS[cover]);
+        // Por encima de la media montaña manda la hipsometría: CORINE clasifica
+        // como matorral hasta las cumbres y a esa altura el gris de roca es lo
+        // que sostiene la lectura del relieve.
+        colour.lerp(landColour, .72 * (1 - THREE.MathUtils.smoothstep(elevation, 700, 1300)));
       }
       // El overview municipal gana su contraste oscureciendo las laderas; a
       // 100 m la pendiente ya viene suavizada por el remuestreo, así que se
