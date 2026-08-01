@@ -1,0 +1,15 @@
+{
+  "bounds": [
+    557600,
+    4060000,
+    612000,
+    4125000
+  ],
+  "webResolutionMeters": 100,
+  "width": 544,
+  "height": 650,
+  "maxElevation": 1572.7208251953125,
+  "minElevation": 0.0,
+  "seaCells": 130182,
+  "assetBytes": 1414400
+}

@@ -45,6 +45,11 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
     roughness: 1,
     metalness: 0
   });
+  // Los estratos se dibujaron para zócalos de 90 m. En un bloque comarcal, un
+  // grosor fijo de 17 m produce cincuenta franjas que se leen como rayado, así
+  // que a partir de cierta profundidad la banda crece con el bloque. Con los
+  // 90 m de todos los chunks actuales el valor sigue siendo exactamente 17.
+  const stratumMeters = Math.max(17, depth / 5.3);
   if (config.visualStyle === "mediterranean-illustrated") {
     material.onBeforeCompile = (shader) => {
       shader.vertexShader = shader.vertexShader
@@ -55,7 +60,7 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
         .replace(
           "#include <color_fragment>",
           `#include <color_fragment>
-          float band = mod(floor((vBaseY + ${depth.toFixed(1)}) / 17.0), 3.0);
+          float band = mod(floor((vBaseY + ${depth.toFixed(1)}) / ${stratumMeters.toFixed(1)}), 3.0);
           vec3 stratumA = vec3(0.27, 0.20, 0.27);
           vec3 stratumB = vec3(0.39, 0.29, 0.36);
           vec3 stratumC = vec3(0.48, 0.35, 0.39);
