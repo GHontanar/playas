@@ -11,8 +11,6 @@ import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { toonMaterial } from "./styles/toonMaterial";
 
 const BOUNDS = { west: 557600, south: 4060000, east: 612000, north: 4125000 };
-const WIDTH = 544;
-const HEIGHT = 650;
 const SEA_LEVEL = .15;
 const CHUNK_DEPTH = 600;
 // Centro del recorte, para el Sol.
@@ -52,6 +50,33 @@ const DEPTH_STOPS: Array<[number, string]> = [
 ];
 const depthStopColours = DEPTH_STOPS.map(([, hex]) => new THREE.Color(hex));
 
+// Lugares rotulados. Vera sale del punto medio del litoral de su overview
+// municipal, `vera-coast`, no de una coordenada escrita a mano. El orden es la
+// prioridad al descartar solapes: primero los municipios que tienen maqueta.
+const ANCHORS: Array<[string, number, number]> = [
+  ["Mojácar", 602204, 4105475],
+  ["Carboneras", 598324, 4095110],
+  ["Garrucha", 604992, 4116428],
+  ["Vera", 605909, 4118751],
+  ["Cabo de Gata", 572181, 4064283],
+  ["Las Negras", 584042, 4081532],
+  ["Villaricos", 608822, 4122979],
+  ["San Miguel", 567987, 4071737]
+];
+
+// El interior solo interesa en la vista general. A partir de ahí el recorrido
+// baja la costa en tramos cortos y muy cerrados, uno por parada.
+const SECTORS: Array<{ name: string; anchors: string[] }> = [
+  { name: "De Villaricos a Garrucha", anchors: ["Villaricos", "Vera", "Garrucha"] },
+  { name: "Mojácar", anchors: ["Mojácar"] },
+  { name: "Carboneras", anchors: ["Carboneras"] },
+  { name: "Níjar · Las Negras", anchors: ["Las Negras"] },
+  { name: "Cabo de Gata", anchors: ["Cabo de Gata", "San Miguel"] }
+];
+const STOPS = SECTORS.length + 1;
+// El mar queda al sureste del recorte en coordenadas de escena.
+const SEAWARD = new THREE.Vector3(1, 0, 1).normalize();
+
 const SIZE_X = BOUNDS.east - BOUNDS.west;
 const SIZE_Z = BOUNDS.north - BOUNDS.south;
 
@@ -61,20 +86,61 @@ const number = (key: string, fallback: number) => Number(params.get(key) ?? fall
 // niveles se lean como la misma maqueta vista desde el mismo sitio.
 const BEARING = number("bearing", 45);
 const PITCH = number("pitch", 32);
+// El overview municipal da a sus rótulos un tamaño de mundo fijo, en torno al
+// 8 % del largo del chunk, a altura constante sobre el mar y corridos hacia el
+// agua para que no trepen por el relieve. Aquí se conserva el mismo criterio a
+// la escala de este bloque: así se achican solos en la vista general y se leen
+// al entrar en un tramo, sin depender del zoom. Se fija la altura y no el
+// ancho, que lo marca la longitud del nombre: fijar el ancho dejaba «Vera» con
+// el doble de letra que «Villaricos».
+const LABEL_HEIGHT = number("labelHeight", 700);
+const LABEL_ALTITUDE = 400;
+const LABEL_SEAWARD = 1200;
 
 const app = document.querySelector<HTMLElement>("#app")!;
+// Mismo recurso que el recorrido municipal: un escenario alto con la escena
+// pegajosa dentro, para que el scroll de la página mueva la cámara.
 app.innerHTML = `
-  <main style="margin:0;height:100vh;display:flex;flex-direction:column;font:14px system-ui">
-    <div id="scene" style="flex:1;min-height:0"></div>
-    <div style="display:flex;gap:1.5rem;align-items:center;padding:.6rem 1rem;background:#17353a;color:#fff8e9">
+  <style>
+    /* Un gesto de scroll, un keyframe. \`scroll-snap-stop: always\` es lo que
+       impide que un impulso largo se salte paradas, igual que en /coast/. */
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    html, body { margin: 0; overscroll-behavior-y: none; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    .story-stop {
+      position: absolute;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      pointer-events: none;
+    }
+  </style>
+  <main style="margin:0;font:14px system-ui">
+    <section id="stage" style="position:relative;height:${STOPS * 100}vh">
+      <div id="scene" style="position:sticky;top:0;height:100vh;overflow:hidden"></div>
+      ${Array.from({ length: STOPS }, (_, index) =>
+        `<i class="story-stop" style="top:${index * 100}vh" aria-hidden="true"></i>`).join("")}
+    </section>
+    <div style="position:fixed;left:0;right:0;bottom:0;display:flex;gap:1.5rem;align-items:center;padding:.6rem 1rem;background:#17353a;color:#fff8e9">
       <label>Exageración <output id="exag-out"></output>
         <input id="exag" type="range" min="1" max="5" step="0.1"></label>
       <label><input id="wire" type="checkbox"> Malla</label>
       <span id="stats"></span>
+      <span id="viewpoint" style="margin-left:auto;opacity:.85"></span>
     </div>
   </main>`;
 
 const container = document.querySelector<HTMLElement>("#scene")!;
+// La rejilla la manda el asset, no una constante escrita a mano: así cambiar la
+// resolución del MDT no obliga a tocar el cliente.
+const demMetadata = await loadJson<{ width: number; height: number; webResolutionMeters: number }>(
+  "/metadata/levante-dem.json"
+);
+const WIDTH = demMetadata.width;
+const HEIGHT = demMetadata.height;
+const RESOLUTION = demMetadata.webResolutionMeters;
 const heights = await loadFloat32("/terrain/assets/levante-dem.f32");
 if (heights.length !== WIDTH * HEIGHT) throw new Error(`DEM ${heights.length} != ${WIDTH * HEIGHT}`);
 
@@ -117,19 +183,22 @@ scene.fog = new THREE.Fog(sky, distance * .86, distance + sceneSize * 1.35);
 const camera = new THREE.OrthographicCamera(-SIZE_X * .56, SIZE_X * .56, SIZE_Z * .56, -SIZE_Z * .56, 1, 600000);
 const bearing = BEARING * Math.PI / 180;
 const pitch = PITCH * Math.PI / 180;
-camera.position.set(
+// La orientación es constante: la cámara siempre se coloca a este vector del
+// objetivo, así que mover el objetivo desplaza el encuadre sin girar la maqueta.
+const cameraOffset = new THREE.Vector3(
   Math.sin(bearing) * Math.cos(pitch) * distance,
   Math.sin(pitch) * distance,
   Math.cos(bearing) * Math.cos(pitch) * distance
 );
 // Un rectángulo que contenga Villaricos y el cabo arrastra por fuerza una
 // esquina de mar abierto al sureste y otra de sierra sin costa al noroeste.
-// Encuadrar sobre el centro de la costa, y no sobre el centro del bloque,
-// recupera para el litoral el espacio que el centro geométrico regala al agua.
-const focus = coastCentre();
-camera.position.add(focus);
+// Encuadrar sobre el litoral, y no sobre el centro del bloque, recupera para la
+// costa el espacio que el centro geométrico regala al agua. El punto medio de
+// los lugares reparte mejor los extremos que el centroide de la orilla, al que
+// arrastra el cabo por tener un litoral mucho más sinuoso.
+const focus = sectorTarget(ANCHORS.map(([name]) => name));
+camera.position.copy(cameraOffset).add(focus);
 camera.lookAt(focus);
-camera.zoom = number("zoom", 1.02);
 camera.updateMatrixWorld();
 const cameraRight = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
 const cameraUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
@@ -161,20 +230,107 @@ if (params.get("base") !== "0") world.add(base.group);
 const water = buildSea();
 if (params.get("sea") !== "0") world.add(water);
 
-// Anclas reales para comprobar orientación y encuadre sin adivinar.
-const ANCHORS: Array<[string, number, number]> = [
-  ["Villaricos", 608822, 4122979],
-  ["Garrucha", 604992, 4116428],
-  ["Mojácar", 602204, 4105475],
-  ["Carboneras", 598324, 4095110],
-  ["Las Negras", 584042, 4081532],
-  ["Cabo de Gata", 572181, 4064283],
-  ["San Miguel", 567987, 4071737]
+const labels = ANCHORS.map(([name, x, y]) => anchorLabel(name, x, y));
+for (const label of labels) world.add(label);
+
+// Los rótulos son sprites en unidades de mundo: sin corregir, al acercarse a un
+// sector taparían media comarca. Se redimensionan con el zoom para ocupar
+// siempre lo mismo en pantalla.
+const projected = new THREE.Vector3();
+function placeLabels() {
+  const worldWidth = (camera.right - camera.left) / camera.zoom;
+  const worldHeight = (camera.top - camera.bottom) / camera.zoom;
+  const ndcHeight = 2 * LABEL_HEIGHT / worldHeight;
+  world.updateMatrixWorld();
+  // En el Levante los pueblos están a dos y tres kilómetros y al alejarse las
+  // cajas se pisan. Se descartan por solape real, y gana el primero de la lista.
+  const shown: Array<[number, number, number]> = [];
+  for (const label of labels) {
+    projected.copy(label.position).applyMatrix4(world.matrixWorld).project(camera);
+    const ndcWidth = 2 * LABEL_HEIGHT * (label.userData.aspect as number) / worldWidth;
+    const clash = shown.some(([x, y, width]) =>
+      Math.abs(x - projected.x) < (width + ndcWidth) / 2 &&
+      Math.abs(y - projected.y) < ndcHeight);
+    label.visible = !clash && Math.abs(projected.x) < 1.1 && Math.abs(projected.y) < 1.1;
+    if (label.visible) shown.push([projected.x, projected.y, ndcWidth]);
+  }
+}
+const viewpoints = [
+    // El interior solo cuenta aquí, así que la general encaja el bloque entero.
+  { name: "Vista general", target: focus.clone(), zoom: number("zoom", 1) },
+  ...SECTORS.map((sector) => ({
+    name: sector.name,
+    // Los sectores de los extremos caen sobre las esquinas del recorte, así que
+    // se sesgan un poco hacia el centro; y todos se corren hacia el mar, que es
+    // lo que cambia sierra por costa sin tener que girar la cámara.
+    target: sectorTarget(sector.anchors).lerp(focus, .08)
+      .addScaledVector(SEAWARD, number("seaward", 1500)),
+    zoom: number("sectorZoom", 4.6)
+  }))
 ];
-for (const [name, x, y] of ANCHORS) world.add(anchorLabel(name, x, y));
+
+const stage = document.querySelector<HTMLElement>("#stage")!;
+const viewpointLabel = document.querySelector<HTMLElement>("#viewpoint")!;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function setCamera(target: THREE.Vector3, zoom: number) {
+  camera.position.copy(cameraOffset).add(target);
+  camera.lookAt(target);
+  camera.zoom = zoom;
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld();
+  placeLabels();
+}
+
+function applyProgress(progress: number) {
+  const position = progress * (viewpoints.length - 1);
+  const from = Math.min(viewpoints.length - 1, Math.floor(position));
+  const to = Math.min(viewpoints.length - 1, from + 1);
+  const t = easeInOut(position - from);
+  setCamera(
+    viewpoints[from].target.clone().lerp(viewpoints[to].target, t),
+    THREE.MathUtils.lerp(viewpoints[from].zoom, viewpoints[to].zoom, t)
+  );
+  viewpointLabel.textContent = viewpoints[t < .5 ? from : to].name;
+}
+
+// El scroll elige un keyframe; no rasca valores intermedios arbitrarios.
+const scrollProgress = () => {
+  const travel = Math.max(1, stage.offsetHeight - window.innerHeight);
+  return THREE.MathUtils.clamp((window.scrollY - stage.offsetTop) / travel, 0, 1);
+};
+const keyedProgress = () => Math.round(scrollProgress() * (viewpoints.length - 1)) / (viewpoints.length - 1);
+// `?progress=0..1` fija un keyframe sin scroll, para inspeccionarlos uno a uno.
+const forcedProgress = params.has("progress")
+  ? THREE.MathUtils.clamp(number("progress", 0), 0, 1)
+  : null;
+let currentProgress = forcedProgress ?? keyedProgress();
+let targetProgress = currentProgress;
+let storyFrame = 0;
+const animateStory = () => {
+  const difference = targetProgress - currentProgress;
+  currentProgress = Math.abs(difference) < .0001
+    ? targetProgress
+    : currentProgress + difference * .16;
+  applyProgress(currentProgress);
+  if (currentProgress !== targetProgress) storyFrame = requestAnimationFrame(animateStory);
+};
+const requestStoryUpdate = () => {
+  if (forcedProgress !== null) return;
+  targetProgress = keyedProgress();
+  cancelAnimationFrame(storyFrame);
+  if (reducedMotion) {
+    currentProgress = targetProgress;
+    applyProgress(currentProgress);
+  } else {
+    storyFrame = requestAnimationFrame(animateStory);
+  }
+};
+window.addEventListener("scroll", requestStoryUpdate, { passive: true });
+applyProgress(currentProgress);
 
 document.querySelector<HTMLElement>("#stats")!.textContent =
-  `${WIDTH}×${HEIGHT} = ${(WIDTH * HEIGHT / 1000).toFixed(0)}k vértices · ${(heights.byteLength / 1e6).toFixed(2)} MB · cota máx ${maxElevation.toFixed(0)} m · 100 m/celda · rumbo ${BEARING}°`;
+  `${WIDTH}×${HEIGHT} = ${(WIDTH * HEIGHT / 1000).toFixed(0)}k vértices · ${(heights.byteLength / 1e6).toFixed(2)} MB · cota máx ${maxElevation.toFixed(0)} m · ${RESOLUTION} m/celda · rumbo ${BEARING}°`;
 
 const exagInput = document.querySelector<HTMLInputElement>("#exag")!;
 exagInput.value = String(exaggeration);
@@ -209,13 +365,18 @@ function resize() {
       }
     }
   }
-  const viewHeight = Math.max(halfHeight * 2, halfWidth * 2 / Math.max(.1, aspect)) * 1.08 / camera.zoom;
+  // El frustum encaja el bloque justo a zoom 1, sin margen: el aire alrededor
+  // lo daba un 8 % que solo servía para alejar la maqueta. El acercamiento lo
+  // hace `camera.zoom`, que la cámara ortográfica ya aplica al proyectar.
+  const viewHeight = Math.max(halfHeight * 2, halfWidth * 2 / Math.max(.1, aspect));
   camera.left = -viewHeight * aspect / 2;
   camera.right = viewHeight * aspect / 2;
   camera.top = viewHeight / 2;
   camera.bottom = -viewHeight / 2;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
+  // El descarte de rótulos depende del frustum, que aquí acaba de cambiar.
+  placeLabels();
 }
 // Cielo, luces y exposición gobernados por la altura real del Sol, con la misma
 // gradación que `createScene`: es lo que da a los overviews su hora del día.
@@ -244,7 +405,10 @@ function applySolarAppearance() {
 }
 applySolarAppearance();
 
-window.addEventListener("resize", resize);
+window.addEventListener("resize", () => {
+  resize();
+  requestStoryUpdate();
+});
 resize();
 renderer.setAnimationLoop(() => renderer.render(scene, camera));
 
@@ -407,53 +571,56 @@ function bandMidpoints(bands: Record<string, string>): number[] {
   return midpoints;
 }
 
-function coastCentre(): THREE.Vector3 {
-  let sumX = 0;
-  let sumZ = 0;
-  let count = 0;
-  for (let index = 0; index < shoreDistance.length; index++) {
-    if (shoreDistance[index] !== 1) continue;
-    sumX += index % WIDTH;
-    sumZ += Math.floor(index / WIDTH);
-    count++;
+function easeInOut(value: number): number {
+  const clamped = THREE.MathUtils.clamp(value, 0, 1);
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
+function sectorTarget(names: string[]): THREE.Vector3 {
+  const centreX = (BOUNDS.west + BOUNDS.east) / 2;
+  const centreY = (BOUNDS.south + BOUNDS.north) / 2;
+  const target = new THREE.Vector3();
+  for (const name of names) {
+    const anchor = ANCHORS.find(([anchorName]) => anchorName === name);
+    if (!anchor) throw new Error(`Sector sin ancla: ${name}`);
+    // El mundo invierte Z, así que el objetivo va en coordenadas de escena.
+    target.add(new THREE.Vector3(anchor[1] - centreX, 0, centreY - anchor[2]));
   }
-  if (!count) return new THREE.Vector3();
-  // El world invierte Z, así que el objetivo va en coordenadas de escena.
-  return new THREE.Vector3(
-    (sumX / count) / (WIDTH - 1) * SIZE_X - SIZE_X / 2,
-    0,
-    (sumZ / count) / (HEIGHT - 1) * SIZE_Z - SIZE_Z / 2
-  );
+  return target.multiplyScalar(1 / names.length);
 }
 
 function anchorLabel(name: string, utmX: number, utmY: number): THREE.Sprite {
+  // El lienzo se ajusta al texto en vez de ser fijo: con un tamaño fijo el
+  // rótulo era casi todo relleno y la letra se quedaba en unos pocos píxeles.
+  const font = "600 96px system-ui, sans-serif";
+  const measure = document.createElement("canvas").getContext("2d")!;
+  measure.font = font;
   const canvas = document.createElement("canvas");
-  canvas.width = 768;
-  canvas.height = 160;
+  canvas.width = Math.ceil(measure.measureText(name).width) + 96;
+  canvas.height = 176;
   const context = canvas.getContext("2d")!;
-  context.fillStyle = "rgba(23, 53, 58, .88)";
+  context.fillStyle = "rgba(23, 53, 58, .9)";
   context.beginPath();
-  context.roundRect(8, 8, 752, 144, 36);
+  context.roundRect(0, 0, canvas.width, canvas.height, 40);
   context.fill();
-  context.font = "600 54px system-ui, sans-serif";
+  context.font = font;
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillStyle = "#fff8e9";
-  context.fillText(name, 384, 82);
+  context.fillText(name, canvas.width / 2, canvas.height / 2 + 4);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.minFilter = THREE.LinearFilter;
+  texture.anisotropy = 4;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }));
-  const col = Math.round((utmX - BOUNDS.west) / 100);
-  const row = Math.round((BOUNDS.north - utmY) / 100);
-  const elevation = heights[row * WIDTH + col] ?? 0;
+  const aspect = canvas.width / canvas.height;
+  sprite.userData.aspect = aspect;
   sprite.position.set(
-    utmX - (BOUNDS.west + BOUNDS.east) / 2,
-    elevation * exaggeration + 900,
-    utmY - (BOUNDS.south + BOUNDS.north) / 2
+    utmX - (BOUNDS.west + BOUNDS.east) / 2 + SEAWARD.x * LABEL_SEAWARD,
+    SEA_LEVEL + LABEL_ALTITUDE,
+    utmY - (BOUNDS.south + BOUNDS.north) / 2 - SEAWARD.z * LABEL_SEAWARD
   );
-  const width = SIZE_Z * .075;
-  sprite.scale.set(width, width * 160 / 768, 1);
+  sprite.scale.set(LABEL_HEIGHT * aspect, LABEL_HEIGHT, 1);
   sprite.center.set(.5, 0);
   sprite.renderOrder = 10;
   return sprite;

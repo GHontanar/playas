@@ -7,6 +7,7 @@ cliente. Solo se rellenan las celdas de mar; en tierra el byte es 0 y la rejilla
 comprime bien.
 """
 import json
+import pathlib
 from collections import deque
 
 import fiona
@@ -16,8 +17,10 @@ from rasterio.transform import from_origin
 from shapely.geometry import box, mapping, shape
 
 WEST, SOUTH, EAST, NORTH = 557600, 4060000, 612000, 4125000
-RESOLUTION = 100
-WIDTH, HEIGHT = 544, 650
+# La rejilla la manda el MDT ya generado, para que no puedan desalinearse.
+_DEM = json.loads(pathlib.Path("public/metadata/levante-dem.json").read_text())
+RESOLUTION = _DEM["webResolutionMeters"]
+WIDTH, HEIGHT = _DEM["width"], _DEM["height"]
 RELIEVE = "data/source/1_Relieve.gpkg"
 MARINO = "data/source/dera-medio-marino/5_Medio_Marino.gpkg"
 

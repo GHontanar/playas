@@ -14,6 +14,7 @@ del Campo de Níjar quedan dentro de "Terrenos regados permanentemente" y no
 pueden rotularse como invernaderos con esta fuente.
 """
 import json
+import pathlib
 from collections import deque
 
 import fiona
@@ -23,8 +24,10 @@ from rasterio.transform import from_origin
 from shapely.geometry import box, mapping, shape
 
 WEST, SOUTH, EAST, NORTH = 557600, 4060000, 612000, 4125000
-RESOLUTION = 100
-WIDTH, HEIGHT = 544, 650
+# La rejilla la manda el MDT ya generado, para que no puedan desalinearse.
+_DEM = json.loads(pathlib.Path("public/metadata/levante-dem.json").read_text())
+RESOLUTION = _DEM["webResolutionMeters"]
+WIDTH, HEIGHT = _DEM["width"], _DEM["height"]
 USOS = "data/source/dera-usos-suelo/6_UsosdelSuelo.gpkg"
 HIDRO = "data/source/dera-hidrografia/3_Hidrografia.gpkg"
 # La red completa son 2.164 km sobre 3.536 km2: a 100 m sería una telaraña que
@@ -149,7 +152,7 @@ def main() -> None:
     for group, (name, _) in GROUPS.items():
         cells = int((grid == group).sum())
         if cells:
-            print(f"  {group} {name:28s} {cells:6d} celdas · {cells / 100:6.1f} km2")
+            print(f"  {group} {name:28s} {cells:6d} celdas · {cells * RESOLUTION ** 2 / 1e6:6.1f} km2")
     if unmapped:
         print("códigos sin grupo:", {k: round(v, 1) for k, v in unmapped.items()})
 

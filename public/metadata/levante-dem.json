@@ -5,11 +5,13 @@
     612000,
     4125000
   ],
-  "webResolutionMeters": 100,
-  "width": 544,
-  "height": 650,
-  "maxElevation": 1572.7208251953125,
+  "webResolutionMeters": 50,
+  "width": 1088,
+  "height": 1300,
+  "maxElevation": 1577.4046630859375,
   "minElevation": 0.0,
-  "seaCells": 130182,
-  "assetBytes": 1414400
+  "seaCells": 521225,
+  "isletCellsDropped": 1488,
+  "isletMaxMetres": 1.5,
+  "assetBytes": 5657600
 }
