@@ -8,6 +8,8 @@ import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecast/openMeteo";
+import { loadingMessage } from "./loading/loadingMessage";
+import { inkOn } from "./styles/ink";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 const municipality = getMunicipality(new URLSearchParams(window.location.search).get("municipality"));
@@ -17,7 +19,8 @@ app.innerHTML = `
   <main class="coast-story">
     <section id="story-stage" class="story-stage" aria-label="Recorrido topográfico por las playas de ${municipality.name}">
       <div id="overview-scene" class="overview-scene">
-        <div id="loading" class="loading">Preparando la costa completa…</div>
+        <h1 class="scene-title">${municipality.name}<small>Levante de Almería</small></h1>
+        <div id="loading" class="loading">${loadingMessage()}</div>
         <div id="overview-error" class="scene-error" hidden></div>
       </div>
       <i id="viewpoint-general" class="story-stop story-stop--general" aria-hidden="true"></i>
@@ -77,6 +80,7 @@ async function initialise() {
   controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
   const skyColour = container.style.backgroundColor;
   document.documentElement.style.setProperty("--coast-sky", skyColour);
+  document.documentElement.style.setProperty("--scene-ink", inkOn(new THREE.Color(skyColour)));
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
   controller.setSeaSun(solar.vector, solar.aboveHorizon);
   document.querySelector("#loading")?.remove();

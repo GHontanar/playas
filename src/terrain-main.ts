@@ -14,6 +14,7 @@ import type { WaterMode } from "./map/sea";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 import type { ObservedBeachStatus } from "./status/types";
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight, seaStateLabel, windName, type BeachForecastPoint } from "./forecast/openMeteo";
+import { loadingMessage } from "./loading/loadingMessage";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const municipality = getMunicipality(config.municipalityId);
@@ -42,7 +43,7 @@ app.innerHTML = `
       </label>
     </header>
     <section class="scene-shell" aria-label="Maqueta topográfica tridimensional de ${config.name}">
-      <div id="scene" class="scene"><div id="loading" class="loading">Preparando el relieve…</div></div>
+      <div id="scene" class="scene"><div id="loading" class="loading">${loadingMessage()}</div></div>
       <div id="scene-error" class="scene-error" hidden></div>
       <div id="wind-glyph" class="wind-glyph" hidden aria-hidden="true"></div>
       <aside class="forecast-card" aria-live="polite">

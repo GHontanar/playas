@@ -9,6 +9,8 @@ import { SUN_LIGHT_RADIUS, createSunLight, updateSunLight } from "./map/shadows"
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { refreshStatusAfterHourChange } from "./status/loadStatus";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
+import { loadingMessage } from "./loading/loadingMessage";
+import { inkOn } from "./styles/ink";
 import { toonMaterial } from "./styles/toonMaterial";
 
 const BOUNDS = { west: 557600, south: 4060000, east: 612000, north: 4125000 };
@@ -54,11 +56,14 @@ const depthStopColours = DEPTH_STOPS.map(([, hex]) => new THREE.Color(hex));
 // Lugares rotulados. Vera sale del punto medio del litoral de su overview
 // municipal, `vera-coast`, no de una coordenada escrita a mano. El orden es la
 // prioridad al descartar solapes: primero los municipios que tienen maqueta.
-const ANCHORS: Array<[string, number, number]> = [
-  ["Mojácar", 602204, 4105475],
-  ["Carboneras", 598324, 4095110],
-  ["Garrucha", 604992, 4116428],
-  ["Vera", 605909, 4118751],
+// El cuarto valor es el municipio con vista de costa, cuando lo hay: Villaricos
+// es Cuevas del Almanzora y los tres del cabo son Níjar y Almería, que todavía
+// no tienen catálogo, así que se rotulan pero no enlazan.
+const ANCHORS: Array<[string, number, number, string?]> = [
+  ["Mojácar", 602204, 4105475, "mojacar"],
+  ["Carboneras", 598324, 4095110, "carboneras"],
+  ["Garrucha", 604992, 4116428, "garrucha"],
+  ["Vera", 605909, 4118751, "vera"],
   ["Cabo de Gata", 572181, 4064283],
   ["Las Negras", 584042, 4081532],
   ["Villaricos", 608822, 4122979],
@@ -117,10 +122,46 @@ app.innerHTML = `
       scroll-snap-stop: always;
       pointer-events: none;
     }
+    /* Mismo rótulo que /coast/: la serif de los títulos de ficha sobre el cielo
+       vacío, con el mono de la interfaz debajo. «Almería» a secas prometería la
+       provincia entera, que no es lo que hay en el recorte. */
+    .scene-title {
+      position: absolute;
+      z-index: 5;
+      top: clamp(16px, 4vh, 44px);
+      left: clamp(16px, 4vw, 50px);
+      margin: 0;
+      color: var(--scene-ink, #173a3d);
+      font: 500 clamp(30px, 5.2vw, 60px)/.95 Georgia, serif;
+      letter-spacing: -.03em;
+      pointer-events: none;
+      transition: color .4s ease;
+    }
+    .scene-title small {
+      display: block;
+      margin-top: .7em;
+      font: 400 clamp(10px, 1.4vw, 13px)/1.3 "IBM Plex Mono", ui-monospace, monospace;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .62;
+    }
+    #loading {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 4;
+      font: 400 14px "IBM Plex Mono", ui-monospace, monospace;
+      letter-spacing: .06em;
+      color: var(--scene-ink, #173a3d);
+    }
   </style>
   <main style="margin:0;font:14px system-ui">
     <section id="stage" style="position:relative;height:${STOPS * 100}vh">
-      <div id="scene" style="position:sticky;top:0;height:100vh;overflow:hidden"></div>
+      <div id="scene" style="position:sticky;top:0;height:100vh;overflow:hidden">
+        <h1 class="scene-title">Almería<small>Levante y Cabo de Gata</small></h1>
+        <div id="loading">${loadingMessage()}</div>
+      </div>
       ${Array.from({ length: STOPS }, (_, index) =>
         `<i class="story-stop" style="top:${index * 100}vh" aria-hidden="true"></i>`).join("")}
     </section>
@@ -174,7 +215,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.08;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-container.append(renderer.domElement);
+container.prepend(renderer.domElement);
 
 const sky = new THREE.Color("#f1e5db");
 const scene = new THREE.Scene();
@@ -235,8 +276,39 @@ if (params.get("base") !== "0") world.add(base.group);
 const water = buildSea();
 if (params.get("sea") !== "0") world.add(water);
 
-const labels = ANCHORS.map(([name, x, y]) => anchorLabel(name, x, y));
+const labels = ANCHORS.map(([name, x, y, municipality]) => anchorLabel(name, x, y, municipality));
 for (const label of labels) world.add(label);
+
+// Los cuatro municipios con vista de costa se abren desde su rótulo. Los demás
+// se rotulan pero no llevan a ninguna parte: el nivel comarcal debe enseñar la
+// cobertura que hay, no insinuar la que falta.
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const linked = labels.filter((label) => label.userData.municipality);
+function pickMunicipality(event: MouseEvent): string | undefined {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.set(
+    (event.clientX - rect.left) / rect.width * 2 - 1,
+    -(event.clientY - rect.top) / rect.height * 2 + 1
+  );
+  raycaster.setFromCamera(pointer, camera);
+  const visible = linked.filter((label) => label.visible);
+  return raycaster.intersectObjects(visible, false)[0]?.object.userData.municipality as string | undefined;
+}
+renderer.domElement.addEventListener("pointermove", (event) => {
+  if (event.pointerType !== "mouse") return;
+  renderer.domElement.style.cursor = pickMunicipality(event) ? "pointer" : "";
+});
+let pointerDown: { x: number; y: number } | null = null;
+renderer.domElement.addEventListener("pointerdown", (event) => {
+  pointerDown = { x: event.clientX, y: event.clientY };
+});
+renderer.domElement.addEventListener("click", (event) => {
+  // Un arrastre para desplazar la página no debe abrir un municipio.
+  if (pointerDown && Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y) > 8) return;
+  const municipality = pickMunicipality(event);
+  if (municipality) window.location.assign(`/coast/?municipality=${encodeURIComponent(municipality)}`);
+});
 
 // Los rótulos son sprites en unidades de mundo: sin corregir, al acercarse a un
 // sector taparían media comarca. Se redimensionan con el zoom para ocupar
@@ -415,6 +487,7 @@ function applySolarAppearance(dateISO: string, minutes: number) {
   container.style.backgroundColor = skyColour;
   document.body.style.backgroundColor = skyColour;
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
+  document.documentElement.style.setProperty("--scene-ink", inkOn(background));
   document.querySelector<HTMLElement>("#sun")!.textContent = solar.aboveHorizon
     ? `Sol a ${solar.altitudeDegrees.toFixed(0)}°`
     : "Sol bajo el horizonte";
@@ -479,6 +552,7 @@ function draw() {
   renderer.render(scene, camera);
 }
 draw();
+document.querySelector("#loading")?.remove();
 
 function buildTerrain() {
   const geometry = new THREE.PlaneGeometry(SIZE_X, SIZE_Z, WIDTH - 1, HEIGHT - 1);
@@ -657,17 +731,20 @@ function sectorTarget(names: string[]): THREE.Vector3 {
   return target.multiplyScalar(1 / names.length);
 }
 
-function anchorLabel(name: string, utmX: number, utmY: number): THREE.Sprite {
+function anchorLabel(name: string, utmX: number, utmY: number, municipality?: string): THREE.Sprite {
   // El lienzo se ajusta al texto en vez de ser fijo: con un tamaño fijo el
   // rótulo era casi todo relleno y la letra se quedaba en unos pocos píxeles.
   const font = "600 96px system-ui, sans-serif";
+  // El chevron distingue de un vistazo los municipios que llevan a su vista de
+  // costa de los que solo están rotulados, sin necesidad de leyenda.
+  const caption = municipality ? `${name} ›` : name;
   const measure = document.createElement("canvas").getContext("2d")!;
   measure.font = font;
   const canvas = document.createElement("canvas");
-  canvas.width = Math.ceil(measure.measureText(name).width) + 96;
+  canvas.width = Math.ceil(measure.measureText(caption).width) + 96;
   canvas.height = 176;
   const context = canvas.getContext("2d")!;
-  context.fillStyle = "rgba(23, 53, 58, .9)";
+  context.fillStyle = municipality ? "rgba(20, 63, 62, .92)" : "rgba(23, 53, 58, .78)";
   context.beginPath();
   context.roundRect(0, 0, canvas.width, canvas.height, 40);
   context.fill();
@@ -675,7 +752,7 @@ function anchorLabel(name: string, utmX: number, utmY: number): THREE.Sprite {
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillStyle = "#fff8e9";
-  context.fillText(name, canvas.width / 2, canvas.height / 2 + 4);
+  context.fillText(caption, canvas.width / 2, canvas.height / 2 + 4);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.minFilter = THREE.LinearFilter;
@@ -691,6 +768,7 @@ function anchorLabel(name: string, utmX: number, utmY: number): THREE.Sprite {
   sprite.scale.set(LABEL_HEIGHT * aspect, LABEL_HEIGHT, 1);
   sprite.center.set(.5, 0);
   sprite.renderOrder = 10;
+  sprite.userData.municipality = municipality;
   return sprite;
 }
 

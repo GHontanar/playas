@@ -23,6 +23,29 @@ body::before {
   background: var(--coast-sky);
 }
 .overview-scene canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
+/* Rótulo sobre el cielo vacío. Misma serif que los títulos de las fichas, con
+   el mono de la interfaz como línea secundaria; la tinta la fija el script
+   según la luz de la hora, porque el cielo va del beige al azul de noche. */
+.scene-title {
+  position: absolute;
+  z-index: 5;
+  top: clamp(16px, 4vh, 44px);
+  left: clamp(16px, 4vw, 50px);
+  margin: 0;
+  color: var(--scene-ink, #173a3d);
+  font: 500 clamp(30px, 5.2vw, 60px)/.95 Georgia, serif;
+  letter-spacing: -.03em;
+  pointer-events: none;
+  transition: color .4s ease;
+}
+.scene-title small {
+  display: block;
+  margin-top: .7em;
+  font: 400 clamp(10px, 1.4vw, 13px)/1.3 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  opacity: .62;
+}
 .scene-error { z-index: 20; }
 .story-stop {
   position: absolute;
