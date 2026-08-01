@@ -7,6 +7,7 @@ import { loadFloat32, loadJson, loadTexture } from "./map/assets";
 import { createChunkBase } from "./map/chunkBase";
 import { SUN_LIGHT_RADIUS, createSunLight, updateSunLight } from "./map/shadows";
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
+import { refreshStatusAfterHourChange } from "./status/loadStatus";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { toonMaterial } from "./styles/toonMaterial";
 
@@ -123,11 +124,16 @@ app.innerHTML = `
       ${Array.from({ length: STOPS }, (_, index) =>
         `<i class="story-stop" style="top:${index * 100}vh" aria-hidden="true"></i>`).join("")}
     </section>
-    <div style="position:fixed;left:0;right:0;bottom:0;display:flex;gap:1.5rem;align-items:center;padding:.6rem 1rem;background:#17353a;color:#fff8e9">
+    <div style="position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;align-items:center;padding:.5rem 1rem;background:#17353a;color:#fff8e9;font-size:12px">
+      <label>Fecha <input id="date" type="date" style="font:inherit"></label>
+      <label>Hora <output id="clock"></output>
+        <input id="time" type="range" min="0" max="1425" step="15"></label>
+      <button id="now" type="button" style="font:inherit">Ahora</button>
+      <span id="sun"></span>
       <label>Exageración <output id="exag-out"></output>
         <input id="exag" type="range" min="1" max="5" step="0.1"></label>
       <label><input id="wire" type="checkbox"> Malla</label>
-      <span id="stats"></span>
+      <span id="stats" style="opacity:.75"></span>
       <span id="viewpoint" style="margin-left:auto;opacity:.85"></span>
     </div>
   </main>`;
@@ -190,13 +196,12 @@ const cameraOffset = new THREE.Vector3(
   Math.sin(pitch) * distance,
   Math.cos(bearing) * Math.cos(pitch) * distance
 );
-// Un rectángulo que contenga Villaricos y el cabo arrastra por fuerza una
-// esquina de mar abierto al sureste y otra de sierra sin costa al noroeste.
-// Encuadrar sobre el litoral, y no sobre el centro del bloque, recupera para la
-// costa el espacio que el centro geométrico regala al agua. El punto medio de
-// los lugares reparte mejor los extremos que el centroide de la orilla, al que
-// arrastra el cabo por tener un litoral mucho más sinuoso.
-const focus = sectorTarget(ANCHORS.map(([name]) => name));
+// La vista general se encuadra sobre el centro del bloque, no sobre el del
+// litoral: la maqueta se extiende tierra adentro hacia el noroeste, así que
+// centrarla en la costa la desplazaba hacia un lado. Al recortar el encuadre
+// las esquinas se pierden de todos modos, que era lo que antes justificaba
+// correrlo hacia el mar.
+const focus = new THREE.Vector3();
 camera.position.copy(cameraOffset).add(focus);
 camera.lookAt(focus);
 camera.updateMatrixWorld();
@@ -256,8 +261,10 @@ function placeLabels() {
   }
 }
 const viewpoints = [
-    // El interior solo cuenta aquí, así que la general encaja el bloque entero.
-  { name: "Vista general", target: focus.clone(), zoom: number("zoom", 1) },
+    // El interior solo cuenta aquí, pero encajar el bloque entero dejaba la
+  // maqueta pequeña y rodeada de fondo. Se acerca hasta un tercio del zoom de
+  // los tramos, aceptando que las esquinas del recorte se corten.
+  { name: "Vista general", target: focus.clone(), zoom: number("zoom", 1.5) },
   ...SECTORS.map((sector) => ({
     name: sector.name,
     // Los sectores de los extremos caen sobre las esquinas del recorte, así que
@@ -280,6 +287,7 @@ function setCamera(target: THREE.Vector3, zoom: number) {
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
   placeLabels();
+  draw();
 }
 
 function applyProgress(progress: number) {
@@ -347,6 +355,7 @@ exagInput.addEventListener("input", () => {
 });
 document.querySelector<HTMLInputElement>("#wire")!.addEventListener("change", (event) => {
   (mesh.material as THREE.MeshToonMaterial).wireframe = (event.target as HTMLInputElement).checked;
+  draw();
 });
 
 function resize() {
@@ -377,12 +386,12 @@ function resize() {
   renderer.setSize(width, height);
   // El descarte de rótulos depende del frustum, que aquí acaba de cambiar.
   placeLabels();
+  draw();
 }
 // Cielo, luces y exposición gobernados por la altura real del Sol, con la misma
 // gradación que `createScene`: es lo que da a los overviews su hora del día.
-function applySolarAppearance() {
-  const now = nowInMojacar();
-  const solar = getSolarPosition(now.dateISO, number("minutes", now.minutes), CENTRE.lat, CENTRE.lon);
+function applySolarAppearance(dateISO: string, minutes: number) {
+  const solar = getSolarPosition(dateISO, minutes, CENTRE.lat, CENTRE.lon);
   updateSunLight(sun, sunVectorForWorldAxes(solar.vector, "south-positive"), solar.aboveHorizon, true, sunRadius);
   const daylight = solar.aboveHorizon ? THREE.MathUtils.smoothstep(solar.altitudeDegrees, -2, 28) : 0;
   const horizonWarmth = solar.aboveHorizon ? 1 - THREE.MathUtils.smoothstep(solar.altitudeDegrees, 4, 24) : 0;
@@ -390,7 +399,6 @@ function applySolarAppearance() {
     .lerp(new THREE.Color("#d69578"), Math.max(horizonWarmth, daylight * .35))
     .lerp(new THREE.Color("#f1e5db"), daylight);
   scene.background = background;
-  container.style.backgroundColor = background.getStyle();
   if (scene.fog) scene.fog.color.copy(background);
   hemisphere.color.copy(new THREE.Color("#6f91a0").lerp(new THREE.Color("#fff2d8"), daylight));
   hemisphere.groundColor.copy(new THREE.Color("#302b42").lerp(new THREE.Color("#6b5a68"), daylight));
@@ -402,15 +410,75 @@ function applySolarAppearance() {
   sun.color.copy(new THREE.Color("#ff9b67").lerp(new THREE.Color("#fff5d8"), 1 - horizonWarmth));
   sun.intensity = solar.aboveHorizon ? 2.25 + daylight * .6 : 0;
   renderer.toneMappingExposure = .82 + daylight * .18;
+  // El cielo tiñe también el lienzo y la barra del navegador, como en /coast/.
+  const skyColour = background.getStyle();
+  container.style.backgroundColor = skyColour;
+  document.body.style.backgroundColor = skyColour;
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
+  document.querySelector<HTMLElement>("#sun")!.textContent = solar.aboveHorizon
+    ? `Sol a ${solar.altitudeDegrees.toFixed(0)}°`
+    : "Sol bajo el horizonte";
 }
-applySolarAppearance();
+
+const initial = nowInMojacar();
+const dateInput = document.querySelector<HTMLInputElement>("#date")!;
+const timeInput = document.querySelector<HTMLInputElement>("#time")!;
+const clock = document.querySelector<HTMLElement>("#clock")!;
+dateInput.value = initial.dateISO;
+timeInput.value = String(number("minutes", initial.minutes));
+let followingClock = !params.has("minutes");
+
+function updateSun() {
+  const minutes = Number(timeInput.value);
+  clock.textContent = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  applySolarAppearance(dateInput.value, minutes);
+  draw();
+}
+for (const input of [dateInput, timeInput]) {
+  input.addEventListener("input", () => {
+    followingClock = false;
+    followClock();
+    updateSun();
+  });
+}
+document.querySelector<HTMLButtonElement>("#now")!.addEventListener("click", () => {
+  const now = nowInMojacar();
+  dateInput.value = now.dateISO;
+  timeInput.value = String(now.minutes);
+  followingClock = true;
+  followClock();
+  updateSun();
+});
+// Mientras nadie toque los controles, la escena sigue al reloj real como hacen
+// las otras dos vistas, que revalidan en cada cambio de hora. Con una hora
+// fijada por URL no se programa: el temporizador se reencadena solo y bajo
+// tiempo virtual —el de las capturas automáticas— no deja avanzar la página.
+let stopClock: (() => void) | undefined;
+function followClock() {
+  stopClock?.();
+  stopClock = followingClock
+    ? refreshStatusAfterHourChange(() => {
+      const now = nowInMojacar();
+      dateInput.value = now.dateISO;
+      timeInput.value = String(now.minutes);
+      updateSun();
+    })
+    : undefined;
+}
+updateSun();
+followClock();
 
 window.addEventListener("resize", () => {
   resize();
   requestStoryUpdate();
 });
 resize();
-renderer.setAnimationLoop(() => renderer.render(scene, camera));
+// Nada se anima por sí solo en esta escena: se dibuja cuando algo cambia, no en
+// bucle a 60 fps. Además de ahorrar batería, es lo que permite capturarla.
+function draw() {
+  renderer.render(scene, camera);
+}
+draw();
 
 function buildTerrain() {
   const geometry = new THREE.PlaneGeometry(SIZE_X, SIZE_Z, WIDTH - 1, HEIGHT - 1);
