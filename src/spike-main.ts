@@ -5,7 +5,8 @@ import * as THREE from "three";
 import type { BeachConfig } from "./beaches/types";
 import { loadFloat32, loadJson, loadTexture } from "./map/assets";
 import { createChunkBase } from "./map/chunkBase";
-import { SUN_LIGHT_RADIUS, createSunLight, updateSunLight } from "./map/shadows";
+import { createStage } from "./map/createStage";
+import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { refreshStatusAfterHourChange } from "./status/loadStatus";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
@@ -208,26 +209,32 @@ waveNormals.wrapT = THREE.RepeatWrapping;
 // que solo aporte grano al agua, igual que la textura de los chunks.
 waveNormals.repeat.set(46, 55);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-container.prepend(renderer.domElement);
+const { mesh, maxElevation } = buildTerrain();
+let exaggeration = number("exag", 2.5);
 
-const sky = new THREE.Color("#f1e5db");
-const scene = new THREE.Scene();
-scene.background = sky;
-const world = new THREE.Group();
-world.scale.z = -1;
-scene.add(world);
-
+// El escenario —renderizador, cámara, luces, niebla, encuadre y la gradación de
+// cielo por altura solar— es el mismo de las otras dos vistas. Aquí solo cambian
+// cuatro cosas: sin aire alrededor del bloque, mapa de sombras mayor, el Sol más
+// lejos y un plano lejano que admita una cámara a 150 km.
 const distance = 150000;
-const sceneSize = Math.max(SIZE_X, SIZE_Z);
-scene.fog = new THREE.Fog(sky, distance * .86, distance + sceneSize * 1.35);
-const camera = new THREE.OrthographicCamera(-SIZE_X * .56, SIZE_X * .56, SIZE_Z * .56, -SIZE_Z * .56, 1, 600000);
+const stage = createStage(container, {
+  bounds: BOUNDS,
+  camera: { bearing: BEARING, pitch: PITCH, roll: 0, distance },
+  worldAxes: "south-positive",
+  visualStyle: "mediterranean-illustrated",
+  vertical: { maxElevation, depthMeters: CHUNK_DEPTH, exaggeration },
+  shadowSceneSize: Math.hypot(SIZE_X, SIZE_Z),
+  margin: 1,
+  shadowMapSize: 2048,
+  sunLightRadius: SUN_LIGHT_RADIUS * 14,
+  cameraFar: 600000
+});
+const { renderer, camera, world, light: sun } = stage;
+// Nada se anima por sí solo en esta escena, así que el escenario no arranca su
+// bucle: se dibuja cuando algo cambia. Además de ahorrar batería, es lo que
+// permite capturar la página con el navegador headless.
+const draw = stage.draw;
+const sunRadius = SUN_LIGHT_RADIUS * 14;
 const bearing = BEARING * Math.PI / 180;
 const pitch = PITCH * Math.PI / 180;
 // La orientación es constante: la cámara siempre se coloca a este vector del
@@ -239,27 +246,9 @@ const cameraOffset = new THREE.Vector3(
 );
 // La vista general se encuadra sobre el centro del bloque, no sobre el del
 // litoral: la maqueta se extiende tierra adentro hacia el noroeste, así que
-// centrarla en la costa la desplazaba hacia un lado. Al recortar el encuadre
-// las esquinas se pierden de todos modos, que era lo que antes justificaba
-// correrlo hacia el mar.
+// centrarla en la costa la desplazaba hacia un lado.
 const focus = new THREE.Vector3();
-camera.position.copy(cameraOffset).add(focus);
-camera.lookAt(focus);
-camera.updateMatrixWorld();
-const cameraRight = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-const cameraUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
 
-const hemisphere = new THREE.HemisphereLight("#fff1d5", "#62556d", 1.35);
-const ambient = new THREE.AmbientLight("#637987", 0);
-const fill = new THREE.DirectionalLight("#8ba6b8", 0);
-fill.position.set(26000, 42000, 26000);
-scene.add(hemisphere, ambient, fill);
-const sunRadius = SUN_LIGHT_RADIUS * 14;
-const sun = createSunLight(Math.hypot(SIZE_X, SIZE_Z), 2048, sunRadius);
-scene.add(sun, sun.target);
-
-const { mesh, maxElevation } = buildTerrain();
-let exaggeration = number("exag", 2.5);
 mesh.scale.y = exaggeration;
 world.add(mesh);
 
@@ -348,7 +337,7 @@ const viewpoints = [
   }))
 ];
 
-const stage = document.querySelector<HTMLElement>("#stage")!;
+const scroller = document.querySelector<HTMLElement>("#stage")!;
 const viewpointLabel = document.querySelector<HTMLElement>("#viewpoint")!;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -376,8 +365,8 @@ function applyProgress(progress: number) {
 
 // El scroll elige un keyframe; no rasca valores intermedios arbitrarios.
 const scrollProgress = () => {
-  const travel = Math.max(1, stage.offsetHeight - window.innerHeight);
-  return THREE.MathUtils.clamp((window.scrollY - stage.offsetTop) / travel, 0, 1);
+  const travel = Math.max(1, scroller.offsetHeight - window.innerHeight);
+  return THREE.MathUtils.clamp((window.scrollY - scroller.offsetTop) / travel, 0, 1);
 };
 const keyedProgress = () => Math.round(scrollProgress() * (viewpoints.length - 1)) / (viewpoints.length - 1);
 // `?progress=0..1` fija un keyframe sin scroll, para inspeccionarlos uno a uno.
@@ -422,6 +411,7 @@ exagInput.addEventListener("input", () => {
   exaggeration = Number(exagInput.value);
   mesh.scale.y = exaggeration;
   base.setExaggeration(exaggeration);
+  stage.setExaggeration(exaggeration);
   showExaggeration();
   resize();
 });
@@ -430,64 +420,19 @@ document.querySelector<HTMLInputElement>("#wire")!.addEventListener("change", (e
   draw();
 });
 
-function resize() {
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  const aspect = width / Math.max(1, height);
-  let halfWidth = 0;
-  let halfHeight = 0;
-  for (const x of [-SIZE_X / 2, SIZE_X / 2]) {
-    for (const y of [-CHUNK_DEPTH, maxElevation * exaggeration]) {
-      for (const z of [-SIZE_Z / 2, SIZE_Z / 2]) {
-        // Relativas al objetivo: la cámara ya no mira al centro del bloque.
-        const corner = new THREE.Vector3(x - focus.x, y, z - focus.z);
-        halfWidth = Math.max(halfWidth, Math.abs(corner.dot(cameraRight)));
-        halfHeight = Math.max(halfHeight, Math.abs(corner.dot(cameraUp)));
-      }
-    }
-  }
-  // El frustum encaja el bloque justo a zoom 1, sin margen: el aire alrededor
-  // lo daba un 8 % que solo servía para alejar la maqueta. El acercamiento lo
-  // hace `camera.zoom`, que la cámara ortográfica ya aplica al proyectar.
-  const viewHeight = Math.max(halfHeight * 2, halfWidth * 2 / Math.max(.1, aspect));
-  camera.left = -viewHeight * aspect / 2;
-  camera.right = viewHeight * aspect / 2;
-  camera.top = viewHeight / 2;
-  camera.bottom = -viewHeight / 2;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-  // El descarte de rótulos depende del frustum, que aquí acaba de cambiar.
-  placeLabels();
-  draw();
-}
-// Cielo, luces y exposición gobernados por la altura real del Sol, con la misma
-// gradación que `createScene`: es lo que da a los overviews su hora del día.
+
+// La gradación de cielo y luz por hora la pone el escenario, la misma que las
+// otras dos vistas. Aquí quedan solo los añadidos de este nivel: mover el Sol,
+// propagar el color del cielo al fondo de la página y elegir la tinta del
+// rótulo, que si no se vuelve ilegible de noche.
 function applySolarAppearance(dateISO: string, minutes: number) {
   const solar = getSolarPosition(dateISO, minutes, CENTRE.lat, CENTRE.lon);
   updateSunLight(sun, sunVectorForWorldAxes(solar.vector, "south-positive"), solar.aboveHorizon, true, sunRadius);
-  const daylight = solar.aboveHorizon ? THREE.MathUtils.smoothstep(solar.altitudeDegrees, -2, 28) : 0;
-  const horizonWarmth = solar.aboveHorizon ? 1 - THREE.MathUtils.smoothstep(solar.altitudeDegrees, 4, 24) : 0;
-  const background = new THREE.Color("#183440")
-    .lerp(new THREE.Color("#d69578"), Math.max(horizonWarmth, daylight * .35))
-    .lerp(new THREE.Color("#f1e5db"), daylight);
-  scene.background = background;
-  if (scene.fog) scene.fog.color.copy(background);
-  hemisphere.color.copy(new THREE.Color("#6f91a0").lerp(new THREE.Color("#fff2d8"), daylight));
-  hemisphere.groundColor.copy(new THREE.Color("#302b42").lerp(new THREE.Color("#6b5a68"), daylight));
-  hemisphere.intensity = .58 + daylight * .55;
-  ambient.color.copy(new THREE.Color("#526b7b").lerp(new THREE.Color("#ffe3c0"), daylight));
-  ambient.intensity = .32 + horizonWarmth * .42 + daylight * .12;
-  fill.color.copy(new THREE.Color("#66859b").lerp(new THREE.Color("#ffe0bc"), daylight));
-  fill.intensity = .55 + horizonWarmth * 1.25 + daylight * .1;
-  sun.color.copy(new THREE.Color("#ff9b67").lerp(new THREE.Color("#fff5d8"), 1 - horizonWarmth));
-  sun.intensity = solar.aboveHorizon ? 2.25 + daylight * .6 : 0;
-  renderer.toneMappingExposure = .82 + daylight * .18;
-  // El cielo tiñe también el lienzo y la barra del navegador, como en /coast/.
-  const skyColour = background.getStyle();
-  container.style.backgroundColor = skyColour;
+  stage.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
+  const skyColour = container.style.backgroundColor;
   document.body.style.backgroundColor = skyColour;
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
-  document.documentElement.style.setProperty("--scene-ink", inkOn(background));
+  document.documentElement.style.setProperty("--scene-ink", inkOn(new THREE.Color(skyColour)));
   document.querySelector<HTMLElement>("#sun")!.textContent = solar.aboveHorizon
     ? `Sol a ${solar.altitudeDegrees.toFixed(0)}°`
     : "Sol bajo el horizonte";
@@ -541,16 +486,18 @@ function followClock() {
 updateSun();
 followClock();
 
+function resize() {
+  stage.resize();
+  // El descarte de rótulos depende del frustum, que aquí acaba de cambiar.
+  placeLabels();
+  stage.draw();
+}
+
 window.addEventListener("resize", () => {
   resize();
   requestStoryUpdate();
 });
 resize();
-// Nada se anima por sí solo en esta escena: se dibuja cuando algo cambia, no en
-// bucle a 60 fps. Además de ahorrar batería, es lo que permite capturarla.
-function draw() {
-  renderer.render(scene, camera);
-}
 draw();
 document.querySelector("#loading")?.remove();
 
