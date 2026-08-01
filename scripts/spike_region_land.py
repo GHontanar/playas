@@ -6,6 +6,9 @@ clases; aquí se agrupan en ocho familias porque a 100 m la diferencia entre un
 olivar y un frutal no es legible y multiplicar colores rompería el parecido con
 el overview municipal.
 
+Sobre las clases de uso se queman los cauces de `T03_01_Rio`, que a esta escala
+aportan la trama de drenaje que el sombreado por sí solo no da.
+
 Nota de alcance: CORINE no distingue el cultivo bajo plástico. Los invernaderos
 del Campo de Níjar quedan dentro de "Terrenos regados permanentemente" y no
 pueden rotularse como invernaderos con esta fuente.
@@ -23,6 +26,11 @@ WEST, SOUTH, EAST, NORTH = 557600, 4060000, 612000, 4125000
 RESOLUTION = 100
 WIDTH, HEIGHT = 544, 650
 USOS = "data/source/dera-usos-suelo/6_UsosdelSuelo.gpkg"
+HIDRO = "data/source/dera-hidrografia/3_Hidrografia.gpkg"
+# La red completa son 2.164 km sobre 3.536 km2: a 100 m sería una telaraña que
+# taparía el uso del suelo. Con 5 km por curso quedan los 139 principales, algo
+# más de la mitad de la red, que es el esqueleto de drenaje reconocible.
+MIN_COURSE_KM = 5.0
 
 # CORINE nivel 3 agrupado. El orden importa: al rasterizar, las clases altas se
 # pintan encima, así que lo escaso y significativo va después de lo extenso.
@@ -36,6 +44,8 @@ GROUPS: dict[int, tuple[str, tuple[int, ...]]] = {
     7: ("Agua continental", (511, 512, 521, 522)),
     8: ("Urbano e industrial", (111, 112, 121, 122, 123, 124, 131, 132, 133, 141, 142)),
 }
+RIVER_GROUP = 9
+RIVER_NAME = "Cauce y rambla"
 GROUP_OF = {code: group for group, (_, codes) in GROUPS.items() for code in codes}
 
 
@@ -62,6 +72,38 @@ def sea_mask(heights: np.ndarray) -> np.ndarray:
             if 0 <= next_row < HEIGHT and 0 <= next_col < WIDTH:
                 push(next_row, next_col)
     return water
+
+
+def burn_rivers(transform) -> tuple[np.ndarray, int, float]:
+    """Cursos cuya longitud total dentro del recorte supera el umbral."""
+    clip = box(WEST, SOUTH, EAST, NORTH)
+    by_name: dict[str, list] = {}
+    with fiona.open(HIDRO, layer="T03_01_Rio") as collection:
+        for feature in collection.filter(bbox=(WEST, SOUTH, EAST, NORTH)):
+            geometry = shape(feature["geometry"]).intersection(clip)
+            if geometry.is_empty:
+                continue
+            name = feature["properties"].get("nombre") or f"anon-{feature['properties']['id_dera']}"
+            by_name.setdefault(name, []).append(geometry)
+    shapes = []
+    total_km = 0.0
+    kept = 0
+    for parts in by_name.values():
+        length_km = sum(part.length for part in parts) / 1000
+        if length_km < MIN_COURSE_KM:
+            continue
+        kept += 1
+        total_km += length_km
+        shapes.extend((mapping(part), 1) for part in parts)
+    grid = rasterize(
+        shapes,
+        out_shape=(HEIGHT, WIDTH),
+        transform=transform,
+        fill=0,
+        dtype="uint8",
+        all_touched=True,
+    )
+    return grid, kept, total_km
 
 
 def main() -> None:
@@ -92,8 +134,14 @@ def main() -> None:
         dtype="uint8",
         all_touched=False,
     )
+    # Las ramblas se queman encima: el lecho es una forma del terreno, no una
+    # cobertura vegetal, y a esta escala su valor es la línea, no la anchura.
+    rivers, kept, total_km = burn_rivers(transform)
+    grid[rivers > 0] = RIVER_GROUP
     grid[water] = 0
     grid.tofile("public/terrain/assets/levante-land.u8")
+    print(f"cauces >= {MIN_COURSE_KM:.0f} km: {kept} cursos, {total_km:.0f} km, "
+          f"{int((grid == RIVER_GROUP).sum())} celdas")
 
     land = int((~water).sum())
     covered = int((grid > 0).sum())
@@ -106,7 +154,10 @@ def main() -> None:
         print("códigos sin grupo:", {k: round(v, 1) for k, v in unmapped.items()})
 
     metadata = {
-        "source": ["Usos del suelo: DERA 6 Usos del Suelo, T06_01_UsoSuelo (IECA), CC BY 4.0"],
+        "source": [
+            "Usos del suelo: DERA 6 Usos del Suelo, T06_01_UsoSuelo (IECA), CC BY 4.0",
+            "Cauces: DERA 3 Hidrografía, T03_01_Rio (IECA), CC BY 4.0",
+        ],
         "nomenclature": "CORINE Land Cover nivel 3, agrupado",
         "scopeNote": (
             "CORINE no distingue el cultivo bajo plástico: los invernaderos quedan "
@@ -116,9 +167,12 @@ def main() -> None:
         "webResolutionMeters": RESOLUTION,
         "width": WIDTH,
         "height": HEIGHT,
-        "encoding": "uint8: 0 mar o sin dato, 1-8 grupo de uso",
-        "groups": {str(g): {"name": name, "corine": list(codes)} for g, (name, codes) in GROUPS.items()},
-        "cellsByGroup": {str(g): int((grid == g).sum()) for g in GROUPS},
+        "encoding": "uint8: 0 mar o sin dato, 1-8 grupo de uso, 9 cauce",
+        "groups": {
+            **{str(g): {"name": name, "corine": list(codes)} for g, (name, codes) in GROUPS.items()},
+            str(RIVER_GROUP): {"name": RIVER_NAME, "source": "T03_01_Rio", "minLengthKm": MIN_COURSE_KM},
+        },
+        "cellsByGroup": {str(g): int((grid == g).sum()) for g in list(GROUPS) + [RIVER_GROUP]},
         "assetBytes": int(grid.nbytes),
     }
     with open("public/metadata/levante-land.json", "w", encoding="utf-8") as stream:

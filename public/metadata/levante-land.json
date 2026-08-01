@@ -1,6 +1,7 @@
 {
   "source": [
-    "Usos del suelo: DERA 6 Usos del Suelo, T06_01_UsoSuelo (IECA), CC BY 4.0"
+    "Usos del suelo: DERA 6 Usos del Suelo, T06_01_UsoSuelo (IECA), CC BY 4.0",
+    "Cauces: DERA 3 Hidrografía, T03_01_Rio (IECA), CC BY 4.0"
   ],
   "nomenclature": "CORINE Land Cover nivel 3, agrupado",
   "scopeNote": "CORINE no distingue el cultivo bajo plástico: los invernaderos quedan dentro de «Terrenos regados permanentemente» y no se rotulan como tales.",
@@ -13,7 +14,7 @@
   "webResolutionMeters": 100,
   "width": 544,
   "height": 650,
-  "encoding": "uint8: 0 mar o sin dato, 1-8 grupo de uso",
+  "encoding": "uint8: 0 mar o sin dato, 1-8 grupo de uso, 9 cauce",
   "groups": {
     "1": {
       "name": "Suelo desnudo y roquedo",
@@ -95,17 +96,23 @@
         141,
         142
       ]
+    },
+    "9": {
+      "name": "Cauce y rambla",
+      "source": "T03_01_Rio",
+      "minLengthKm": 5.0
     }
   },
   "cellsByGroup": {
-    "1": 32482,
-    "2": 114740,
-    "3": 49514,
-    "4": 3907,
-    "5": 13795,
-    "6": 626,
+    "1": 29659,
+    "2": 108501,
+    "3": 45033,
+    "4": 3753,
+    "5": 13176,
+    "6": 582,
     "7": 24,
-    "8": 6156
+    "8": 5925,
+    "9": 14594
   },
   "assetBytes": 353600
 }

@@ -35,7 +35,8 @@ const LAND_COLOURS: Record<number, string> = {
   5: "#5f9448",  // regadío permanente
   6: "#d3c3c4",  // humedal y salinas
   7: "#3f8f96",  // agua continental
-  8: "#d98c74"   // urbano e industrial
+  8: "#d98c74",  // urbano e industrial
+  9: "#e8d8a6"   // cauce y rambla, lecho seco de arena
 };
 
 // Escalones sobre profundidad logarítmica: los primeros cien metros son los que
@@ -300,8 +301,13 @@ function buildTerrain() {
         landColour.set(LAND_COLOURS[cover]);
         // Por encima de la media montaña manda la hipsometría: CORINE clasifica
         // como matorral hasta las cumbres y a esa altura el gris de roca es lo
-        // que sostiene la lectura del relieve.
-        colour.lerp(landColour, .72 * (1 - THREE.MathUtils.smoothstep(elevation, 700, 1300)));
+        // que sostiene la lectura del relieve. El cauce se salva de esa regla:
+        // es una forma del terreno, no una cobertura, y en la sierra es justo
+        // donde el drenaje explica el relieve.
+        const coverMix = cover === 9
+          ? .8
+          : .72 * (1 - THREE.MathUtils.smoothstep(elevation, 700, 1300));
+        colour.lerp(landColour, coverMix);
       }
       // El overview municipal gana su contraste oscureciendo las laderas; a
       // 100 m la pendiente ya viene suavizada por el remuestreo, así que se
