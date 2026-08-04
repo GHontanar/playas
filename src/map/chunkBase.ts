@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { BeachConfig } from "../beaches/types";
+import type { StageBounds } from "./createStage";
 
 interface EdgePoint {
   x: number;
@@ -13,14 +13,32 @@ export interface ChunkBase {
   dispose(): void;
 }
 
-export function createChunkBase(heights: Float32Array, config: BeachConfig): ChunkBase {
-  const { width, height } = config.terrain;
-  const bounds = config.projectedBounds;
+/**
+ * Lo único que el zócalo necesita saber del bloque que envuelve. Antes pedía un
+ * `BeachConfig` entero y usaba seis campos, así que los niveles comarcal y de
+ * índice —que no tienen ficha de playa ni la tendrán— fabricaban una falsa y la
+ * colaban con un `as unknown as`. Era el único sitio del proyecto donde se
+ * desactivaba el tipado, y estaba en un módulo de dibujo.
+ */
+export interface ChunkBaseOptions {
+  /** Rejilla del relieve al que se ciñe el perímetro. */
+  width: number;
+  height: number;
+  /** Extensión proyectada del bloque, en metros. */
+  bounds: StageBounds;
+  /** Cuánto baja el zócalo por debajo de la cota cero. */
+  depthMeters: number;
+  verticalExaggeration: number;
+  visualStyle: "classic" | "mediterranean-illustrated";
+}
+
+export function createChunkBase(heights: Float32Array, options: ChunkBaseOptions): ChunkBase {
+  const { width, height, bounds, visualStyle } = options;
   const sizeX = bounds.east - bounds.west;
   const sizeZ = bounds.north - bounds.south;
   const halfX = sizeX / 2;
   const halfZ = sizeZ / 2;
-  const depth = config.chunk.depthMeters;
+  const depth = options.depthMeters;
   const perimeter: EdgePoint[] = [];
 
   const point = (col: number, row: number): EdgePoint => ({
@@ -35,13 +53,13 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
   for (let row = height - 2; row > 0; row--) perimeter.push(point(0, row));
 
   const positions = new Float32Array(perimeter.length * 6 * 3);
-  const rimPositions = config.visualStyle === "mediterranean-illustrated"
+  const rimPositions = visualStyle === "mediterranean-illustrated"
     ? new Float32Array(perimeter.length * 3)
     : undefined;
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   const material = new THREE.MeshStandardMaterial({
-    color: config.visualStyle === "mediterranean-illustrated" ? "#685363" : "#8a6477",
+    color: visualStyle === "mediterranean-illustrated" ? "#685363" : "#8a6477",
     roughness: 1,
     metalness: 0
   });
@@ -50,7 +68,7 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
   // que a partir de cierta profundidad la banda crece con el bloque. Con los
   // 90 m de todos los chunks actuales el valor sigue siendo exactamente 17.
   const stratumMeters = Math.max(17, depth / 5.3);
-  if (config.visualStyle === "mediterranean-illustrated") {
+  if (visualStyle === "mediterranean-illustrated") {
     material.onBeforeCompile = (shader) => {
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", "#include <common>\nvarying float vBaseY;")
@@ -103,7 +121,7 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
   }
   let contactShadowGeometry: THREE.BufferGeometry | undefined;
   let contactShadowMaterial: THREE.Material | undefined;
-  if (config.visualStyle === "mediterranean-illustrated") {
+  if (visualStyle === "mediterranean-illustrated") {
     const shadowGeometry = new THREE.PlaneGeometry(sizeX * 1.07, sizeZ * 1.07);
     shadowGeometry.rotateX(-Math.PI / 2);
     const shadowMaterial = new THREE.MeshBasicMaterial({
@@ -148,7 +166,7 @@ export function createChunkBase(heights: Float32Array, config: BeachConfig): Chu
       rimGeometry.computeBoundingSphere();
     }
   };
-  setExaggeration(config.terrain.verticalExaggeration);
+  setExaggeration(options.verticalExaggeration);
 
   return {
     group,

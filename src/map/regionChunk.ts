@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { loadFloat32, loadJson, loadUint8 } from "./assets";
 import { toonMaterial } from "../styles/toonMaterial";
-import { regionAssets, type RegionCatalog } from "../regions/catalog";
+import type { StageBounds } from "./createStage";
 
 /**
  * El relieve, el mar y la clasificación tierra-agua del bloque comarcal. Es la
@@ -12,6 +12,11 @@ import { regionAssets, type RegionCatalog } from "../regions/catalog";
  * No hay `seaSide` aquí: a esta escala la costa gira en un cabo y el mar puede
  * rodear la maqueta por dos lados, así que el agua se deduce por inundación
  * desde el borde del recorte.
+ *
+ * Recibe recorte y rutas, no la ficha de la comarca: `src/map/` dibuja bloques y
+ * no tiene por qué saber qué es una comarca. Quien traduce catálogo a estos
+ * parámetros es `regions/catalog.ts`, y así se puede dibujar un bloque que no
+ * esté en el catálogo —una previsualización, un render para imprimir—.
  */
 
 export const SEA_LEVEL = .15;
@@ -58,6 +63,15 @@ const DEPTH_STOPS: Array<[number, string]> = [
 ];
 const depthStopColours = DEPTH_STOPS.map(([, hex]) => new THREE.Color(hex));
 
+/** Los cinco derivados que describen un bloque comarcal a una resolución. */
+export interface RegionGridSources {
+  dem: string;
+  sea: string;
+  land: string;
+  demMetadata: string;
+  seaMetadata: string;
+}
+
 export interface RegionGrid {
   width: number;
   height: number;
@@ -77,11 +91,7 @@ export interface RegionGrid {
   demBytes: number;
 }
 
-export async function loadRegionGrid(
-  region: RegionCatalog,
-  variant: "full" | "thumbnail" = "full"
-): Promise<RegionGrid> {
-  const paths = regionAssets(region, variant);
+export async function loadRegionGrid(paths: RegionGridSources): Promise<RegionGrid> {
   // La rejilla la manda el asset, no una constante escrita a mano: así cambiar
   // la resolución del MDT no obliga a tocar el cliente.
   const [demMetadata, seaMetadata] = await Promise.all([
@@ -111,10 +121,10 @@ export async function loadRegionGrid(
   };
 }
 
-export function buildRegionTerrain(region: RegionCatalog, grid: RegionGrid) {
+export function buildRegionTerrain(bounds: StageBounds, grid: RegionGrid) {
   const { width, height, heights, landCover, sea } = grid;
-  const sizeX = region.bounds.east - region.bounds.west;
-  const sizeZ = region.bounds.north - region.bounds.south;
+  const sizeX = bounds.east - bounds.west;
+  const sizeZ = bounds.north - bounds.south;
   const geometry = new THREE.PlaneGeometry(sizeX, sizeZ, width - 1, height - 1);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;
@@ -195,13 +205,13 @@ export function buildRegionTerrain(region: RegionCatalog, grid: RegionGrid) {
 }
 
 export function buildRegionSea(
-  region: RegionCatalog,
+  bounds: StageBounds,
   grid: RegionGrid,
   waveNormals?: THREE.Texture
 ): THREE.Mesh {
   const { width, height, sea, seaCover, shoreDistance, bandDepths } = grid;
-  const sizeX = region.bounds.east - region.bounds.west;
-  const sizeZ = region.bounds.north - region.bounds.south;
+  const sizeX = bounds.east - bounds.west;
+  const sizeZ = bounds.north - bounds.south;
   // Recortada exactamente al bloque, como en los overviews: el agua es parte de
   // la maqueta, no un plano infinito bajo ella.
   const geometry = new THREE.PlaneGeometry(sizeX, sizeZ, width - 1, height - 1);

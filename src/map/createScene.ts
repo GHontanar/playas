@@ -83,7 +83,14 @@ export async function createScene(
   const terrain = await terrainPromise;
   terrain.mesh.scale.y = config.terrain.verticalExaggeration;
   world.add(terrain.mesh);
-  const chunkBase = createChunkBase(terrain.heights, config);
+  const chunkBase = createChunkBase(terrain.heights, {
+    width: config.terrain.width,
+    height: config.terrain.height,
+    bounds: config.projectedBounds,
+    depthMeters: config.chunk.depthMeters,
+    verticalExaggeration: config.terrain.verticalExaggeration,
+    visualStyle: config.visualStyle
+  });
   world.add(chunkBase.group);
   stage.resize();
 

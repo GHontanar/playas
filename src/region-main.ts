@@ -20,9 +20,8 @@ import { refreshStatusAfterHourChange } from "./status/loadStatus";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { loadingMessage } from "./loading/loadingMessage";
 import { breadcrumbHtml, municipalityChipsHtml, regionCrumbs } from "./nav/breadcrumb";
-import { getRegion } from "./regions/catalog";
+import { getRegion, regionAssets } from "./regions/catalog";
 import { inkOn } from "./styles/ink";
-import type { BeachConfig } from "./beaches/types";
 
 const params = new URLSearchParams(window.location.search);
 const region = getRegion(params.get("region"));
@@ -105,7 +104,7 @@ function showError(message: string) {
 }
 
 async function initialise() {
-  const grid = await loadRegionGrid(region);
+  const grid = await loadRegionGrid(regionAssets(region));
   const waveNormals = await loadTexture("/terrain/textures/mediterranean-waves-normal.webp");
   waveNormals.wrapS = THREE.RepeatWrapping;
   waveNormals.wrapT = THREE.RepeatWrapping;
@@ -113,7 +112,7 @@ async function initialise() {
   // que solo aporte grano al agua, igual que la textura de los chunks.
   waveNormals.repeat.set(region.waveRepeat.x, region.waveRepeat.y);
 
-  const { mesh, maxElevation } = buildRegionTerrain(region, grid);
+  const { mesh, maxElevation } = buildRegionTerrain(BOUNDS, grid);
   let exaggeration = number("exag", 2.5);
 
   // El escenario —renderizador, cámara, luces, niebla, encuadre y la gradación de
@@ -159,14 +158,16 @@ async function initialise() {
   // El zócalo es lo que convierte el recorte en maqueta: paredes estratificadas,
   // fondo y sombra de contacto sobre el fondo del lienzo.
   const base = createChunkBase(grid.heights, {
-    terrain: { width: grid.width, height: grid.height, verticalExaggeration: exaggeration },
-    projectedBounds: BOUNDS,
-    chunk: { depthMeters: REGION_CHUNK_DEPTH },
+    width: grid.width,
+    height: grid.height,
+    bounds: BOUNDS,
+    depthMeters: REGION_CHUNK_DEPTH,
+    verticalExaggeration: exaggeration,
     visualStyle: "mediterranean-illustrated"
-  } as unknown as BeachConfig);
+  });
   if (params.get("base") !== "0") world.add(base.group);
 
-  if (params.get("sea") !== "0") world.add(buildRegionSea(region, grid, waveNormals));
+  if (params.get("sea") !== "0") world.add(buildRegionSea(BOUNDS, grid, waveNormals));
 
   const labels = region.anchors.map((anchor) => anchorLabel(anchor.name, anchor.x, anchor.y, anchor.municipalityId));
   for (const label of labels) world.add(label);

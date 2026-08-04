@@ -10,8 +10,7 @@ import { buildRegionSea, buildRegionTerrain, loadRegionGrid, REGION_CHUNK_DEPTH 
 import { SUN_LIGHT_RADIUS, updateSunLight } from "./map/shadows";
 import { getSolarPosition, nowInMojacar } from "./solar/sunPosition";
 import { sunVectorForWorldAxes } from "./solar/sunVector";
-import { regionHref, regions, type RegionCatalog } from "./regions/catalog";
-import type { BeachConfig } from "./beaches/types";
+import { regionAssets, regionHref, regions, type RegionCatalog } from "./regions/catalog";
 
 const THUMBNAIL_EXAGGERATION = 2.5;
 
@@ -64,8 +63,8 @@ if (!window.WebGLRenderingContext) {
 async function renderThumbnail(element: HTMLElement) {
   const region = regions.find((candidate) => candidate.id === element.dataset.region);
   if (!region) throw new Error("Comarca desconocida.");
-  const grid = await loadRegionGrid(region, "thumbnail");
-  const { mesh, maxElevation } = buildRegionTerrain(region, grid);
+  const grid = await loadRegionGrid(regionAssets(region, "thumbnail"));
+  const { mesh, maxElevation } = buildRegionTerrain(region.bounds, grid);
 
   const stage = createStage(element, {
     bounds: region.bounds,
@@ -89,14 +88,16 @@ async function renderThumbnail(element: HTMLElement) {
   mesh.scale.y = THUMBNAIL_EXAGGERATION;
   stage.world.add(mesh);
   stage.world.add(createChunkBase(grid.heights, {
-    terrain: { width: grid.width, height: grid.height, verticalExaggeration: THUMBNAIL_EXAGGERATION },
-    projectedBounds: region.bounds,
-    chunk: { depthMeters: REGION_CHUNK_DEPTH },
+    width: grid.width,
+    height: grid.height,
+    bounds: region.bounds,
+    depthMeters: REGION_CHUNK_DEPTH,
+    verticalExaggeration: THUMBNAIL_EXAGGERATION,
     visualStyle: "mediterranean-illustrated"
-  } as unknown as BeachConfig).group);
+  }).group);
   // Sin normal map: a este tamaño el grano del agua no se ve y son 59 KB que la
   // portada no tiene por qué pedir.
-  stage.world.add(buildRegionSea(region, grid));
+  stage.world.add(buildRegionSea(region.bounds, grid));
 
   const now = nowInMojacar();
   const solar = getSolarPosition(now.dateISO, now.minutes, region.centre.lat, region.centre.lon);

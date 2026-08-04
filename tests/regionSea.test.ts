@@ -39,7 +39,7 @@ function gridWithNorthernSea(width = 4, height = 4): RegionGrid {
 describe("lámina de agua comarcal", () => {
   it("no tesela los cuadros que son tierra por sus cuatro esquinas", () => {
     const grid = gridWithNorthernSea();
-    const mesh = buildRegionSea(regions[0], grid);
+    const mesh = buildRegionSea(regions[0].bounds, grid);
     const index = mesh.geometry.getIndex();
     expect(index, "la lámina debe ir indexada para poder descartar tierra").not.toBeNull();
     // De los nueve cuadros solo sobrevive la fila que toca el mar: tres cuadros,
@@ -49,7 +49,7 @@ describe("lámina de agua comarcal", () => {
 
   it("ningún vértice del agua baja hasta el suelo del zócalo", () => {
     const grid = gridWithNorthernSea();
-    const mesh = buildRegionSea(regions[0], grid);
+    const mesh = buildRegionSea(regions[0].bounds, grid);
     const positions = mesh.geometry.attributes.position;
     let lowest = 0;
     for (let vertex = 0; vertex < positions.count; vertex++) {
@@ -62,7 +62,7 @@ describe("lámina de agua comarcal", () => {
 
   it("hunde la tierra de la orilla para que el relieve la tape", () => {
     const grid = gridWithNorthernSea();
-    const mesh = buildRegionSea(regions[0], grid);
+    const mesh = buildRegionSea(regions[0].bounds, grid);
     const positions = mesh.geometry.attributes.position;
     // Fila de vértices 3 = fila 0 del ráster = mar; fila 2 = tierra de orilla.
     // El giro del plano deja residuo de coma flotante en el cero.
@@ -73,7 +73,7 @@ describe("lámina de agua comarcal", () => {
   it("un bloque sin tierra conserva la lámina entera", () => {
     const grid = gridWithNorthernSea();
     grid.sea.fill(1);
-    const mesh = buildRegionSea(regions[0], grid);
+    const mesh = buildRegionSea(regions[0].bounds, grid);
     expect(mesh.geometry.getIndex()!.count / 3).toBe(9 * 2);
   });
 });
