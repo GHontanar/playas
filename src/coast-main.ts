@@ -9,17 +9,23 @@ import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadStatus";
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecast/openMeteo";
 import { loadingMessage } from "./loading/loadingMessage";
+import { breadcrumbHtml, municipalityChipsHtml, municipalityCrumbs } from "./nav/breadcrumb";
+import { regionOfMunicipality } from "./regions/catalog";
 import { inkOn } from "./styles/ink";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 const municipality = getMunicipality(new URLSearchParams(window.location.search).get("municipality"));
+const region = regionOfMunicipality(municipality);
 const coastOverview = municipality.overview;
 document.title = `Costa de ${municipality.name} · Estado de las playas`;
 app.innerHTML = `
   <main class="coast-story">
     <section id="story-stage" class="story-stage" aria-label="Recorrido topográfico por las playas de ${municipality.name}">
       <div id="overview-scene" class="overview-scene">
-        <h1 class="scene-title">${municipality.name}<small>Levante de Almería</small></h1>
+        <div class="scene-heading">
+          ${breadcrumbHtml(municipalityCrumbs(municipality))}
+          <h1 class="scene-title">${municipality.name}<small>${municipality.region}</small></h1>
+        </div>
         <div id="loading" class="loading">${loadingMessage()}</div>
         <div id="overview-error" class="scene-error" hidden></div>
       </div>
@@ -28,6 +34,7 @@ app.innerHTML = `
       <i id="viewpoint-centre" class="story-stop story-stop--centre" aria-hidden="true"></i>
       <i id="viewpoint-south" class="story-stop story-stop--south" aria-hidden="true"></i>
     </section>
+    ${municipalityChipsHtml(region, municipality.id)}
   </main>`;
 
 const container = document.querySelector<HTMLElement>("#overview-scene")!;
@@ -120,6 +127,7 @@ async function initialise() {
 
   const applyProgress = (progress: number) => {
     const position = progress * (viewpoints.length - 1);
+    zones.setSeparatorsVisible(progress > 0);
     if (reducedMotion) {
       const viewpoint = viewpoints[Math.round(position)];
       setCamera(viewpoint.target, viewpoint.zoom);
@@ -201,7 +209,12 @@ async function initialise() {
   const refreshStatus = async () => {
     try {
       zones.setStatuses(await loadObservedStatus(demo, municipality.id));
-    } catch {
+    } catch (error: unknown) {
+      // Sin bandera observada las franjas se quedan con su material original, que
+      // es lo correcto: no se infiere un color. Pero el motivo tiene que salir por
+      // consola, porque el resultado visual de «no hay datos» y el de «el estado
+      // no se pudo pedir» son idénticos.
+      console.warn("Estado oficial no disponible; las franjas quedan sin color.", error);
       zones.setStatuses([]);
     }
   };

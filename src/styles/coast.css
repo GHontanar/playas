@@ -1,9 +1,7 @@
 @import "./terrain.css";
+@import "./scene.css";
 
-:root { --coast-sky: #eadfd7; background-color: var(--coast-sky); }
-html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
 html, body, #app, .coast-story { min-height: 100%; background-color: var(--coast-sky); }
-html, body { min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
 body::before {
   content: "";
   position: fixed;
@@ -23,44 +21,8 @@ body::before {
   background: var(--coast-sky);
 }
 .overview-scene canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
-/* Rótulo sobre el cielo vacío. Misma serif que los títulos de las fichas, con
-   el mono de la interfaz como línea secundaria; la tinta la fija el script
-   según la luz de la hora, porque el cielo va del beige al azul de noche. */
-.scene-title {
-  position: absolute;
-  z-index: 5;
-  top: clamp(16px, 4vh, 44px);
-  left: clamp(16px, 4vw, 50px);
-  margin: 0;
-  color: var(--scene-ink, #173a3d);
-  font: 500 clamp(30px, 5.2vw, 60px)/.95 Georgia, serif;
-  letter-spacing: -.03em;
-  pointer-events: none;
-  transition: color .4s ease;
-}
-.scene-title small {
-  display: block;
-  margin-top: .7em;
-  font: 400 clamp(10px, 1.4vw, 13px)/1.3 "IBM Plex Mono", ui-monospace, monospace;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  opacity: .62;
-}
 .scene-error { z-index: 20; }
-.story-stop {
-  position: absolute;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  pointer-events: none;
-}
 .story-stop--general { top: 0; }
 .story-stop--north { top: 100vh; top: 100dvh; }
 .story-stop--centre { top: 200vh; top: 200dvh; }
 .story-stop--south { top: 300vh; top: 300dvh; }
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-}

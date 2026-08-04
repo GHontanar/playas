@@ -9,8 +9,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data": "scripts/download-dem.sh && scripts/download-coastline.sh && scripts/download-urban.sh && tsx scripts/prepare-all-beaches.ts all && npm run verify:assets",
+    "data": "scripts/download-dem.sh && scripts/download-coastline.sh && scripts/download-urban.sh && scripts/download-barreiros.sh && tsx scripts/prepare-all-beaches.ts all && npm run verify:assets",
     "data:beach": "tsx scripts/prepare-all-beaches.ts",
+    "data:thumbnails": "tsx scripts/prepare-region-thumbnails.ts",
     "verify:assets": "tsx scripts/verify-assets.ts"
   },
   "engines": {

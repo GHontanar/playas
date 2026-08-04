@@ -15,6 +15,7 @@ import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadS
 import type { ObservedBeachStatus } from "./status/types";
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight, seaStateLabel, windName, type BeachForecastPoint } from "./forecast/openMeteo";
 import { loadingMessage } from "./loading/loadingMessage";
+import { beachCrumbs, breadcrumbHtml } from "./nav/breadcrumb";
 
 const config = getBeach(new URLSearchParams(window.location.search).get("beach"));
 const municipality = getMunicipality(config.municipalityId);
@@ -26,7 +27,7 @@ app.innerHTML = `
   <main class="terrain-app">
     <header class="title">
       <div>
-        <a href="/coast/?municipality=${municipality.id}" class="back">${municipality.name} / costa</a>
+        ${breadcrumbHtml(beachCrumbs(config))}
         <h1>${config.name}</h1>
         <div id="beach-status" class="beach-status" data-service="loading" aria-live="polite">
           <i class="beach-status-colour" aria-hidden="true"></i>

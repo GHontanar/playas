@@ -1,0 +1,19 @@
+{
+  "bounds": [
+    609215,
+    4799988,
+    661153,
+    4849303
+  ],
+  "webResolutionMeters": 400,
+  "width": 130,
+  "height": 124,
+  "maxElevation": 1001.6888179779053,
+  "minElevation": 0,
+  "decimation": 8,
+  "sourceGrid": [
+    1039,
+    987
+  ],
+  "assetBytes": 64480
+}

@@ -146,3 +146,27 @@ adentro se deriva de la geometría DERA. Desde ese punto se calcula una estela
 dinámica en la dirección de avance del oleaje: reduce progresivamente volumen y
 espuma a sotavento y se disipa con la distancia. Es una abstracción visual de
 apantallamiento, no un modelo de difracción o refracción.
+
+## Zócalo del nivel comarcal
+
+El bloque comarcal comparte zócalo con las playas: paredes estratificadas, fondo
+y sombra de contacto. A esa escala hay una diferencia que importa. Los chunks de
+playa y los overviews municipales recortan el agua en el sombreador con la
+envolvente DERA, pero el bloque comarcal no tiene `seaSide` —la costa gira en un
+cabo y el mar puede rodear la maqueta por dos lados— y clasifica el agua por
+inundación desde el borde del recorte.
+
+Con esa clasificación por celda, la lámina de agua **solo se tesela donde hay
+agua**: los cuadros que son tierra por sus cuatro esquinas no se dibujan, y los
+de la orilla conservan sus vértices de tierra hundidos 60 m para que el relieve
+costero los tape. La versión anterior dibujaba la lámina entera y hundía la
+tierra hasta el fondo del bloque, a 15 cm del suelo del zócalo; con el plano
+lejano a 600 km el buffer de profundidad no separa esa distancia y las dos caras
+se peleaban.
+
+En el Levante el fallo no se veía: sus dos caras visibles desde la cámara
+—sur y este— son mar abierto, así que la lámina hundida quedaba dentro del
+bloque. En la Mariña la tierra llega al borde sur, que es una de esas dos caras,
+y el moteado de espuma se comía la pared entera justo donde tenía que leerse
+como tierra. Una comarca cuyo recorte deje tierra contra la cámara vuelve a
+poner esto a prueba; `tests/regionSea.test.ts` fija las dos condiciones.

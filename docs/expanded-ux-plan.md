@@ -2,15 +2,20 @@
 
 ## Objetivo
 
-La aplicación tendrá dos niveles coherentes, ambos con estética de maqueta:
+La aplicación tiene cuatro niveles coherentes, todos con estética de maqueta:
 
-1. `/coast/`: chunk general de 8,5 km con toda la costa de Mojácar y las siete
-   zonas de baño seleccionables.
-2. `/terrain/?beach=<id>`: drill-in topográfico de cada playa, con Sol, sombra,
+1. `/`: índice, con cada comarca en miniatura para elegir por dónde entrar.
+2. `/region/?region=<id>`: bloque comarcal de 50 m con toda la costa cubierta y
+   los municipios rotulados.
+3. `/coast/?municipality=<id>`: chunk general de la costa de un municipio, con
+   sus zonas de baño seleccionables.
+4. `/terrain/?beach=<id>`: drill-in topográfico de cada playa, con Sol, sombra,
    edificios, calles, agua volumétrica y controles de depuración.
 
-La maqueta general ocupa `/`; la portada histórica se conserva sin enlaces en
-`/flags/` como archivo recuperable.
+Los niveles 1 y 2 llegaron después que los otros dos: el comarcal nació como dos
+spikes gemelos, uno por comarca, fuera del build. La portada histórica se
+conserva sin enlaces en `/flags/` como archivo recuperable. El detalle de la
+navegación entre niveles está en [`navigation.md`](navigation.md).
 
 ## Estado observado: dependencia inicial
 
@@ -92,6 +97,22 @@ causa puede no ser marina.
 - [x] bandera y hora observada en las siete fichas topográficas;
 - [x] sombreado de las franjas del overview solo con bandera activa;
 - [x] sustituir `/` por el nuevo acceso y archivar la portada anterior.
+
+### Fase A2 — jerarquía completa
+
+- [x] nivel comarcal en el build, con las dos comarcas sobre un solo motor y un
+  catálogo propio (`src/regions/catalog.ts`);
+- [x] índice en `/` con las comarcas en miniatura, montadas con el mismo
+  escenario sobre la rejilla diezmada a 400 m;
+- [x] migas de pan en los cuatro niveles y fichas hermanas alcanzables con
+  teclado, derivadas de los catálogos; en el nivel comarcal las fichas repetían
+  los rótulos de la maqueta y solo se muestran al tabular;
+- [x] controles horarios y de calibración plegados por defecto en el nivel
+  comarcal, con el sector del recorrido en el propio resumen;
+- [x] validación del grafo de navegación en `tests/navigation.test.ts`;
+- [ ] comarcas sin municipios detallados: hoy toda comarca publicada tiene al
+  menos una costa, y la prueba lo exige;
+- [ ] transición visual entre niveles, que ahora es una carga completa.
 
 ### Fase B — previsión puntual
 

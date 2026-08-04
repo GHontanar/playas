@@ -1,0 +1,87 @@
+@import "./scene.css";
+@import "./nav.css";
+
+/* Nivel comarcal. Comparte con la costa municipal el escenario alto y la escena
+   pegajosa; lo suyo es la barra de depuración del pie, que aquí sigue siendo
+   parte de la vista porque la maqueta se sigue calibrando contra ella. */
+
+.region-story { margin: 0; font: 14px system-ui, sans-serif; }
+.region-stage { position: relative; }
+.region-scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.region-scene canvas { display: block; width: 100%; height: 100%; }
+
+.region-loading, .region-error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  padding: 30px;
+  color: var(--scene-ink, #173a3d);
+  font: 400 14px/1.5 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .06em;
+  text-align: center;
+}
+.region-error { color: #8d2f28; }
+.region-error[hidden] { display: none; }
+
+.region-footer {
+  position: fixed;
+  z-index: 7;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Las costas ya se abren desde sus rótulos sobre la maqueta, así que repetirlas
+   como botones era decir dos veces lo mismo. Se conservan fuera de pantalla y
+   solo asoman al llegar con el tabulador, que es la vía que el lienzo no da. */
+.region-skip-links .scene-siblings {
+  position: absolute;
+  bottom: 100%;
+  clip-path: inset(50%);
+}
+.region-skip-links:focus-within .scene-siblings {
+  position: static;
+  clip-path: none;
+  padding: 0 clamp(10px, 3vw, 24px) 10px;
+}
+
+/* Los controles horarios y de calibración estorban a la maqueta, que es lo que
+   se viene a ver: van plegados y solo ocupan su renglón. El sector del
+   recorrido viaja en el propio resumen, para que plegado siga diciendo dónde
+   está la cámara. */
+.region-controls {
+  background: #17353a;
+  color: #fff8e9;
+  font-size: 12px;
+}
+.region-controls summary {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+  padding: .55rem 1rem calc(.55rem + env(safe-area-inset-bottom));
+  cursor: pointer;
+  letter-spacing: .04em;
+}
+.region-controls[open] summary {
+  padding-bottom: .55rem;
+  border-bottom: 1px solid #fff8e91f;
+}
+.region-controls summary::marker { color: #fff8e980; }
+.region-controls #viewpoint { margin-left: auto; opacity: .85; }
+.region-controls-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.1rem;
+  align-items: center;
+  padding: .5rem 1rem calc(.5rem + env(safe-area-inset-bottom));
+}
+.region-controls input, .region-controls button { font: inherit; }
+.region-controls #stats { opacity: .75; }

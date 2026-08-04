@@ -48,6 +48,41 @@ El overview municipal carga aproximadamente 755 KB de derivados sin comprimir:
 detallados. En el build, Three.js se comparte entre las entradas y el código
 específico de `/coast/` añade unos 7 KB (3,2 KB gzip).
 
+### Índice y nivel comarcal
+
+En este documento «la portada» son las mediciones del overview municipal, que
+desde la reestructuración de la navegación vive en `/coast/`. `/` es ahora el
+índice de comarcas.
+
+El índice monta una miniatura por comarca con el mismo escenario y el mismo
+zócalo que la vista comarcal, sobre la rejilla diezmada a 400 m que produce
+`scripts/prepare-region-thumbnails.ts`: 130 KB en el Levante y 94 KB en la
+Mariña, DEM y dos coberturas incluidos, frente a los 8,5 MB de los derivados
+completos de las dos comarcas. Las miniaturas se montan en serie y solo cuando
+su tarjeta entra en el margen de 200 px del `IntersectionObserver`; cada una
+abre su propio contexto WebGL, se dibuja una vez y no arranca bucle de
+animación. No descargan el normal map del agua.
+
+El nivel comarcal completo carga 5,7 MB (Levante) o 4,1 MB (Mariña) de DEM más
+sus dos coberturas de 1,4 MB y 1,0 MB. Es el nivel más caro del sistema y por
+eso no es la entrada: se llega a él desde el índice, ya elegido. Su escena no
+anima nada, así que se dibuja bajo demanda —al mover el Sol, la exageración o la
+cámara— en vez de mantener un `requestAnimationFrame` abierto.
+
+La lámina de agua se tesela solo donde hay agua. Antes cubría el bloque entero y
+las celdas de tierra se hundían al fondo, así que se dibujaban 2.824k triángulos
+en el Levante y 2.047k en la Mariña de los cuales dos tercios quedaban ocultos
+dentro del zócalo: ahora son 1.047k y 705k, un 63 % y un 66 % menos. El cambio
+llegó arreglando un fallo visual, no buscando rendimiento; el ahorro es un
+efecto secundario.
+
+El catálogo pasó de 7 a 31 playas (Mojácar, Carboneras, Garrucha, Vera y
+Barreiros) sin cambiar el renderer ni el presupuesto por ficha: cada playa sigue
+cargando únicamente sus seis derivados. El overview de Barreiros (8,6 × 4,5 km a
+20 m) usa el mismo presupuesto de máscara de inundación que los recortes con
+puerto, y la línea de costa IHM añade decenas de geometrías frente a la única de
+DERA, pero la envolvente y la máscara se preparan una sola vez en CPU.
+
 Se realizó un smoke test headless Chromium a 1280 × 900 y 390 × 844: carga,
 WebGL, controles y layout sin errores de página. No se publica un dato de FPS
 de ese test porque usa SwiftShader y no representa una GPU móvil.
@@ -105,13 +140,16 @@ remota conectada, por lo que no se atribuyen FPS, memoria GPU o consumo térmico
 a esa observación. Para obtener cifras se repetirá este protocolo:
 
 1. Chrome actualizado, caché vacía y ahorro de batería desactivado.
-2. Abrir `/`, recorrer los cuatro keyframes dos veces y registrar 20 s en el
-   panel Performance de DevTools remoto.
+2. Abrir `/coast/`, recorrer los cuatro keyframes dos veces y registrar 20 s en
+   el panel Performance de DevTools remoto.
 3. Abrir Ventanicas, mantener el mar animado 30 s y cambiar la hora cinco veces
    mientras se registra otro tramo de 20 s.
 4. Anotar FPS mediano y percentil 5, memoria JS, memoria GPU si el dispositivo
    la expone, tiempo hasta primera maqueta y frames largos superiores a 50 ms.
-5. Repetir con el teléfono caliente después de cinco minutos.
+5. Abrir `/`, esperar a que las dos miniaturas terminen de montarse y anotar
+   memoria GPU con dos contextos WebGL vivos; después abrir `/region/` y repetir
+   el recorrido de sectores.
+6. Repetir con el teléfono caliente después de cinco minutos.
 
 Criterio provisional: al menos 30 FPS sostenidos, interacción horaria sin
 pausas visibles mayores de 100 ms y ausencia de crecimiento continuado de

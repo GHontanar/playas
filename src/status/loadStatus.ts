@@ -12,13 +12,18 @@ export async function loadObservedStatus(demo = false, municipality = "mojacar")
       "garrucha-playa", "garrucha-posito", "garrucha-playazo"
     ] : municipality === "vera" ? [
       "vera-marinas-bolaga", "vera-puerto-rey", "vera-playazo", "vera-cala-marques"
+    ] : municipality === "barreiros" ? [
+      "barreiros-anguieira", "barreiros-altar", "barreiros-san-bartolo",
+      "barreiros-remior", "barreiros-pena-de-salsa", "barreiros-benquerencia",
+      "barreiros-area-da-balea", "barreiros-longara", "barreiros-a-pasada",
+      "barreiros-arealonga"
     ] : [
       "marina-de-la-torre", "descargador", "piedra-villazar", "el-cantal",
       "lance-nuevo", "ventanicas", "venta-del-bancal"
     ];
     return ids.map((beachId, index) => ({
       beachId,
-      flag: demoFlags[index],
+      flag: demoFlags[index] ?? "unknown",
       lifeguardService: "active",
       jellyfish: index === 4,
       observedAtLocal: "modo de demostración",
@@ -27,6 +32,13 @@ export async function loadObservedStatus(demo = false, municipality = "mojacar")
   }
   const response = await fetch(`/api/status?municipality=${encodeURIComponent(municipality)}`, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`Estado oficial no disponible (${response.status})`);
+  // Un entorno sin la Pages Function montada devuelve el HTML de la aplicación
+  // con un 200: sin esta comprobación el fallo llegaba como un error de sintaxis
+  // de JSON y la costa se quedaba sin banderas sin decir por qué.
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("json")) {
+    throw new Error(`/api/status no devolvió JSON sino ${contentType || "una respuesta sin tipo"}; ¿está montada la Pages Function?`);
+  }
   const payload = await response.json() as ObservedStatusResponse;
   return payload.beaches;
 }

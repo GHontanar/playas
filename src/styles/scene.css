@@ -1,0 +1,92 @@
+/* Chrome común de las maquetas con recorrido: la comarcal y la costa municipal.
+   Las dos son una escena pegajosa dentro de un escenario alto, con el rótulo y
+   la ruta flotando sobre el cielo. Estaba duplicado —una copia en `coast.css` y
+   otra dentro de un `<style>` en cada spike— y con él se duplicaba el criterio
+   de qué tinta usar sobre un cielo que cambia con la hora. */
+
+:root { --coast-sky: #eadfd7; background-color: var(--coast-sky); }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+html, body { margin: 0; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+body { background-color: var(--coast-sky); }
+
+/* Un gesto de scroll, un keyframe. `scroll-snap-stop: always` es lo que impide
+   que un impulso largo se salte paradas. */
+.story-stop {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  pointer-events: none;
+}
+
+.scene-heading {
+  position: absolute;
+  z-index: 5;
+  top: clamp(16px, 4vh, 44px);
+  left: clamp(16px, 4vw, 50px);
+  right: clamp(16px, 4vw, 50px);
+  color: var(--scene-ink, #173a3d);
+  transition: color .4s ease;
+  pointer-events: none;
+}
+
+/* Rótulo sobre el cielo vacío. Misma serif que los títulos de las fichas, con
+   el mono de la interfaz como línea secundaria; la tinta la fija el script
+   según la luz de la hora, porque el cielo va del beige al azul de noche. */
+.scene-title {
+  margin: 0;
+  color: inherit;
+  font: 500 clamp(30px, 5.2vw, 60px)/.95 Georgia, serif;
+  letter-spacing: -.03em;
+}
+.scene-title small {
+  display: block;
+  margin-top: .7em;
+  font: 400 clamp(10px, 1.4vw, 13px)/1.3 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  opacity: .62;
+}
+
+/* Fichas hermanas al pie de la escena: en la maqueta comarcal son la única vía
+   de teclado hacia las costas, porque los rótulos se pican sobre el lienzo. */
+.scene-siblings {
+  position: fixed;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 clamp(10px, 3vw, 24px) max(10px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.scene-siblings ol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scene-siblings a, .scene-siblings span {
+  display: block;
+  padding: .5em .9em;
+  border-radius: 999px;
+  background: rgba(23, 53, 58, .82);
+  color: #fff8e9;
+  font: 400 12px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .06em;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: background .2s ease;
+}
+.scene-siblings a:hover, .scene-siblings a:focus-visible { background: rgba(14, 40, 44, .95); }
+.scene-siblings span { background: rgba(23, 53, 58, .42); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

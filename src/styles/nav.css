@@ -1,0 +1,26 @@
+/* La ruta entre niveles. Aparece sobre el cielo de las maquetas —donde la tinta
+   la fija el script según la luz de la hora— y en la cabecera clara de la ficha
+   de playa, así que hereda el color en vez de traer el suyo. */
+
+.scene-nav { margin: 0 0 clamp(10px, 1.6vh, 18px); }
+.scene-nav ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .1em .55em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 clamp(10px, 1.3vw, 12px)/1.4 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.scene-nav li { display: flex; gap: .55em; align-items: baseline; }
+.scene-nav li + li::before { content: "›"; opacity: .45; }
+.scene-nav a {
+  color: inherit;
+  pointer-events: auto;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: .25em;
+}
+.scene-nav a:hover, .scene-nav a:focus-visible { text-decoration-color: currentColor; }
+.scene-nav [aria-current] { opacity: .58; }
