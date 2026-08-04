@@ -55,7 +55,7 @@ export default {
       const municipality = url.searchParams.get("municipality") || "mojacar";
       if (municipality === "carboneras") return observedCarbonerasStatus();
       if (municipality === "mojacar") return observedStatus();
-      if (["garrucha", "vera"].includes(municipality)) return unavailableMunicipalityStatus(municipality);
+      if (["garrucha", "vera", "barreiros"].includes(municipality)) return unavailableMunicipalityStatus(municipality);
       return fail(400, "Municipio no válido");
     }
 
@@ -204,7 +204,9 @@ async function observedStatus() {
 function unavailableMunicipalityStatus(municipality) {
   const ids = municipality === "garrucha"
     ? ["garrucha-playa", "garrucha-posito", "garrucha-playazo"]
-    : ["vera-marinas-bolaga", "vera-puerto-rey", "vera-playazo", "vera-cala-marques"];
+    : municipality === "vera"
+    ? ["vera-marinas-bolaga", "vera-puerto-rey", "vera-playazo", "vera-cala-marques"]
+    : ["barreiros-anguieira", "barreiros-altar", "barreiros-san-bartolo", "barreiros-remior", "barreiros-pena-de-salsa", "barreiros-benquerencia", "barreiros-area-da-balea", "barreiros-longara", "barreiros-a-pasada", "barreiros-arealonga"];
   return new Response(JSON.stringify({
     fetchedAt: new Date().toISOString(),
     beaches: ids.map(beachId => ({ beachId, flag: "unknown", lifeguardService: "unknown", jellyfish: null, observedAtLocal: null, source: "unavailable" })),

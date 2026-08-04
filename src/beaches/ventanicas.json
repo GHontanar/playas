@@ -1,6 +1,7 @@
 {
   "id": "ventanicas",
   "name": "Ventanicas",
+  "municipalityId": "mojacar",
   "timezone": "Europe/Madrid",
   "center": {
     "lat": 37.109198,
@@ -41,8 +42,10 @@
   "seaSide": "east",
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
   "seaLevelMeters": 1.5,
   "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
   "shoreline": {
     "start": {
       "x": 602620.3138,

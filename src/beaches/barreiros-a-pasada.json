@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-a-pasada",
+  "name": "Playa de A Pasada",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.562403,
+    "lon": -7.18245
+  },
+  "bounds": {
+    "west": -7.191388,
+    "south": 43.556867,
+    "east": -7.174678,
+    "north": 43.566155
+  },
+  "projectedBounds": {
+    "west": 646080,
+    "south": 4824246,
+    "east": 647407,
+    "north": 4825307,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1194
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 332,
+    "height": 265,
+    "minElevation": 0,
+    "maxElevation": 23.71,
+    "asset": "/terrain/assets/barreiros-a-pasada-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 646430,
+      "z": 4824796
+    },
+    "end": {
+      "x": 647147,
+      "z": 4824957
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.195798,
+      "south": 43.533527,
+      "east": -7.170802,
+      "north": 43.571495
+    },
+    "projectedBounds": {
+      "west": 645780,
+      "south": 4821646,
+      "east": 647707,
+      "north": 4825907,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 128,
+      "height": 284,
+      "minElevation": 0,
+      "maxElevation": 279.7,
+      "asset": "/terrain/assets/barreiros-a-pasada-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-a-pasada-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-a-pasada-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-a-pasada-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

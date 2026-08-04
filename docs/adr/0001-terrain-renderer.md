@@ -61,3 +61,14 @@ superior sin desplazar el fondo.
 Las siete playas usan ya un asset/config por playa y reutilizan escena, Sol,
 oleaje y controles mediante un catálogo declarativo. Si más adelante se añade navegación geográfica continua,
 MapLibre puede envolver la selección de playa sin migrar las maquetas.
+
+### Ampliación posterior (2-08-2026)
+
+El catálogo se extendió a Carboneras, Garrucha, Vera y Barreiros sin cambiar el
+renderer. Dos generalizaciones lo hicieron posible:
+
+- el huso deja de ser fijo: cada config declara `EPSG:25830` o `EPSG:25829` y el
+  pipeline normaliza el alias 3041 de las hojas gallegas;
+- `seaSide` pasa de `east|west` a `east|west|north|south`, con la orientación
+  abstraída en `coastalOrientation.ts` (`alongOf`/`crossOf`/`recompose`) para
+  que el mismo motor sirva la costa cantábrica de Barreiros.

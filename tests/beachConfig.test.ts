@@ -13,9 +13,9 @@ describe("configuración declarativa de playa", () => {
 
   it("valida todos los catálogos municipales sin identificadores duplicados", () => {
     const parsed = beaches.map(parseBeachConfig);
-    expect(parsed).toHaveLength(21);
-    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(21);
-    expect(municipalities.map((municipality) => municipality.beaches.length)).toEqual([7, 7, 3, 4]);
+    expect(parsed).toHaveLength(31);
+    expect(new Set(parsed.map((beach) => beach.id)).size).toBe(31);
+    expect(municipalities.map((municipality) => municipality.beaches.length)).toEqual([7, 7, 3, 4, 10]);
     for (const beach of parsed) {
       expect(beach.shoreline.start.x).toBeGreaterThanOrEqual(beach.projectedBounds.west);
       expect(beach.shoreline.start.x).toBeLessThanOrEqual(beach.projectedBounds.east);

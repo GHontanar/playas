@@ -203,6 +203,38 @@ representan batimetría, humedad medida, materiales constructivos ni geología
 clasificada. Las rompientes continúan ligadas a la costa derivada y excluyen
 el espigón; su escala y cadencia están exageradas intencionadamente.
 
+## Validación de Barreiros (Lugo)
+
+Fecha de comprobación: 2 de agosto de 2026.
+
+El municipio se validó con los mismos criterios que el resto, más las
+particularidades del huso 29 y de la costa cantábrica:
+
+- **Huso 29N**: los assets se generan en EPSG:25829 desde las hojas MDT02
+  `0009-2`, `0009-4` y `0010-3`. Dos de ellas llegan etiquetadas como
+  EPSG:3041 (alias «N-E» de UTM 29N con píxeles E-N); la normalización previa
+  al merge se contrastó contra la hoja `0010-3`, ya nativa en 25829: ambos
+  husos producen el mismo recorte en coordenadas coherentes.
+- **Costa IHM**: la línea COALNE/PLEAMAR del Instituto Hidrográfico de la
+  Marina se reproyecta de EPSG:4326 a 25829. `verify:assets` comprueba que la
+  costa queda dentro de cada chunk y que la orientación tierra-mar es correcta
+  contra la envolvente marina (el test se generalizó a las cuatro direcciones
+  de `seaSide`). En la panorámica municipal la extracción pasó de 58 a 37
+  geometrías al descartar anillos cerrados (islas/rocas) y fragmentos
+  minúsculos.
+- **Ría e islotes**: la envolvente única fallaba en la desembocadura de la ría
+  de Foz y junto a los islotes. Las configuraciones de Barreiros usan la
+  máscara de inundación (`useFloodMask`), que clasifica mar/tierra inundando
+  desde el borde marino; es el mismo mecanismo ya validado en los puertos de
+  Garrucha.
+- **Smoke test headless**: se cargaron la panorámica y las diez fichas en
+  Chromium headless a 1280 × 900. Sin errores de página, WebGL activo,
+  indicador de carga retirado y tarjeta de previsión poblada. Muestreando los
+  píxeles del canvas en hora diurna, la franja marina aparece siempre al norte
+  (arriba) y la arena al sur, confirmando la orientación de la costa
+  cantábrica. El estado de bandera queda «Bandera no disponible» por ausencia
+  de feed.
+
 ## Límites
 
 - MDT de 2 m remuestreado a 2,5 m con una pasada de suavizado visual, y 15 m

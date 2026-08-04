@@ -9,7 +9,7 @@ const boundsSchema = z.object({
 
 const projectedBoundsSchema = z.object({
   west: z.number(), south: z.number(), east: z.number(), north: z.number(),
-  crs: z.literal("EPSG:25830")
+  crs: z.enum(["EPSG:25830", "EPSG:25829"])
 });
 
 const terrainSchema = z.object({
@@ -26,7 +26,7 @@ const terrainSchema = z.object({
 export const beachConfigSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  municipalityId: z.enum(["mojacar", "carboneras", "garrucha", "vera"]).default("mojacar"),
+  municipalityId: z.enum(["mojacar", "carboneras", "garrucha", "vera", "barreiros"]).default("mojacar"),
   timezone: z.literal("Europe/Madrid"),
   center: z.object({ lat: z.number(), lon: z.number() }),
   bounds: boundsSchema,
@@ -41,7 +41,7 @@ export const beachConfigSchema = z.object({
   chunk: z.object({
     depthMeters: z.number().min(10).max(300)
   }),
-  seaSide: z.enum(["east", "west"]),
+  seaSide: z.enum(["east", "west", "north", "south"]),
   worldAxes: z.enum(["north-positive", "south-positive"]).default("north-positive"),
   visualStyle: z.enum(["classic", "mediterranean-illustrated"]).default("classic"),
   urbanDetail: z.enum(["detailed", "overview"]).default("detailed"),
@@ -51,7 +51,8 @@ export const beachConfigSchema = z.object({
     kind: z.literal("breakwater")
   })).default([]),
   overviewZonePaddingMeters: z.number().min(0).max(500).default(0),
-  coastalWaterEdgeSeeding: z.boolean().default(false),
+  /** Clasifica mar/tierra por inundación desde el borde marino (rías, islas). */
+  useFloodMask: z.boolean().default(false),
   shoreline: z.object({
     start: z.object({ x: z.number(), z: z.number() }),
     end: z.object({ x: z.number(), z: z.number() })

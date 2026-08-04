@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-benquerencia",
+  "name": "Playa de Benquerencia",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.562391,
+    "lon": -7.205047
+  },
+  "bounds": {
+    "west": -7.21367,
+    "south": 43.556975,
+    "east": -7.19759,
+    "north": 43.566023
+  },
+  "projectedBounds": {
+    "west": 644280,
+    "south": 4824219,
+    "east": 645557,
+    "north": 4825252,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1149
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 319,
+    "height": 258,
+    "minElevation": 0,
+    "maxElevation": 26.02,
+    "asset": "/terrain/assets/barreiros-benquerencia-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 644630,
+      "z": 4824902
+    },
+    "end": {
+      "x": 645297,
+      "z": 4824769
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.218072,
+      "south": 43.533633,
+      "east": -7.193715,
+      "north": 43.571365
+    },
+    "projectedBounds": {
+      "west": 643980,
+      "south": 4821619,
+      "east": 645857,
+      "north": 4825852,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 125,
+      "height": 282,
+      "minElevation": 0,
+      "maxElevation": 185.15,
+      "asset": "/terrain/assets/barreiros-benquerencia-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-benquerencia-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-benquerencia-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-benquerencia-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

@@ -1,0 +1,17 @@
+{
+  "bounds": [
+    609215,
+    4799988,
+    661153,
+    4849303
+  ],
+  "webResolutionMeters": 50,
+  "width": 1039,
+  "height": 987,
+  "maxElevation": 1046.6851806640625,
+  "minElevation": 0.0,
+  "seaCells": 351060,
+  "isletCellsDropped": 15,
+  "isletMaxMetres": 1.5,
+  "assetBytes": 4101972
+}

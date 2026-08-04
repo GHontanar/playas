@@ -1,0 +1,112 @@
+{
+  "source": [
+    "Usos del suelo: CORINE Land Cover 2018 (Copernicus EEA, servicio DisCoMap image.discomap.eea.europa.eu, capa Corine/CLC2018_WM/MapServer/0), CC BY 4.0"
+  ],
+  "nomenclature": "CORINE Land Cover 2018 nivel 3 agrupado en 8 familias",
+  "scopeNote": "Escala 1:100k agrupada en 8 familias. Sin cauces propios; ríos y estuarios se ven a través de la clase 511/512 (grupo 7, agua continental).",
+  "bounds": [
+    609215,
+    4799988,
+    661153,
+    4849303
+  ],
+  "webResolutionMeters": 50,
+  "width": 1039,
+  "height": 987,
+  "encoding": "uint8: 0 mar o sin dato, 1-8 grupo de uso",
+  "groups": {
+    "1": {
+      "name": "Suelo desnudo y roquedo",
+      "corine": [
+        331,
+        332,
+        333,
+        334
+      ]
+    },
+    "2": {
+      "name": "Matorral y pastizal",
+      "corine": [
+        321,
+        322,
+        323
+      ]
+    },
+    "3": {
+      "name": "Mosaico agrícola y secano",
+      "corine": [
+        211,
+        221,
+        222,
+        223,
+        231,
+        241,
+        242,
+        243,
+        244
+      ]
+    },
+    "4": {
+      "name": "Bosque",
+      "corine": [
+        311,
+        312,
+        313,
+        324
+      ]
+    },
+    "5": {
+      "name": "Regadío permanente",
+      "corine": [
+        212,
+        213
+      ]
+    },
+    "6": {
+      "name": "Humedal y salinas",
+      "corine": [
+        411,
+        421,
+        422,
+        423
+      ]
+    },
+    "7": {
+      "name": "Agua continental",
+      "corine": [
+        511,
+        512,
+        521,
+        522
+      ]
+    },
+    "8": {
+      "name": "Urbano e industrial",
+      "corine": [
+        111,
+        112,
+        121,
+        122,
+        123,
+        124,
+        131,
+        132,
+        133,
+        141,
+        142
+      ]
+    }
+  },
+  "cellsByGroup": {
+    "0": 354603,
+    "1": 508,
+    "2": 109083,
+    "3": 162961,
+    "4": 385884,
+    "5": 0,
+    "6": 1196,
+    "7": 1283,
+    "8": 9975
+  },
+  "assetBytes": 1025493
+}

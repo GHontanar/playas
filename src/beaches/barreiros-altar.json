@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-altar",
+  "name": "Playa de Altar",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.564806,
+    "lon": -7.24055
+  },
+  "bounds": {
+    "west": -7.247676,
+    "south": 43.558384,
+    "east": -7.234588,
+    "north": 43.569446
+  },
+  "projectedBounds": {
+    "west": 641530,
+    "south": 4824317,
+    "east": 642561,
+    "north": 4825568,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1126
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 258,
+    "height": 313,
+    "minElevation": 0,
+    "maxElevation": 32.08,
+    "asset": "/terrain/assets/barreiros-altar-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 641880,
+      "z": 4824867
+    },
+    "end": {
+      "x": 642301,
+      "z": 4825218
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.252065,
+      "south": 43.53504,
+      "east": -7.230717,
+      "north": 43.574789
+    },
+    "projectedBounds": {
+      "west": 641230,
+      "south": 4821717,
+      "east": 642861,
+      "north": 4826168,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 109,
+      "height": 297,
+      "minElevation": 0,
+      "maxElevation": 152.5,
+      "asset": "/terrain/assets/barreiros-altar-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-altar-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-altar-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-altar-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-coast",
+  "name": "Costa de Barreiros",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.561672,
+    "lon": -7.208331
+  },
+  "bounds": {
+    "west": -7.262131,
+    "south": 43.542244,
+    "east": -7.154497,
+    "north": 43.581075
+  },
+  "projectedBounds": {
+    "west": 640400,
+    "south": 4822500,
+    "east": 649000,
+    "north": 4827000,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 32,
+    "roll": 0,
+    "distance": 8200
+  },
+  "terrain": {
+    "verticalExaggeration": 1.7,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 20,
+    "width": 430,
+    "height": 225,
+    "minElevation": 0,
+    "maxElevation": 100.95,
+    "asset": "/terrain/assets/barreiros-coast-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "overview",
+  "seaLevelMeters": 0.15,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 641300,
+      "z": 4825612
+    },
+    "end": {
+      "x": 647800,
+      "z": 4824065
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.262131,
+      "south": 43.542244,
+      "east": -7.154497,
+      "north": 43.581075
+    },
+    "projectedBounds": {
+      "west": 640400,
+      "south": 4822500,
+      "east": 649000,
+      "north": 4827000,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.7,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 40,
+      "width": 215,
+      "height": 112,
+      "minElevation": 0,
+      "maxElevation": 98.55,
+      "asset": "/terrain/assets/barreiros-coast-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-coast-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-coast-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-coast-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

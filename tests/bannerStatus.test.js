@@ -76,12 +76,12 @@ describe("estado de Protección Civil Carboneras", () => {
 });
 
 describe("municipios sin fuente diaria verificable", () => {
-  it.each(["garrucha", "vera"])("no hereda por error las banderas de Mojácar para %s", async (municipality) => {
+  it.each(["garrucha", "vera", "barreiros"])("no hereda por error las banderas de Mojácar para %s", async (municipality) => {
     const { default: worker } = await import("../worker/playas-mojacar-proxy.js");
     const response = await worker.fetch(new Request(`https://example.test/api/status?municipality=${municipality}`));
     const payload = await response.json();
     expect(response.status).toBe(200);
-    expect(payload.beaches.length).toBe(municipality === "garrucha" ? 3 : 4);
+    expect(payload.beaches.length).toBe(municipality === "garrucha" ? 3 : municipality === "vera" ? 4 : 10);
     expect(payload.beaches.every((beach) => beach.flag === "unknown" && beach.source === "unavailable")).toBe(true);
   });
 });

@@ -45,10 +45,12 @@
   "urbanDetail": "detailed",
   "seaLevelMeters": 1.5,
   "coastalStructures": [
-    { "featureId": 10125300001431, "kind": "breakwater" }
+    {
+      "featureId": 10125300001431,
+      "kind": "breakwater"
+    }
   ],
   "overviewZonePaddingMeters": 100,
-  "coastalWaterEdgeSeeding": true,
   "shoreline": {
     "start": {
       "x": 604979,

@@ -5,8 +5,12 @@ from pathlib import Path
 
 import numpy as np
 import rasterio
+from rasterio.crs import CRS
 from rasterio.fill import fillnodata
 from rasterio.merge import merge
+from rasterio.vrt import WarpedVRT
+
+ALLOWED_EPSG = {25830, 25829, 3041}
 
 
 def main() -> None:
@@ -17,18 +21,40 @@ def main() -> None:
     parser.add_argument("--east", type=float, required=True)
     parser.add_argument("--north", type=float, required=True)
     parser.add_argument("--resolution", type=float, required=True)
+    parser.add_argument("--epsg", type=int, default=25830)
     parser.add_argument("--smooth-passes", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--metadata", type=Path, required=True)
     parser.add_argument("--preview", type=Path, required=True)
     args = parser.parse_args()
+    if args.epsg not in ALLOWED_EPSG:
+        raise SystemExit(f"CRS destino inesperado: EPSG:{args.epsg}")
+    target = CRS.from_epsg(args.epsg)
 
-    datasets = [rasterio.open(path) for path in args.sources]
+    datasets = []
     try:
-        if any(src.crs.to_epsg() != 25830 for src in datasets):
-            raise SystemExit("CRS inesperado: todos los MDT deben ser EPSG:25830")
-        if any(abs(src.res[0] - 2) > 0.01 or abs(src.res[1] - 2) > 0.01 for src in datasets):
-            raise SystemExit("Resolución fuente inesperada: se requieren celdas de 2 m")
+        for path in args.sources:
+            src = rasterio.open(path)
+            epsg = src.crs.to_epsg()
+            if epsg not in ALLOWED_EPSG:
+                raise SystemExit(f"CRS inesperado en {path}: {src.crs}")
+            # 3041 es el alias «N-E» de ETRS89/UTM 29N, pero el GeoTIFF ya guarda
+            # la transformación en E-N: se trata como 25829 sin reproyectar.
+            normalized = 25829 if epsg == 3041 else epsg
+            if abs(src.res[0] - 2) > 0.01 or abs(src.res[1] - 2) > 0.01:
+                raise SystemExit(f"Resolución fuente inesperada en {path}: {src.res}")
+            if normalized == args.epsg and epsg == args.epsg:
+                datasets.append(src)
+            else:
+                # WarpedVRT con CRS normalizado (identidad para 3041→25829):
+                # deja el merge con CRS homogéneo y compara igual en merge().
+                datasets.append(WarpedVRT(
+                    src,
+                    src_crs=CRS.from_epsg(normalized),
+                    dst_crs=target,
+                    nodata=-32767,
+                    resampling=rasterio.enums.Resampling.bilinear,
+                ))
         mosaic, transform = merge(
             datasets,
             bounds=(args.west, args.south, args.east, args.north),
@@ -37,14 +63,14 @@ def main() -> None:
             resampling=rasterio.enums.Resampling.bilinear,
         )
     finally:
-        for src in datasets:
-            src.close()
+        for dataset in datasets:
+            dataset.close()
 
     heights = mosaic[0].astype("<f4")
     nodata_count = int(np.count_nonzero(heights <= -32000))
     filled_nodata_count = nodata_count
     if nodata_count:
-        # Las dos hojas tienen rejillas desplazadas y el merge remuestreado puede
+        # Las hojas tienen rejillas desplazadas y el merge remuestreado puede
         # dejar una costura de una celda. Solo se rellena esa costura interior.
         valid_mask = heights > -32000
         heights = fillnodata(heights, mask=valid_mask, max_search_distance=4).astype("<f4")
@@ -68,7 +94,7 @@ def main() -> None:
     metadata = {
         "sourceProduct": "MDT02 - 2ª cobertura (2015-2021)",
         "sourceFiles": [Path(path).name for path in args.sources],
-        "sourceCRS": "EPSG:25830",
+        "sourceCRS": f"EPSG:{args.epsg}",
         "sourceResolutionMeters": 2,
         "bounds": [args.west, args.south, args.east, args.north],
         "webResolutionMeters": args.resolution,

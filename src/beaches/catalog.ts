@@ -23,6 +23,17 @@ import veraMarinas from "./vera-marinas-bolaga.json";
 import veraPuertoRey from "./vera-puerto-rey.json";
 import veraPlayazo from "./vera-playazo.json";
 import veraCalaMarques from "./vera-cala-marques.json";
+import barreirosCoast from "./barreiros-coast.json";
+import barreirosAnguieira from "./barreiros-anguieira.json";
+import barreirosAltar from "./barreiros-altar.json";
+import barreirosSanBartolo from "./barreiros-san-bartolo.json";
+import barreirosRemior from "./barreiros-remior.json";
+import barreirosPenaDeSalsa from "./barreiros-pena-de-salsa.json";
+import barreirosBenquerencia from "./barreiros-benquerencia.json";
+import barreirosAreaDaBalea from "./barreiros-area-da-balea.json";
+import barreirosLongara from "./barreiros-longara.json";
+import barreirosAPasada from "./barreiros-a-pasada.json";
+import barreirosArealonga from "./barreiros-arealonga.json";
 import { parseBeachConfig, type BeachConfig } from "./types";
 
 const mojacarBeaches: BeachConfig[] = [
@@ -45,18 +56,25 @@ const carbonerasBeaches = [
   carbonerasMuertos
 ].map(parseBeachConfig);
 
+export type MunicipalityId = "mojacar" | "carboneras" | "garrucha" | "vera" | "barreiros";
+
 export interface MunicipalityCatalog {
-  id: "mojacar" | "carboneras" | "garrucha" | "vera";
+  id: MunicipalityId;
   name: string;
+  /** Nombre de la comarca, tal y como se rotula en las fichas. */
+  region: string;
+  /** Comarca del catálogo regional, el nivel que hay por encima de la costa. */
+  regionId: "levante" | "marina-lucense";
   overview: BeachConfig;
   beaches: BeachConfig[];
 }
 
 export const municipalities: MunicipalityCatalog[] = [
-  { id: "mojacar", name: "Mojácar", overview: parseBeachConfig(mojacarCoast), beaches: mojacarBeaches },
-  { id: "carboneras", name: "Carboneras", overview: parseBeachConfig(carbonerasCoast), beaches: carbonerasBeaches },
-  { id: "garrucha", name: "Garrucha", overview: parseBeachConfig(garruchaCoast), beaches: [garruchaPlaya, garruchaPosito, garruchaPlayazo].map(parseBeachConfig) },
-  { id: "vera", name: "Vera", overview: parseBeachConfig(veraCoast), beaches: [veraMarinas, veraPuertoRey, veraPlayazo, veraCalaMarques].map(parseBeachConfig) }
+  { id: "mojacar", name: "Mojácar", region: "Levante de Almería", regionId: "levante", overview: parseBeachConfig(mojacarCoast), beaches: mojacarBeaches },
+  { id: "carboneras", name: "Carboneras", region: "Levante de Almería", regionId: "levante", overview: parseBeachConfig(carbonerasCoast), beaches: carbonerasBeaches },
+  { id: "garrucha", name: "Garrucha", region: "Levante de Almería", regionId: "levante", overview: parseBeachConfig(garruchaCoast), beaches: [garruchaPlaya, garruchaPosito, garruchaPlayazo].map(parseBeachConfig) },
+  { id: "vera", name: "Vera", region: "Levante de Almería", regionId: "levante", overview: parseBeachConfig(veraCoast), beaches: [veraMarinas, veraPuertoRey, veraPlayazo, veraCalaMarques].map(parseBeachConfig) },
+  { id: "barreiros", name: "Barreiros", region: "A Mariña Lucense", regionId: "marina-lucense", overview: parseBeachConfig(barreirosCoast), beaches: [barreirosAnguieira, barreirosAltar, barreirosSanBartolo, barreirosRemior, barreirosPenaDeSalsa, barreirosBenquerencia, barreirosAreaDaBalea, barreirosLongara, barreirosAPasada, barreirosArealonga].map(parseBeachConfig) }
 ];
 export const beaches = municipalities.flatMap((municipality) => municipality.beaches);
 export const coastOverview = municipalities[0].overview;

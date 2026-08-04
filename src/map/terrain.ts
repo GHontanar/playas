@@ -44,7 +44,7 @@ export async function loadTerrain(
   const illustratedRock = new THREE.Color("#666b70");
   const color = new THREE.Color();
   const illustrated = config.visualStyle === "mediterranean-illustrated" && source === config;
-  const floodedSea = coast && config.coastalStructures.length
+  const floodedSea = coast && (config.coastalStructures.length || config.useFloodMask)
     ? coastalFloodMask(
       coast.lines,
       config.seaSide,
@@ -52,7 +52,7 @@ export async function loadTerrain(
       height,
       sizeX / 2,
       sizeZ / 2,
-      config.coastalWaterEdgeSeeding ? { heightsNorthToSouth: heights } : undefined
+      { heightsNorthToSouth: heights }
     )
     : undefined;
 

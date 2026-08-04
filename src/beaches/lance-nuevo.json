@@ -1,6 +1,7 @@
 {
   "id": "lance-nuevo",
   "name": "Lance Nuevo",
+  "municipalityId": "mojacar",
   "timezone": "Europe/Madrid",
   "center": {
     "lat": 37.117017,
@@ -49,6 +50,7 @@
       "kind": "breakwater"
     }
   ],
+  "overviewZonePaddingMeters": 0,
   "shoreline": {
     "start": {
       "x": 603230,

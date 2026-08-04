@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-anguieira",
+  "name": "Playa de Anguieira",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.566675,
+    "lon": -7.246693
+  },
+  "bounds": {
+    "west": -7.254854,
+    "south": 43.558493,
+    "east": -7.239696,
+    "north": 43.573072
+  },
+  "projectedBounds": {
+    "west": 640950,
+    "south": 4824317,
+    "east": 642140,
+    "north": 4825962,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1481
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 298,
+    "height": 411,
+    "minElevation": 0,
+    "maxElevation": 32.08,
+    "asset": "/terrain/assets/barreiros-anguieira-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 641300,
+      "z": 4825612
+    },
+    "end": {
+      "x": 641880,
+      "z": 4824867
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.259241,
+      "south": 43.53515,
+      "east": -7.235825,
+      "north": 43.578415
+    },
+    "projectedBounds": {
+      "west": 640650,
+      "south": 4821717,
+      "east": 642440,
+      "north": 4826562,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 119,
+      "height": 323,
+      "minElevation": 0,
+      "maxElevation": 137.84,
+      "asset": "/terrain/assets/barreiros-anguieira-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-anguieira-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-anguieira-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-anguieira-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

@@ -94,3 +94,22 @@ Los ejes proceden de OpenStreetMap mediante una consulta Overpass reproducible,
 se filtran por `highway` y se convierten en polígonos simplificados durante el
 pipeline. Datos © OpenStreetMap contributors, licencia ODbL 1.0:
 <https://www.openstreetmap.org/copyright>.
+
+## Barreiros (Lugo)
+
+Fecha de comprobación: 2 de agosto de 2026. Fuentes del huso 29:
+
+- **Elevación**: MDT02 de la 2.ª cobertura en ETRS89 / UTM 29N (EPSG:25829).
+  Barreiros cruza las hojas `0009-2`, `0009-4` y `0010-3`. Dos de ellas llegan
+  etiquetadas como EPSG:3041 (alias «N-E» con píxeles E-N); `prepare_dem.py`
+  normaliza ese alias antes del merge. Descarga automática en
+  `scripts/download-barreiros.sh`.
+- **Costa**: Línea de costa del Instituto Hidrográfico de la Marina, capa
+  `COSTA` (`FEATURE=COALNE`, `PLEAMAR`), distribuida por el CNIG
+  (<https://centrodedescargas.cnig.es/CentroDescargas/linea-costa>), en ETRS89
+  geográfico. La extracción la reproyecta a 25829 y descarta anillos cerrados
+  (islas/rocas) y fragmentos minúsculos. Licencia: uso libre con cita
+  «© Instituto Hidrográfico de la Marina».
+- **Edificios**: Catastro INSPIRE, municipio `27005-BARREIROS` (nota: el código
+  catastral es 27005, no el 27006 del INE). Misma fuente y licencia que el resto.
+- **Calles**: OSM Overpass sobre el ámbito municipal.

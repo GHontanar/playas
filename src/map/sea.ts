@@ -1,13 +1,17 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import {
-  coastlineEnvelope,
+  alongOf,
+  coastAt,
   coastalFloodMask,
-  coastXAt,
+  coastlineEnvelope,
+  crossOf,
   isPointInPolygon,
   isSeaPoint,
   landPolygonFromCoastlines,
+  recompose,
   seawardNormal,
+  seawardSign,
   type CoastLine
 } from "./coastalOrientation";
 import type { Vector3Like } from "../solar/sunVector";
@@ -89,8 +93,8 @@ export async function createSea(
   const geometry = new THREE.PlaneGeometry(
     sizeX,
     sizeZ,
-    structureIds.size ? config.terrain.width - 1 : 96,
-    structureIds.size ? config.terrain.height - 1 : 180
+    structureIds.size || config.useFloodMask ? config.terrain.width - 1 : 96,
+    structureIds.size || config.useFloodMask ? config.terrain.height - 1 : 180
   );
   geometry.setAttribute(
     "coastMask",
@@ -455,6 +459,7 @@ function createShoreDistance(
 function createBreakerCoastline(coastlines: CoastLine[], config: BeachConfig): CoastLine {
   const centerX = (config.projectedBounds.west + config.projectedBounds.east) / 2;
   const centerZ = (config.projectedBounds.south + config.projectedBounds.north) / 2;
+  const side = config.seaSide;
   const start: [number, number] = [
     config.shoreline.start.x - centerX,
     config.shoreline.start.z - centerZ
@@ -463,15 +468,15 @@ function createBreakerCoastline(coastlines: CoastLine[], config: BeachConfig): C
     config.shoreline.end.x - centerX,
     config.shoreline.end.z - centerZ
   ];
-  const dx = end[0] - start[0];
-  const dz = end[1] - start[1];
-  const length = Math.hypot(dx, dz);
+  const alongStart = alongOf(side, start[0], start[1]);
+  const alongEnd = alongOf(side, end[0], end[1]);
+  const length = Math.abs(alongEnd - alongStart);
   const sampleCount = Math.max(12, Math.round(length / 12));
-  const envelope = coastlineEnvelope(coastlines, config.seaSide);
+  const envelope = coastlineEnvelope(coastlines, side);
   const coast = Array.from({ length: sampleCount + 1 }, (_, index) => {
     const progress = index / sampleCount;
-    const targetZ = start[1] + dz * progress;
-    return [coastXAt(envelope, targetZ), targetZ] as [number, number];
+    const along = alongStart + (alongEnd - alongStart) * progress;
+    return recompose(side, along, coastAt(envelope, along, side));
   });
   if (coast.length < 3) {
     throw new Error(`La costa oficial de ${config.name} no contiene puntos suficientes para el oleaje`);
@@ -485,7 +490,7 @@ function createCoastMask(
   config: BeachConfig,
   terrainHeights: Float32Array
 ): number[] {
-  if (config.coastalStructures.length) {
+  if (config.coastalStructures.length || config.useFloodMask) {
     return coastalFloodMask(
       coastlines,
       config.seaSide,
@@ -493,7 +498,7 @@ function createCoastMask(
       config.terrain.height,
       (config.projectedBounds.east - config.projectedBounds.west) / 2,
       (config.projectedBounds.north - config.projectedBounds.south) / 2,
-      config.coastalWaterEdgeSeeding ? { heightsNorthToSouth: terrainHeights } : undefined
+      { heightsNorthToSouth: terrainHeights }
     );
   }
   const coast = coastlineEnvelope(coastlines, config.seaSide);
@@ -512,7 +517,7 @@ function createCoastMask(
 
 function createSeaPointPredicate(coastlines: CoastLine[], config: BeachConfig) {
   const coast = coastlineEnvelope(coastlines, config.seaSide);
-  const landPolygon = config.coastalStructures.length
+  const landPolygon = config.coastalStructures.length || config.useFloodMask
     ? landPolygonFromCoastlines(
       coastlines,
       config.seaSide,
@@ -758,12 +763,15 @@ function findSeawardStructureTip(
   structureIds: Set<number>,
   seaSide: BeachConfig["seaSide"]
 ): [number, number] | undefined {
+  const sign = seawardSign(seaSide);
   const points = records
     .filter(({ featureId }) => featureId != null && structureIds.has(featureId))
     .flatMap(({ line }) => line);
   if (!points.length) return undefined;
   return points.reduce((tip, point) => {
-    const fartherSeaward = seaSide === "east" ? point[0] > tip[0] : point[0] < tip[0];
+    const fartherSeaward = sign === 1
+      ? crossOf(seaSide, point[0], point[1]) > crossOf(seaSide, tip[0], tip[1])
+      : crossOf(seaSide, point[0], point[1]) < crossOf(seaSide, tip[0], tip[1]);
     return fartherSeaward ? point : tip;
   });
 }

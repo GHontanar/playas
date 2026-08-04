@@ -58,7 +58,7 @@ function makeConfig(id: string, name: string, municipalityId: Municipality, cent
     camera: { bearing: 45, pitch: 35.264, roll: 0, distance: Math.round(Math.max(projectedBounds.east - projectedBounds.west, projectedBounds.north - projectedBounds.south) * .9) },
     terrain: { verticalExaggeration: 1.5, sourceResolutionMeters: 2, webResolutionMeters: resolution, width: 2, height: 2, minElevation: 0, maxElevation: 1, asset: `/terrain/assets/${id}-dem.f32` },
     chunk: { depthMeters: 90 }, seaSide: "east", worldAxes: "south-positive", visualStyle: "mediterranean-illustrated", urbanDetail: "detailed", seaLevelMeters: 1.5,
-    coastalStructures: municipalityId === "garrucha" ? garruchaStructures(id) : [], overviewZonePaddingMeters: id === "garrucha-playazo" ? 100 : 0, coastalWaterEdgeSeeding: id === "garrucha-playazo", shoreline: { start: { x: start[0], z: start[1] }, end: { x: end[0], z: end[1] } },
+    coastalStructures: municipalityId === "garrucha" ? garruchaStructures(id) : [], overviewZonePaddingMeters: id === "garrucha-playazo" ? 100 : 0, shoreline: { start: { x: start[0], z: start[1] }, end: { x: end[0], z: end[1] } },
     shadowTerrain: { bounds: geographicBounds(horizon), projectedBounds: { ...horizon, crs: "EPSG:25830" }, terrain: { verticalExaggeration: 1.5, sourceResolutionMeters: 2, webResolutionMeters: 15, width: 2, height: 2, minElevation: 0, maxElevation: 1, asset: `/terrain/assets/${id}-horizon.f32` } },
     coastlineAsset: `/terrain/assets/${id}-coastline.geojson`, buildingsAsset: `/terrain/assets/${id}-buildings.geojson`, roadsAsset: `/terrain/assets/${id}-roads.geojson`, attribution
   };

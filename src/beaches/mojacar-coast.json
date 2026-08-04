@@ -1,6 +1,7 @@
 {
   "id": "mojacar-coast",
   "name": "Costa de Mojácar",
+  "municipalityId": "mojacar",
   "timezone": "Europe/Madrid",
   "center": {
     "lat": 37.135667,
@@ -53,6 +54,7 @@
       "kind": "breakwater"
     }
   ],
+  "overviewZonePaddingMeters": 0,
   "shoreline": {
     "start": {
       "x": 602500,

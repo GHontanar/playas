@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-san-bartolo",
+  "name": "Playa de San Bartolo",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.566395,
+    "lon": -7.23352
+  },
+  "bounds": {
+    "west": -7.242374,
+    "south": 43.561463,
+    "east": -7.22583,
+    "north": 43.569545
+  },
+  "projectedBounds": {
+    "west": 641951,
+    "south": 4824668,
+    "east": 643268,
+    "north": 4825594,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1185
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 329,
+    "height": 232,
+    "minElevation": 0,
+    "maxElevation": 23.45,
+    "asset": "/terrain/assets/barreiros-san-bartolo-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 642301,
+      "z": 4825218
+    },
+    "end": {
+      "x": 643008,
+      "z": 4825244
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.246766,
+      "south": 43.53812,
+      "east": -7.221958,
+      "north": 43.574887
+    },
+    "projectedBounds": {
+      "west": 641651,
+      "south": 4822068,
+      "east": 643568,
+      "north": 4826194,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 128,
+      "height": 275,
+      "minElevation": 0,
+      "maxElevation": 106.64,
+      "asset": "/terrain/assets/barreiros-san-bartolo-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-san-bartolo-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-san-bartolo-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-san-bartolo-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

@@ -1,6 +1,7 @@
 {
   "id": "marina-de-la-torre",
   "name": "Marina de la Torre",
+  "municipalityId": "mojacar",
   "timezone": "Europe/Madrid",
   "center": {
     "lat": 37.163133,
@@ -41,8 +42,10 @@
   "seaSide": "east",
   "worldAxes": "south-positive",
   "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
   "seaLevelMeters": 1.5,
   "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
   "shoreline": {
     "start": {
       "x": 604387.2948,

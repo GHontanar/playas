@@ -23,21 +23,23 @@ ROAD_WIDTHS = {
 }
 
 
-def feature_collection(name: str, features: list[dict], source: str) -> dict:
+ALLOWED_EPSG = {25830, 25829, 3041}
+
+def feature_collection(name: str, features: list[dict], source: str, epsg: int) -> dict:
     return {
         "type": "FeatureCollection",
         "name": name,
-        "crs": {"type": "name", "properties": {"name": "EPSG:25830"}},
+        "crs": {"type": "name", "properties": {"name": f"EPSG:{epsg}"}},
         "source": source,
         "features": features,
     }
 
 
-def buildings(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool) -> dict:
+def buildings(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool, epsg: int) -> dict:
     clip = box(*bounds)
     features = []
     with fiona.open(source, layer="BuildingPart") as collection:
-        if collection.crs.to_epsg() != 25830:
+        if collection.crs.to_epsg() not in ALLOWED_EPSG:
             raise SystemExit(f"CRS catastral inesperado: {collection.crs}")
         for raw in collection.filter(bbox=bounds):
             geometry = shape(raw["geometry"]).intersection(clip)
@@ -78,13 +80,14 @@ def buildings(source: Path, bounds: tuple[float, float, float, float], name: str
         f"{name}-buildings",
         features,
         "Dirección General del Catastro, INSPIRE BU",
+        epsg,
     )
 
 
-def roads(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool) -> dict:
+def roads(source: Path, bounds: tuple[float, float, float, float], name: str, overview: bool, epsg: int) -> dict:
     clip = box(*bounds)
     payload = json.loads(source.read_text(encoding="utf-8"))
-    transformer = Transformer.from_crs(4326, 25830, always_xy=True)
+    transformer = Transformer.from_crs(4326, epsg, always_xy=True)
     buffered_by_class: dict[str, list] = {}
     for element in payload.get("elements", []):
         road_class = element.get("tags", {}).get("highway")
@@ -118,7 +121,7 @@ def roads(source: Path, bounds: tuple[float, float, float, float], name: str, ov
             },
             "geometry": mapping(merged),
         })
-    return feature_collection(f"{name}-roads", features, "© OpenStreetMap contributors, ODbL 1.0")
+    return feature_collection(f"{name}-roads", features, "© OpenStreetMap contributors, ODbL 1.0", epsg)
 
 
 def write(path: Path, payload: dict) -> None:
@@ -134,8 +137,9 @@ if __name__ == "__main__":
     parser.add_argument("roads_output", type=Path)
     parser.add_argument("--name", required=True)
     parser.add_argument("--bounds", nargs=4, required=True, type=float, metavar=("W", "S", "E", "N"))
+    parser.add_argument("--epsg", type=int, default=25830)
     parser.add_argument("--overview", action="store_true")
     args = parser.parse_args()
     bounds = tuple(args.bounds)
-    write(args.buildings_output, buildings(args.buildings_source, bounds, args.name, args.overview))
-    write(args.roads_output, roads(args.roads_source, bounds, args.name, args.overview))
+    write(args.buildings_output, buildings(args.buildings_source, bounds, args.name, args.overview, args.epsg))
+    write(args.roads_output, roads(args.roads_source, bounds, args.name, args.overview, args.epsg))

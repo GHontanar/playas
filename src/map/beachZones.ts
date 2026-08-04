@@ -1,7 +1,14 @@
 import * as THREE from "three";
 import type { BeachConfig } from "../beaches/types";
 import type { ObservedBeachStatus, FlagState } from "../status/types";
-import { coastlineEnvelope, coastXAt, seawardNormal, type CoastLine } from "./coastalOrientation";
+import {
+  alongOf,
+  coastAt,
+  coastlineEnvelope,
+  recompose,
+  seawardNormal,
+  type CoastLine
+} from "./coastalOrientation";
 import { sampleTerrainElevation } from "./terrain";
 import { loadJson } from "./assets";
 
@@ -21,6 +28,7 @@ export interface BeachZoneLayer {
   meshes: THREE.Mesh[];
   setStatuses(statuses: ObservedBeachStatus[]): void;
   setActive(beachId: string | null): void;
+  setSeparatorsVisible(visible: boolean): void;
   dispose(): void;
 }
 
@@ -41,9 +49,10 @@ export async function createBeachZones(
     return source.map((line) => line.map(([x, z]) => [x - centerX, z - centerZ] as [number, number]));
   });
   const coast = coastlineEnvelope(lines, overview.seaSide, 12);
+  const side = overview.seaSide;
   const group = new THREE.Group();
   const meshes = beaches.map((beach) => {
-    const geometry = zoneGeometry(beach, overview, coast, heights, centerZ);
+    const geometry = zoneGeometry(beach, overview, coast, heights, centerX, centerZ);
     const material = new THREE.MeshBasicMaterial({
       color: FLAG_COLOURS.unknown,
       transparent: true,
@@ -62,13 +71,14 @@ export async function createBeachZones(
     overview,
     coast,
     heights,
+    centerX,
     centerZ,
     beaches
   );
   const separatorMaterial = new THREE.MeshBasicMaterial({
     color: "#274c50",
     transparent: true,
-    opacity: .74,
+    opacity: 0,
     depthWrite: false,
     side: THREE.DoubleSide
   });
@@ -76,7 +86,7 @@ export async function createBeachZones(
   separators.name = "beach-zone-separators";
   separators.renderOrder = 6;
   group.add(separators);
-  const labels = beaches.map((beach) => createBeachLabel(beach, overview, coast));
+  const labels = beaches.map((beach) => createBeachLabel(beach, overview, coast, centerX, centerZ));
   labels.forEach((label) => group.add(label));
 
   return {
@@ -102,6 +112,9 @@ export async function createBeachZones(
         mesh.position.y = active ? 3 : 0;
       }
     },
+    setSeparatorsVisible(visible) {
+      separatorMaterial.opacity = visible ? .74 : 0;
+    },
     dispose() {
       for (const mesh of meshes) {
         mesh.geometry.dispose();
@@ -118,7 +131,13 @@ export async function createBeachZones(
   };
 }
 
-function createBeachLabel(beach: BeachConfig, overview: BeachConfig, coast: CoastLine): THREE.Sprite {
+function createBeachLabel(
+  beach: BeachConfig,
+  overview: BeachConfig,
+  coast: CoastLine,
+  overviewCenterX: number,
+  overviewCenterZ: number
+): THREE.Sprite {
   const canvas = document.createElement("canvas");
   canvas.width = 768;
   canvas.height = 160;
@@ -137,20 +156,25 @@ function createBeachLabel(beach: BeachConfig, overview: BeachConfig, coast: Coas
   texture.minFilter = THREE.LinearFilter;
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
   const label = new THREE.Sprite(material);
-  const coastSpan = overview.projectedBounds.north - overview.projectedBounds.south;
-  const labelWidth = THREE.MathUtils.clamp(coastSpan * .09, 300, 780);
-  const centerZProjected = (beach.shoreline.start.z + beach.shoreline.end.z) / 2;
-  const overviewCenterZ = (overview.projectedBounds.south + overview.projectedBounds.north) / 2;
-  const z = centerZProjected - overviewCenterZ;
-  const previousZ = z - 12;
-  const nextZ = z + 12;
-  const normal = seawardNormal(
-    coastXAt(coast, nextZ) - coastXAt(coast, previousZ),
-    nextZ - previousZ,
-    overview.seaSide
+  const side = overview.seaSide;
+  const overviewCenterAlong = alongOf(side, overviewCenterX, overviewCenterZ);
+  const coastSpan = Math.hypot(
+    overview.projectedBounds.east - overview.projectedBounds.west,
+    overview.projectedBounds.north - overview.projectedBounds.south
   );
-  const x = coastXAt(coast, z) + normal.x * 120;
-  const labelZ = z + normal.z * 120;
+  const labelWidth = THREE.MathUtils.clamp(coastSpan * .09, 300, 780);
+  const beachCenterAlong = alongOf(side, beach.shoreline.start.x, beach.shoreline.start.z)
+    + (alongOf(side, beach.shoreline.end.x, beach.shoreline.end.z)
+      - alongOf(side, beach.shoreline.start.x, beach.shoreline.start.z)) / 2;
+  const along = beachCenterAlong - overviewCenterAlong;
+  const previousAlong = along - 12;
+  const nextAlong = along + 12;
+  const current = recompose(side, along, coastAt(coast, along, side));
+  const previous = recompose(side, previousAlong, coastAt(coast, previousAlong, side));
+  const next = recompose(side, nextAlong, coastAt(coast, nextAlong, side));
+  const normal = seawardNormal(next[0] - previous[0], next[1] - previous[1], side);
+  const x = current[0] + normal.x * 120;
+  const labelZ = current[1] + normal.z * 120;
   label.position.set(x, overview.seaLevelMeters + 55, labelZ);
   label.scale.set(labelWidth, labelWidth * 163 / 780, 1);
   label.center.set(.5, 0);
@@ -165,30 +189,37 @@ function zoneGeometry(
   overview: BeachConfig,
   coast: CoastLine,
   heights: Float32Array,
+  overviewCenterX: number,
   overviewCenterZ: number
 ): THREE.BufferGeometry {
-  const minZ = Math.min(beach.shoreline.start.z, beach.shoreline.end.z) - beach.overviewZonePaddingMeters - overviewCenterZ;
-  const maxZ = Math.max(beach.shoreline.start.z, beach.shoreline.end.z) + beach.overviewZonePaddingMeters - overviewCenterZ;
-  const count = Math.max(8, Math.ceil((maxZ - minZ) / 35));
+  const side = overview.seaSide;
+  const overviewCenterAlong = alongOf(side, overviewCenterX, overviewCenterZ);
+  const startAlong = alongOf(side, beach.shoreline.start.x, beach.shoreline.start.z);
+  const endAlong = alongOf(side, beach.shoreline.end.x, beach.shoreline.end.z);
+  const minAlong = Math.min(startAlong, endAlong) - beach.overviewZonePaddingMeters - overviewCenterAlong;
+  const maxAlong = Math.max(startAlong, endAlong) + beach.overviewZonePaddingMeters - overviewCenterAlong;
+  const count = Math.max(8, Math.ceil((maxAlong - minAlong) / 35));
   const positions = new Float32Array((count + 1) * 3 * 3);
   const indices: number[] = [];
   for (let index = 0; index <= count; index++) {
-    const z = THREE.MathUtils.lerp(minZ, maxZ, index / count);
-    const previousZ = Math.max(minZ, z - 8);
-    const nextZ = Math.min(maxZ, z + 8);
-    const x = coastXAt(coast, z);
+    const along = THREE.MathUtils.lerp(minAlong, maxAlong, index / count);
+    const previousAlong = Math.max(minAlong, along - 8);
+    const nextAlong = Math.min(maxAlong, along + 8);
+    const current = recompose(side, along, coastAt(coast, along, side));
+    const previous = recompose(side, previousAlong, coastAt(coast, previousAlong, side));
+    const next = recompose(side, nextAlong, coastAt(coast, nextAlong, side));
     const normal = seawardNormal(
-      coastXAt(coast, nextZ) - coastXAt(coast, previousZ),
-      nextZ - previousZ,
-      overview.seaSide
+      next[0] - previous[0],
+      next[1] - previous[1],
+      side
     );
     // Anchura expresiva para que la zona siga siendo legible y táctil en el
-    // overview de 8,5 km. Centro y longitud proceden de la costa oficial; esta
-    // anchura no pretende delimitar una lámina de agua administrativa.
+    // overview. Centro y longitud proceden de la costa oficial; esta anchura no
+    // pretende delimitar una lámina de agua administrativa.
     const edges = [-80, 0, 180];
     edges.forEach((distance, edge) => {
-      const px = x + normal.x * distance;
-      const pz = z + normal.z * distance;
+      const px = current[0] + normal.x * distance;
+      const pz = current[1] + normal.z * distance;
       const offset = (index * 3 + edge) * 3;
       positions[offset] = px;
       positions[offset + 1] = distance <= 0
@@ -215,42 +246,49 @@ function createSeparatorGeometry(
   overview: BeachConfig,
   coast: CoastLine,
   heights: Float32Array,
+  overviewCenterX: number,
   overviewCenterZ: number,
   beaches: BeachConfig[]
 ): THREE.BufferGeometry {
-  const boundaries = beaches
+  const side = overview.seaSide;
+  const overviewCenterAlong = alongOf(side, overviewCenterX, overviewCenterZ);
+  const alongBoundaries = beaches
     .flatMap((beach) => [
-      beach.shoreline.start.z - beach.overviewZonePaddingMeters,
-      beach.shoreline.end.z + beach.overviewZonePaddingMeters
+      Math.min(alongOf(side, beach.shoreline.start.x, beach.shoreline.start.z),
+        alongOf(side, beach.shoreline.end.x, beach.shoreline.end.z)) - beach.overviewZonePaddingMeters,
+      Math.max(alongOf(side, beach.shoreline.start.x, beach.shoreline.start.z),
+        alongOf(side, beach.shoreline.end.x, beach.shoreline.end.z)) + beach.overviewZonePaddingMeters
     ])
     .sort((a, b) => a - b)
     .filter((value, index, all) => index === 0 || value - all[index - 1] > 35)
-    .map((z) => z - overviewCenterZ);
-  const positions = new Float32Array(boundaries.length * 4 * 3);
+    .map((value) => value - overviewCenterAlong);
+  const positions = new Float32Array(alongBoundaries.length * 4 * 3);
   const indices: number[] = [];
-  boundaries.forEach((z, boundaryIndex) => {
-    const previousZ = z - 10;
-    const nextZ = z + 10;
-    const tangentX = coastXAt(coast, nextZ) - coastXAt(coast, previousZ);
-    const tangentZ = nextZ - previousZ;
+  alongBoundaries.forEach((along, boundaryIndex) => {
+    const previousAlong = along - 10;
+    const nextAlong = along + 10;
+    const previous = recompose(side, previousAlong, coastAt(coast, previousAlong, side));
+    const next = recompose(side, nextAlong, coastAt(coast, nextAlong, side));
+    const tangentX = next[0] - previous[0];
+    const tangentZ = next[1] - previous[1];
     const tangentLength = Math.hypot(tangentX, tangentZ) || 1;
     const tx = tangentX / tangentLength;
     const tz = tangentZ / tangentLength;
-    const x = coastXAt(coast, z);
-    const normal = seawardNormal(tangentX, tangentZ, overview.seaSide);
+    const current = recompose(side, along, coastAt(coast, along, side));
+    const normal = seawardNormal(tangentX, tangentZ, side);
     const distances = [-95, 235];
     for (let end = 0; end < 2; end++) {
-      for (let side = 0; side < 2; side++) {
+      for (let sideOffset = 0; sideOffset < 2; sideOffset++) {
         const distance = distances[end];
-        const sideOffset = side ? 9 : -9;
-        const px = x + normal.x * distance + tx * sideOffset;
-        const pz = z + normal.z * distance + tz * sideOffset;
-        const offset = (boundaryIndex * 4 + end * 2 + side) * 3;
-        positions[offset] = px;
-        positions[offset + 1] = distance <= 0
+        const offset = sideOffset ? 9 : -9;
+        const px = current[0] + normal.x * distance + tx * offset;
+        const pz = current[1] + normal.z * distance + tz * offset;
+        const index = (boundaryIndex * 4 + end * 2 + sideOffset) * 3;
+        positions[index] = px;
+        positions[index + 1] = distance <= 0
           ? sampleTerrainElevation(heights, overview, px, pz) * overview.terrain.verticalExaggeration + 8
           : overview.seaLevelMeters + 8;
-        positions[offset + 2] = pz;
+        positions[index + 2] = pz;
       }
     }
     const offset = boundaryIndex * 4;

@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-pena-de-salsa",
+  "name": "Playa de Pena de Salsa",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.563769,
+    "lon": -7.214584
+  },
+  "bounds": {
+    "west": -7.224525,
+    "south": 43.558341,
+    "east": -7.205808,
+    "north": 43.567413
+  },
+  "projectedBounds": {
+    "west": 643400,
+    "south": 4824352,
+    "east": 644890,
+    "north": 4825392,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1341
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 372,
+    "height": 260,
+    "minElevation": 0,
+    "maxElevation": 21.36,
+    "asset": "/terrain/assets/barreiros-pena-de-salsa-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 643750,
+      "z": 4825042
+    },
+    "end": {
+      "x": 644630,
+      "z": 4824902
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.228923,
+      "south": 43.534999,
+      "east": -7.201934,
+      "north": 43.572755
+    },
+    "projectedBounds": {
+      "west": 643100,
+      "south": 4821752,
+      "east": 645190,
+      "north": 4825992,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 139,
+      "height": 283,
+      "minElevation": 0,
+      "maxElevation": 156.87,
+      "asset": "/terrain/assets/barreiros-pena-de-salsa-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-pena-de-salsa-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-pena-de-salsa-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-pena-de-salsa-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

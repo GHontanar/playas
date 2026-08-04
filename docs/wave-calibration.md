@@ -46,3 +46,14 @@ usar el modelo.
 La dirección queda preservada en el contrato, pero todavía no modifica la
 incidencia de las crestas. Una adaptación por playa deberá partir de orientación
 costera, exposición y apantallamiento, y documentarse como derivación separada.
+
+## Barreiros (Lugo)
+
+Desde el 2-08-2026 el catálogo incluye la costa cantábrica. Los presets de
+`calm`/`moderate`/`rough` y la calibración histórica siguen siendo comunes,
+pero la celda marina de Barreiros (Atlántico) tiene olas notablemente mayores
+que el Mediterráneo de Almería: la banda `rough` (Hs ≥ 0,90 m) es el estado
+habitual, no la excepción. No se ha recalibrado la tabla; documenta que el
+mismo umbral clasifica el Cantábrico casi siempre como agitado. Los presets
+siguen siendo artísticos y no equivalen a un criterio de seguridad ni a la
+bandera observada.

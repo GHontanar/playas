@@ -1,0 +1,94 @@
+{
+  "id": "barreiros-arealonga",
+  "name": "Playa de Arealonga",
+  "municipalityId": "barreiros",
+  "timezone": "Europe/Madrid",
+  "center": {
+    "lat": 43.558978,
+    "lon": -7.174071
+  },
+  "bounds": {
+    "west": -7.182713,
+    "south": 43.550148,
+    "east": -7.166596,
+    "north": 43.566026
+  },
+  "projectedBounds": {
+    "west": 646797,
+    "south": 4823515,
+    "east": 648060,
+    "north": 4825307,
+    "crs": "EPSG:25829"
+  },
+  "camera": {
+    "bearing": 45,
+    "pitch": 35.264,
+    "roll": 0,
+    "distance": 1613
+  },
+  "terrain": {
+    "verticalExaggeration": 1.5,
+    "sourceResolutionMeters": 2,
+    "webResolutionMeters": 4,
+    "width": 316,
+    "height": 448,
+    "minElevation": 0,
+    "maxElevation": 27.62,
+    "asset": "/terrain/assets/barreiros-arealonga-dem.f32"
+  },
+  "chunk": {
+    "depthMeters": 90
+  },
+  "seaSide": "north",
+  "worldAxes": "south-positive",
+  "visualStyle": "mediterranean-illustrated",
+  "urbanDetail": "detailed",
+  "seaLevelMeters": 1.5,
+  "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
+  "shoreline": {
+    "start": {
+      "x": 647147,
+      "z": 4824957
+    },
+    "end": {
+      "x": 647800,
+      "z": 4824065
+    }
+  },
+  "shadowTerrain": {
+    "bounds": {
+      "west": -7.187126,
+      "south": 43.526808,
+      "east": -7.162719,
+      "north": 43.571366
+    },
+    "projectedBounds": {
+      "west": 646497,
+      "south": 4820915,
+      "east": 648360,
+      "north": 4825907,
+      "crs": "EPSG:25829"
+    },
+    "terrain": {
+      "verticalExaggeration": 1.5,
+      "sourceResolutionMeters": 2,
+      "webResolutionMeters": 15,
+      "width": 124,
+      "height": 333,
+      "minElevation": 0,
+      "maxElevation": 471.91,
+      "asset": "/terrain/assets/barreiros-arealonga-horizon.f32"
+    }
+  },
+  "coastlineAsset": "/terrain/assets/barreiros-arealonga-coastline.geojson",
+  "buildingsAsset": "/terrain/assets/barreiros-arealonga-buildings.geojson",
+  "roadsAsset": "/terrain/assets/barreiros-arealonga-roads.geojson",
+  "attribution": [
+    "Obra derivada de MDT02-cob2 2015-2021 CC-BY 4.0 scne.es",
+    "Línea de costa © Instituto Hidrográfico de la Marina",
+    "Edificios: Dirección General del Catastro",
+    "Calles: © OpenStreetMap contributors, ODbL 1.0"
+  ],
+  "useFloodMask": true
+}

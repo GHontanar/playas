@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  coastAt,
   coastlineEnvelope,
   coastalFloodMask,
-  coastXAt,
   isPointInPolygon,
   isSeaPoint,
   landPolygonFromCoastlines,
@@ -11,10 +11,10 @@ import {
 
 const coast: Array<[number, number]> = [[0, 0], [10, 100], [30, 200]];
 
-describe("orientación costa-mar de Ventanicas", () => {
+describe("orientación costa-mar de Ventanicas (mar al este)", () => {
   it("interpola la X de costa en coordenadas métricas", () => {
-    expect(coastXAt(coast, 50)).toBeCloseTo(5);
-    expect(coastXAt(coast, 150)).toBeCloseTo(20);
+    expect(coastAt(coast, 50, "east")).toBeCloseTo(5);
+    expect(coastAt(coast, 150, "east")).toBeCloseTo(20);
   });
 
   it("clasifica como mar únicamente el lado oriental y respeta el margen", () => {
@@ -30,21 +30,25 @@ describe("orientación costa-mar de Ventanicas", () => {
   });
 
   it("reduce ramales costeros al borde exterior del lado del mar", () => {
-    expect(coastlineEnvelope([
+    const envelope = coastlineEnvelope([
       [[0, 0], [2, 10]],
       [[5, 0], [3, 10]]
-    ], "east", 1)).toEqual([[5, 0], [3, 10]]);
+    ], "east", 1);
+    // Un cubo sin vértices se resuelve muestreando el tramo, no heredando el
+    // ramal interior: ningún punto sale de la rama de X pequeña.
+    expect(envelope).toHaveLength(11);
+    for (const [x, z] of envelope) expect(x).toBeGreaterThan(z * .2);
   });
 
   it("conserva un espigón que vuelve sobre sí mismo en la máscara poligonal", () => {
     const polygon = landPolygonFromCoastlines([
-      [[0, -10], [0, -2]],
-      [[0, -2], [6, -2], [6, 2], [0, 2]],
-      [[0, 2], [0, 10]]
-    ], "east", 10, 10);
-    expect(isPointInPolygon([4, 0], polygon)).toBe(true);
-    expect(isPointInPolygon([8, 0], polygon)).toBe(false);
-    expect(isPointInPolygon([-4, 0], polygon)).toBe(true);
+      [[0, -50], [0, -20]],
+      [[0, -20], [30, -20], [30, 20], [0, 20]],
+      [[0, 20], [0, 50]]
+    ], "east", 60, 60);
+    expect(isPointInPolygon([20, 0], polygon)).toBe(true);
+    expect(isPointInPolygon([40, 0], polygon)).toBe(false);
+    expect(isPointInPolygon([-20, 0], polygon)).toBe(true);
   });
 
   it("deja entrar el mar por una bocana sin atravesar los muelles", () => {
@@ -62,9 +66,6 @@ describe("orientación costa-mar de Ventanicas", () => {
   });
 
   it("inunda la dársena encerrada sin invadir la playa llana", () => {
-    // Recorte tipo Playazo Garrucha: costa abierta al este, muelles que
-    // encierran una dársena abierta por el borde sur y una franja de arena
-    // llana pegada a la costa que sigue siendo tierra.
     const size = 21;
     const heights = new Float32Array(size * size);
     for (let demRow = 0; demRow < size; demRow++) {
@@ -98,5 +99,109 @@ describe("orientación costa-mar de Ventanicas", () => {
     expect(at(4, 0)).toBe(0);
     expect(at(-8, 0)).toBe(0);
     expect(at(-4, 5)).toBe(0);
+  });
+});
+
+describe("orientación costa-mar de Barreiros (mar al norte)", () => {
+  const northCoast: Array<[number, number]> = [[0, 0], [100, 10], [200, 30]];
+
+  it("interpola la Z de costa a partir de la X", () => {
+    expect(coastAt(northCoast, 50, "north")).toBeCloseTo(5);
+    expect(coastAt(northCoast, 150, "north")).toBeCloseTo(20);
+  });
+
+  it("clasifica como mar únicamente el lado septentrional y respeta el margen", () => {
+    expect(isSeaPoint(northCoast, 150, 22, "north", 1.5)).toBe(true);
+    expect(isSeaPoint(northCoast, 150, 21, "north", 1.5)).toBe(false);
+    expect(isSeaPoint(northCoast, 150, 19, "north")).toBe(false);
+  });
+
+  it("orienta la normal de las rompientes hacia Z UTM positiva", () => {
+    const normal = seawardNormal(10, 0, "north");
+    expect(normal.z).toBeCloseTo(1);
+    expect(normal.x).toBeCloseTo(0);
+  });
+
+  it("reduce ramales costeros al borde exterior septentrional", () => {
+    const envelope = coastlineEnvelope([
+      [[0, 0], [10, 2]],
+      [[0, 5], [10, 3]]
+    ], "north", 1);
+    expect(envelope).toHaveLength(11);
+    for (const [x, z] of envelope) expect(z).toBeGreaterThan(x * .2);
+  });
+
+  it("cierra la bocana de la ría en vez de descolgarse hasta la orilla interior", () => {
+    const envelope = coastlineEnvelope([
+      [[-100, 0], [-20, 0]],
+      [[20, 0], [100, 0]],
+      // Orillas del estuario: entran 400 m tierra adentro por una boca de 40 m.
+      [[-20, 0], [-20, -400], [20, -400], [20, 0]]
+    ], "north", 4);
+    for (const [, z] of envelope) expect(z).toBeGreaterThan(-1);
+  });
+
+  it("conserva una ensenada más ancha que profunda", () => {
+    const envelope = coastlineEnvelope([
+      [[-300, 0], [-200, 0]],
+      [[200, 0], [300, 0]],
+      [[-200, 0], [-200, -40], [200, -40], [200, 0]]
+    ], "north", 4);
+    expect(Math.min(...envelope.map(([, z]) => z))).toBeCloseTo(-40);
+  });
+
+  it("cierra el polígono terrestre por el lado sur", () => {
+    const polygon = landPolygonFromCoastlines([
+      [[-10, 0], [10, 0]]
+    ], "north", 10, 10);
+    expect(isPointInPolygon([0, -5], polygon)).toBe(true);
+    expect(isPointInPolygon([0, 5], polygon)).toBe(false);
+  });
+
+  it("no se filtra por los huecos de una costa fragmentada", () => {
+    const size = 21;
+    const heights = new Float32Array(size * size);
+    for (let demRow = 0; demRow < size; demRow++) {
+      const z = 10 - demRow;
+      for (let col = 0; col < size; col++) {
+        heights[demRow * size + col] = z > 0 ? 0 : 8;
+      }
+    }
+    const mask = coastalFloodMask(
+      [
+        [[-10, 0], [-2, 0]],
+        [[2, 0], [10, 0]]
+      ],
+      "north",
+      size,
+      size,
+      10,
+      10,
+      { heightsNorthToSouth: heights }
+    );
+    const at = (x: number, z: number) => {
+      const col = Math.round((x + 10) / 20 * (size - 1));
+      const row = Math.round((z + 10) / 20 * (size - 1));
+      return mask[row * size + col];
+    };
+    expect(at(0, 4)).toBe(1);
+    expect(at(5, 4)).toBe(1);
+    expect(at(-5, 4)).toBe(1);
+    expect(at(0, -4)).toBe(0);
+    expect(at(5, -4)).toBe(0);
+    expect(at(-5, -4)).toBe(0);
+  });
+
+  it("siembra la inundación por el borde norte de la rejilla", () => {
+    const mask = coastalFloodMask([
+      [[-5, 0], [5, 0]]
+    ], "north", 21, 21, 5, 5);
+    const at = (x: number, z: number) => {
+      const col = Math.round((x + 5) / 10 * 20);
+      const row = Math.round((z + 5) / 10 * 20);
+      return mask[row * 21 + col];
+    };
+    expect(at(0, 4)).toBe(1);
+    expect(at(0, 0)).toBe(0);
   });
 });

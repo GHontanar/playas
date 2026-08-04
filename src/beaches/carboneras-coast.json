@@ -45,6 +45,7 @@
   "urbanDetail": "overview",
   "seaLevelMeters": 0.15,
   "coastalStructures": [],
+  "overviewZonePaddingMeters": 0,
   "shoreline": {
     "start": {
       "x": 598050,

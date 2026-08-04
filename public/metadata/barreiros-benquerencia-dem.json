@@ -1,0 +1,36 @@
+{
+  "sourceProduct": "MDT02 - 2\u00aa cobertura (2015-2021)",
+  "sourceFiles": [
+    "MDT02-ETRS89-HU29-0009-2-COB2.TIF",
+    "MDT02-ETRS89-HU29-0009-4-COB2.TIF",
+    "MDT02-ETRS89-HU29-0010-3-COB2.TIF"
+  ],
+  "sourceCRS": "EPSG:25829",
+  "sourceResolutionMeters": 2,
+  "bounds": [
+    644280.0,
+    4824219.0,
+    645557.0,
+    4825252.0
+  ],
+  "webResolutionMeters": 4.0,
+  "smoothingPasses": 1,
+  "width": 319,
+  "height": 258,
+  "nodataCells": 0,
+  "filledSeamCells": 0,
+  "minElevation": 0.0,
+  "maxElevation": 26.021581649780273,
+  "minLandElevation": 0.5000555515289307,
+  "byteOrder": "little-endian",
+  "dataType": "float32",
+  "assetBytes": 329208,
+  "transform": [
+    4.0,
+    0.0,
+    644280.0,
+    0.0,
+    -4.0,
+    4825252.0
+  ]
+}

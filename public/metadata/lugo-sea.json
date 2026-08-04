@@ -1,0 +1,34 @@
+{
+  "source": [
+    "Batimetría: GMRT GridServer (GEBCO 2023 + multibeam), marine-geo.org; EMODnet WCS no disponible en la descarga"
+  ],
+  "bounds": [
+    609215,
+    4799988,
+    661153,
+    4849303
+  ],
+  "webResolutionMeters": 50,
+  "width": 1039,
+  "height": 987,
+  "encoding": "uint8: bits 0-4 banda batimétrica, bits 5-7 clase de flora",
+  "depthBands": {
+    "0": "0-10",
+    "1": "10-30",
+    "2": "30-100",
+    "3": "100-300",
+    "4": "300-1000",
+    "5": "1000-1800",
+    "6": "1800-99999"
+  },
+  "floraClasses": {
+    "0": "Sin flora cartografiada"
+  },
+  "depthCellsByBand": {
+    "0": 18005,
+    "1": 44510,
+    "2": 102985,
+    "3": 185575
+  },
+  "assetBytes": 1025493
+}
