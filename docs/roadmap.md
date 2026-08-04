@@ -14,19 +14,19 @@ leer esto ya no cuadran, vuelve a medirlas antes de decidir.
 
 Lo más grave del repo no es código, es proceso.
 
-- [ ] Workflow de CI que ejecute `typecheck`, `test`, `verify:assets` y `build`
-      en cada push y en cada PR. Hoy no hay CI, ni linter, ni formateador: hay
-      92 pruebas en 15 ficheros y **nada las ejecuta**. Como Cloudflare Pages
-      despliega en cada push a `main`, el único filtro entre un test roto y
-      producción es acordarse de ejecutarlo a mano.
-- [ ] Commitear el trabajo pendiente. El 03-08-2026 había **233 ficheros sin
+- [x] Workflow de CI que ejecute `typecheck`, `test`, `verify:assets` y `build`
+      en cada push y en cada PR. Había 92 pruebas en 15 ficheros y **nada las
+      ejecutaba**; como Cloudflare Pages despliega en cada push a `main`, el
+      único filtro entre un test roto y producción era acordarse de ejecutarlo a
+      mano. Hecho en `.github/workflows/ci.yml`. No bloquea el despliegue —Pages
+      no espera a Actions— pero deja constancia inmediata.
+- [x] Commitear el trabajo pendiente. El 03-08-2026 había **233 ficheros sin
       commitear** y el último commit era de dos días antes: dentro estaban la
-      integración completa de Barreiros y el nivel comarcal entero. No es
-      desorden estético; es que no hay nada que bisecar cuando algo falle, y un
-      `git checkout` desafortunado se lleva semanas.
-- [ ] Elegir linter y formateador, aunque sea con la configuración de serie. No
-      por estilo —el código es homogéneo— sino para que el CI tenga algo que
-      decir sobre importaciones muertas y variables sin usar.
+      integración completa de Barreiros y el nivel comarcal entero. Repartido en
+      tres commits temáticos, comprobando que cada uno compila por separado.
+- [x] ~~Linter y formateador~~. Descartado al fijar el proyecto como personal:
+      con una sola persona y el código ya homogéneo es fricción sin retorno. Si
+      alguna vez colabora alguien más, reconsiderarlo.
 
 ### 2. Duplicación que sobrevive
 
@@ -217,7 +217,7 @@ Conviene dejarlo escrito para que nadie «arregle» una decisión buena:
 
 ## Orden sugerido
 
-1. Commitear lo pendiente y montar el CI. Es lo único que cambia el riesgo hoy.
+1. ~~Commitear lo pendiente y montar el CI.~~ Hecho el 03-08-2026.
 2. `as unknown as` e inversión de capas: son los que envenenan lo demás.
 3. Recorrido con scroll y arranque común.
 4. Pruebas de `beachZones`.
