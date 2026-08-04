@@ -55,20 +55,19 @@ Lo más grave del repo no es código, es proceso.
 
 ### 3. Dos mentiras al compilador
 
-- [ ] Quitar los `as unknown as BeachConfig` de `region-main.ts:166` y
-      `landing-main.ts:96`. `createChunkBase` pide un `BeachConfig` entero y
-      solo usa cuatro campos, así que los llamadores comarcales fabrican uno
-      falso. Es el único sitio del proyecto donde se desactiva el tipado, y
-      está en un módulo de dibujo. Se arregla haciendo que reciba esos cuatro
-      campos.
+- [x] Quitados los `as unknown as BeachConfig` de `region-main.ts` y
+      `landing-main.ts`. `createChunkBase` pedía un `BeachConfig` entero y solo
+      usaba seis campos, así que los llamadores comarcales fabricaban uno falso.
+      Ahora recibe `ChunkBaseOptions` y no queda ningún `as unknown as` en
+      `src/`.
 
 ### 4. Una inversión de capas
 
-- [ ] `src/map/regionChunk.ts` importa `src/regions/catalog.ts`: es el único
-      punto donde la capa de dibujo conoce el dominio. Debería recibir `bounds`
-      y rutas de assets, no la ficha del catálogo. Hoy no molesta; molestará el
-      día que haya que dibujar un bloque que no esté en el catálogo —una
-      previsualización, un render para imprimir—.
+- [x] `src/map/regionChunk.ts` importaba `src/regions/catalog.ts`: era el único
+      punto donde la capa de dibujo conocía el dominio. Ahora recibe
+      `StageBounds` y un `RegionGridSources` con las cinco rutas, y `src/map/`
+      ya no importa `regions/`. Los módulos de playa siguen tomando
+      `BeachConfig`, que ahí sí es su dominio propio.
 
 ### 5. Lo no probado es justo lo que tiene consecuencias
 
@@ -218,7 +217,7 @@ Conviene dejarlo escrito para que nadie «arregle» una decisión buena:
 ## Orden sugerido
 
 1. ~~Commitear lo pendiente y montar el CI.~~ Hecho el 03-08-2026.
-2. `as unknown as` e inversión de capas: son los que envenenan lo demás.
+2. ~~`as unknown as` e inversión de capas.~~ Hecho el 04-08-2026.
 3. Recorrido con scroll y arranque común.
 4. Pruebas de `beachZones`.
 5. Shaders fuera de `sea.ts` y troceado del bundle.
