@@ -1,0 +1,47 @@
+# Comprobaciones automáticas.
+#
+# Cloudflare Pages despliega en cada push a `main` mediante su integración Git,
+# así que hasta aquí el único filtro entre una prueba rota y producción era
+# acordarse de ejecutarla a mano. Esto no impide el despliegue —Pages no espera
+# a Actions— pero deja constancia inmediata de si el commit que se acaba de
+# publicar estaba sano.
+#
+# Es un proyecto personal: el CI comprueba lo que ya se comprueba a mano y nada
+# más. Sin linter ni formateador, que aquí serían fricción sin retorno.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Para poder relanzarlo a mano cuando falle algo de red.
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # El mismo suelo que declara `engines` en package.json.
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Pruebas
+        run: npm test
+
+      # Verifica los derivados geográficos versionados en el repo: rejillas
+      # alineadas con sus metadatos, orientación tierra-mar, presupuesto de las
+      # miniaturas. Es lo que detecta un asset regenerado a medias.
+      - name: Assets
+        run: npm run verify:assets
+
+      - name: Build
+        run: npm run build
