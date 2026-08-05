@@ -1,5 +1,6 @@
 import { municipalities, type MunicipalityCatalog } from "../beaches/catalog";
-import { getRegion, municipalitiesOfRegion, regionHref, type RegionCatalog } from "../regions/catalog";
+import { getRegion, regionHref, type RegionCatalog } from "../regions/catalog";
+import { municipalitiesOfRegion } from "../regions/coasts";
 import type { BeachConfig } from "../beaches/types";
 
 /**

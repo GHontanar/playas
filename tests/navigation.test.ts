@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { beaches, municipalities } from "../src/beaches/catalog";
-import {
-  getRegion,
-  municipalitiesOfRegion,
-  regionAssets,
-  regionHref,
-  regionOfMunicipality,
-  regions
-} from "../src/regions/catalog";
+import { getRegion, regionAssets, regionHref, regions } from "../src/regions/catalog";
+import { municipalitiesOfRegion, regionOfMunicipality } from "../src/regions/coasts";
 import { beachCrumbs, municipalityCrumbs, municipalityChipsHtml, regionCrumbs } from "../src/nav/breadcrumb";
 
 /**

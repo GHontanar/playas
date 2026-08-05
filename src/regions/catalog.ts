@@ -1,4 +1,6 @@
-import { municipalities, type MunicipalityCatalog, type MunicipalityId } from "../beaches/catalog";
+// Solo tipos: el catálogo comarcal no arrastra las fichas de playa. El puente
+// entre ambos niveles está en `coasts.ts`, y por qué está allí lo explica.
+import type { MunicipalityId } from "../beaches/catalog";
 
 /**
  * El nivel comarcal: el bloque de 50 m que enseña de una vez toda la costa que
@@ -114,16 +116,6 @@ export const regions: RegionCatalog[] = [
 
 export function getRegion(id: string | null): RegionCatalog {
   return regions.find((region) => region.id === id) ?? regions[0];
-}
-
-/** La comarca a la que pertenece un municipio del catálogo. */
-export function regionOfMunicipality(municipality: MunicipalityCatalog): RegionCatalog {
-  return getRegion(municipality.regionId);
-}
-
-/** Los municipios con vista de costa de una comarca, en el orden del catálogo. */
-export function municipalitiesOfRegion(region: RegionCatalog): MunicipalityCatalog[] {
-  return municipalities.filter((municipality) => municipality.regionId === region.id);
 }
 
 export function regionHref(region: RegionCatalog): string {

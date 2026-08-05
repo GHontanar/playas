@@ -10,7 +10,7 @@ import { loadObservedStatus, refreshStatusAfterHourChange } from "./status/loadS
 import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecast/openMeteo";
 import { loadingMessage } from "./loading/loadingMessage";
 import { breadcrumbHtml, municipalityChipsHtml, municipalityCrumbs } from "./nav/breadcrumb";
-import { regionOfMunicipality } from "./regions/catalog";
+import { regionOfMunicipality } from "./regions/coasts";
 import { applySceneSky } from "./styles/ink";
 import { createScrollStory } from "./story/scrollStory";
 

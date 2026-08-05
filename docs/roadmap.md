@@ -88,18 +88,18 @@ Lo más grave del repo no es código, es proceso.
 
 ### 6. El fichero que nadie querrá abrir
 
-- [ ] Separar los shaders de `sea.ts` a su propio módulo. Son 777 líneas con un
-      único export, de las cuales 173 son GLSL dentro de plantillas de texto.
-      Extraerlas lo deja en unas 600 y, de paso, da resaltado de sintaxis justo
-      donde más falta hace.
+- [x] Separados los shaders de `sea.ts` en `seaShader.ts`: el parche del oleaje
+      volumétrico y los dos materiales de espuma. `sea.ts` baja de 777 a 580
+      líneas y se queda con la escena.
 
 ### 7. El índice paga por 31 playas que no usa
 
-- [ ] Trocear el chunk común o cargar el catálogo de playas de forma dinámica.
-      El código propio del índice son 2,33 kB, pero arrastra un chunk de 738 kB
-      (190 kB gzip) que contiene Three.js **y las 31 fichas de playa completas**.
-      Three.js es inevitable en una portada que dibuja dos maquetas; el catálogo
-      no.
+- [x] El índice ya no arrastra las 31 fichas. La causa eran dos funciones puente
+      —`municipalitiesOfRegion` y `regionOfMunicipality`— que obligaban al
+      catálogo comarcal a importar el de playas; se han movido a
+      `src/regions/coasts.ts`, que el índice no toca. El chunk único de 738 kB se
+      parte en Three.js (619 kB) y catálogo de playas más navegación (121 kB), y
+      el índice solo pide el primero: 28 kB gzip menos.
 
 ### 8. Fiabilidad de datos
 
@@ -226,7 +226,7 @@ Conviene dejarlo escrito para que nadie «arregle» una decisión buena:
 2. ~~`as unknown as` e inversión de capas.~~ Hecho el 04-08-2026.
 3. Recorrido con scroll y arranque común.
 4. ~~Pruebas de `beachZones`.~~ Hecho el 04-08-2026, con `loadStatus` de paso.
-5. Shaders fuera de `sea.ts` y troceado del bundle.
+5. ~~Shaders fuera de `sea.ts` y troceado del bundle.~~ Hecho el 05-08-2026.
 
 Del 2 al 5 es aproximadamente un día de trabajo. El prerender de las fichas es
 lo siguiente, porque es requisito de cualquier vía que dependa de tráfico y

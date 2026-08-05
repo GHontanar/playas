@@ -54,6 +54,11 @@ En este documento «la portada» son las mediciones del overview municipal, que
 desde la reestructuración de la navegación vive en `/coast/`. `/` es ahora el
 índice de comarcas.
 
+El índice descarga Three.js (619 kB, 163 kB gzip) y su propio código, 2,3 kB.
+No descarga el catálogo de playas: las 31 fichas y la navegación viven en un
+chunk aparte de 121 kB (28 kB gzip) que solo piden los niveles de costa y playa.
+Antes iba todo junto en un único chunk de 738 kB.
+
 El índice monta una miniatura por comarca con el mismo escenario y el mismo
 zócalo que la vista comarcal, sobre la rejilla diezmada a 400 m que produce
 `scripts/prepare-region-thumbnails.ts`: 130 KB en el Levante y 94 KB en la
