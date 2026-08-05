@@ -23,6 +23,35 @@ const FLAG_COLOURS: Record<FlagState, string> = {
   unknown: "#8ca5a0"
 };
 
+export interface ZoneAppearance {
+  colour: string;
+  opacity: number;
+}
+
+/**
+ * Cómo se pinta la franja de una playa.
+ *
+ * La regla con consecuencias del sistema: el color tenue expresa **bandera
+ * observada y solo cuando el servicio de socorrismo está activo**. Con el
+ * servicio inactivo o desconocido, o sin bandera, la franja deja visible el
+ * material original en vez de inferir un color; una bandera verde retenida
+ * después del cierre no puede leerse como playa vigilada.
+ *
+ * `active` es el resaltado por puntero o teclado, que sube la opacidad pero no
+ * inventa color: una franja sin dato resaltada sigue siendo un velo neutro.
+ *
+ * Estaba escrita dos veces —una en `setStatuses` y otra en `setActive`— con la
+ * misma condición copiada, que es como el resaltado y el reposo acaban
+ * discrepando sin que nadie lo note.
+ */
+export function zoneAppearance(status: ObservedBeachStatus | undefined, active: boolean): ZoneAppearance {
+  const coloured = status?.lifeguardService === "active" && status.flag !== "unknown";
+  return {
+    colour: FLAG_COLOURS[status?.flag ?? "unknown"],
+    opacity: coloured ? (active ? .82 : .46) : (active ? .14 : 0)
+  };
+}
+
 export interface BeachZoneLayer {
   group: THREE.Group;
   meshes: THREE.Mesh[];
@@ -97,9 +126,10 @@ export async function createBeachZones(
       for (const mesh of meshes) {
         const status = byId.get(String(mesh.userData.beachId));
         const material = mesh.material as THREE.MeshBasicMaterial;
-        material.color.set(FLAG_COLOURS[status?.flag ?? "unknown"]);
+        const { colour, opacity } = zoneAppearance(status, false);
+        material.color.set(colour);
+        material.opacity = opacity;
         mesh.userData.status = status;
-        material.opacity = status?.lifeguardService === "active" && status.flag !== "unknown" ? .46 : 0;
       }
     },
     setActive(beachId) {
@@ -107,8 +137,7 @@ export async function createBeachZones(
         const active = mesh.userData.beachId === beachId;
         const material = mesh.material as THREE.MeshBasicMaterial;
         const status = mesh.userData.status as ObservedBeachStatus | undefined;
-        const coloured = status?.lifeguardService === "active" && status.flag !== "unknown";
-        material.opacity = coloured ? (active ? .82 : .46) : (active ? .14 : 0);
+        material.opacity = zoneAppearance(status, active).opacity;
         mesh.position.y = active ? 3 : 0;
       }
     },
