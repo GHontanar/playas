@@ -74,11 +74,14 @@ Lo más grave del repo no es código, es proceso.
 
 ### 5. Lo no probado es justo lo que tiene consecuencias
 
-- [ ] **`beachZones.ts`**, 302 líneas, sin una sola prueba. Es lo que decide qué
-      franja se pinta de qué color de bandera: la parte del sistema donde
-      equivocarse tiene consecuencias para quien va a bañarse.
-- [ ] **`loadStatus.ts`**, 59 líneas, sin prueba, y con lógica nueva desde que
-      comprueba el `content-type` de `/api/status`.
+- [x] **`beachZones.ts`**, 302 líneas, sin una sola prueba. Cubierto con once:
+      la regla de pintado recorrida entera —cuatro banderas por tres estados de
+      servicio— y el montaje de la capa contra la costa DERA real de Mojácar. La
+      regla sale a `zoneAppearance()`, que estaba escrita dos veces con la misma
+      condición copiada.
+- [x] **`loadStatus.ts`**, cubierto con siete. Su modo de fallo interesante no
+      es el error sino el falso acierto: el HTML de la aplicación servido con un
+      200 cuando falta la Pages Function.
 - [ ] `createStage` y `createScene` tampoco tienen prueba. Ahí es legítimamente
       más difícil por WebGL; al menos cubrir el encuadre, que es aritmética
       pura.
@@ -222,7 +225,7 @@ Conviene dejarlo escrito para que nadie «arregle» una decisión buena:
 1. ~~Commitear lo pendiente y montar el CI.~~ Hecho el 03-08-2026.
 2. ~~`as unknown as` e inversión de capas.~~ Hecho el 04-08-2026.
 3. Recorrido con scroll y arranque común.
-4. Pruebas de `beachZones`.
+4. ~~Pruebas de `beachZones`.~~ Hecho el 04-08-2026, con `loadStatus` de paso.
 5. Shaders fuera de `sea.ts` y troceado del bundle.
 
 Del 2 al 5 es aproximadamente un día de trabajo. El prerender de las fichas es
