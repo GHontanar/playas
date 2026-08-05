@@ -30,17 +30,20 @@ Lo más grave del repo no es código, es proceso.
 
 ### 2. Duplicación que sobrevive
 
-- [ ] **Extraer el recorrido con scroll.** `coast-main.ts` y `region-main.ts`
-      implementan el mismo mecanismo de keyframes —progreso, interpolación,
-      `prefers-reduced-motion`, animación diferida— con nombres distintos
-      (`smoothstep`/`easeInOut`, `animateToScroll`/`animateStory`). Unos 19
-      renglones equivalentes en cada uno. Al unificar los dos spikes comarcales
-      se resolvió la duplicación entre comarcas y se dejó intacta la que hay
-      entre comarca y municipio.
-- [ ] **Extraer el arranque común de las vistas.** Los cuatro puntos de entrada
-      repiten comprobar WebGL, montar el reloj solar, propagar el color del
-      cielo al `theme-color`, elegir la tinta con `inkOn` y reencuadrar al
-      redimensionar. Cabe en un `bootstrapScene()`.
+- [x] **Extraer el recorrido con scroll**, ahora en `src/story/scrollStory.ts`:
+      progreso desde el scroll, redondeo a la parada más cercana, interpolación
+      suavizada y `prefers-reduced-motion`. Lo que cambia entre niveles —el
+      comarcal mira al objetivo, recoloca rótulos y dibuja a mano porque su
+      escena no tiene bucle— se queda en `onFrame`. 132 líneas menos entre las
+      dos vistas por 121 del módulo, y una sola implementación que mantener.
+- [x] **Extraer el color del cielo** en `applySceneSky()`: eran cuatro líneas
+      idénticas que sacan el cielo del lienzo al fondo de la página, la tinta de
+      los rótulos y la barra del navegador.
+- [x] ~~Un `bootstrapScene()` con el arranque común~~. Descartado tras medirlo:
+      una vez fuera el recorrido y el cielo, lo que queda repetido son cuatro
+      líneas de comprobación de WebGL con destinos de error distintos en cada
+      vista, y usos del reloj solar que solo se parecen por fuera. Envolverlo
+      sería una indirección que cuesta más de leer que las cuatro líneas.
 - [ ] **Unificar los tres `scaffold-*.ts`.** `scaffold-carboneras`,
       `scaffold-garrucha-vera` y `scaffold-barreiros` son el mismo script con
       datos distintos.

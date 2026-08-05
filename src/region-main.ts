@@ -21,7 +21,8 @@ import { sunVectorForWorldAxes } from "./solar/sunVector";
 import { loadingMessage } from "./loading/loadingMessage";
 import { breadcrumbHtml, municipalityChipsHtml, regionCrumbs } from "./nav/breadcrumb";
 import { getRegion, regionAssets } from "./regions/catalog";
-import { inkOn } from "./styles/ink";
+import { applySceneSky } from "./styles/ink";
+import { createScrollStory } from "./story/scrollStory";
 
 const params = new URLSearchParams(window.location.search);
 const region = getRegion(params.get("region"));
@@ -245,64 +246,27 @@ async function initialise() {
 
   const scroller = document.querySelector<HTMLElement>("#stage")!;
   const viewpointLabel = document.querySelector<HTMLElement>("#viewpoint")!;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function setCamera(target: THREE.Vector3, zoom: number) {
-    camera.position.copy(cameraOffset).add(target);
-    camera.lookAt(target);
-    camera.zoom = zoom;
-    camera.updateProjectionMatrix();
-    camera.updateMatrixWorld();
-    placeLabels();
-    draw();
-  }
-
-  function applyProgress(progress: number) {
-    const position = progress * (viewpoints.length - 1);
-    const from = Math.min(viewpoints.length - 1, Math.floor(position));
-    const to = Math.min(viewpoints.length - 1, from + 1);
-    const t = easeInOut(position - from);
-    setCamera(
-      viewpoints[from].target.clone().lerp(viewpoints[to].target, t),
-      THREE.MathUtils.lerp(viewpoints[from].zoom, viewpoints[to].zoom, t)
-    );
-    viewpointLabel.textContent = viewpoints[t < .5 ? from : to].name;
-  }
-
-  // El scroll elige un keyframe; no rasca valores intermedios arbitrarios.
-  const scrollProgress = () => {
-    const travel = Math.max(1, scroller.offsetHeight - window.innerHeight);
-    return THREE.MathUtils.clamp((window.scrollY - scroller.offsetTop) / travel, 0, 1);
-  };
-  const keyedProgress = () => Math.round(scrollProgress() * (viewpoints.length - 1)) / (viewpoints.length - 1);
-  // `?progress=0..1` fija un keyframe sin scroll, para inspeccionarlos uno a uno.
-  const forcedProgress = params.has("progress")
-    ? THREE.MathUtils.clamp(number("progress", 0), 0, 1)
-    : null;
-  let currentProgress = forcedProgress ?? keyedProgress();
-  let targetProgress = currentProgress;
-  let storyFrame = 0;
-  const animateStory = () => {
-    const difference = targetProgress - currentProgress;
-    currentProgress = Math.abs(difference) < .0001
-      ? targetProgress
-      : currentProgress + difference * .16;
-    applyProgress(currentProgress);
-    if (currentProgress !== targetProgress) storyFrame = requestAnimationFrame(animateStory);
-  };
-  const requestStoryUpdate = () => {
-    if (forcedProgress !== null) return;
-    targetProgress = keyedProgress();
-    cancelAnimationFrame(storyFrame);
-    if (reducedMotion) {
-      currentProgress = targetProgress;
-      applyProgress(currentProgress);
-    } else {
-      storyFrame = requestAnimationFrame(animateStory);
+  const story = createScrollStory({
+    scroller,
+    viewpoints,
+    // `?progress=0..1` fija un keyframe sin scroll, para inspeccionarlos uno a
+    // uno y para las capturas automáticas.
+    forcedProgress: params.has("progress")
+      ? THREE.MathUtils.clamp(number("progress", 0), 0, 1)
+      : null,
+    onFrame({ target, zoom, viewpoint }) {
+      camera.position.copy(cameraOffset).add(target);
+      camera.lookAt(target);
+      camera.zoom = zoom;
+      camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+      // Esta escena no tiene bucle: si nadie dibuja, no se ve el movimiento.
+      placeLabels();
+      draw();
+      viewpointLabel.textContent = viewpoint.name ?? "";
     }
-  };
-  window.addEventListener("scroll", requestStoryUpdate, { passive: true });
-  applyProgress(currentProgress);
+  });
 
   document.querySelector<HTMLElement>("#stats")!.textContent =
     `${grid.width}×${grid.height} = ${(grid.width * grid.height / 1000).toFixed(0)}k vértices · ${(grid.demBytes / 1e6).toFixed(2)} MB · cota máx ${maxElevation.toFixed(0)} m · ${grid.resolution} m/celda · rumbo ${BEARING}°`;
@@ -334,10 +298,7 @@ async function initialise() {
     const solar = getSolarPosition(dateISO, minutes, region.centre.lat, region.centre.lon);
     updateSunLight(sun, sunVectorForWorldAxes(solar.vector, "south-positive"), solar.aboveHorizon, true, sunRadius);
     stage.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
-    const skyColour = container.style.backgroundColor;
-    document.documentElement.style.setProperty("--coast-sky", skyColour);
-    document.documentElement.style.setProperty("--scene-ink", inkOn(new THREE.Color(skyColour)));
-    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
+    applySceneSky(container);
     document.querySelector<HTMLElement>("#sun")!.textContent = solar.aboveHorizon
       ? `Sol a ${solar.altitudeDegrees.toFixed(0)}°`
       : "Sol bajo el horizonte";
@@ -400,7 +361,7 @@ async function initialise() {
 
   window.addEventListener("resize", () => {
     resize();
-    requestStoryUpdate();
+    story.refresh();
   });
   resize();
   draw();
@@ -418,11 +379,6 @@ async function initialise() {
     }
     return target.multiplyScalar(1 / names.length);
   }
-}
-
-function easeInOut(value: number): number {
-  const clamped = THREE.MathUtils.clamp(value, 0, 1);
-  return clamped * clamped * (3 - 2 * clamped);
 }
 
 function anchorLabel(name: string, utmX: number, utmY: number, municipality?: string): THREE.Sprite {

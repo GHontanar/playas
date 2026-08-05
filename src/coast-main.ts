@@ -11,7 +11,8 @@ import { forecastKey, loadBeachForecast, seaStateForWaveHeight } from "./forecas
 import { loadingMessage } from "./loading/loadingMessage";
 import { breadcrumbHtml, municipalityChipsHtml, municipalityCrumbs } from "./nav/breadcrumb";
 import { regionOfMunicipality } from "./regions/catalog";
-import { inkOn } from "./styles/ink";
+import { applySceneSky } from "./styles/ink";
+import { createScrollStory } from "./story/scrollStory";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 const municipality = getMunicipality(new URLSearchParams(window.location.search).get("municipality"));
@@ -85,10 +86,7 @@ async function initialise() {
     SUN_LIGHT_RADIUS
   );
   controller.setSolarAppearance(solar.altitudeDegrees, solar.aboveHorizon);
-  const skyColour = container.style.backgroundColor;
-  document.documentElement.style.setProperty("--coast-sky", skyColour);
-  document.documentElement.style.setProperty("--scene-ink", inkOn(new THREE.Color(skyColour)));
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", skyColour);
+  applySceneSky(container);
   controller.setSeaSun(solar.vector, solar.aboveHorizon);
   document.querySelector("#loading")?.remove();
 
@@ -101,7 +99,6 @@ async function initialise() {
     return center;
   });
   const stage = document.querySelector<HTMLElement>("#story-stage")!;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const overviewZoom = 1;
   const detailZoom = window.innerWidth <= 760 ? 3.35 : 3.15;
   let hoverBeach: string | null = null;
@@ -119,64 +116,23 @@ async function initialise() {
     }))
   ];
 
-  const setCamera = (target: THREE.Vector3, zoom: number) => {
-    controller.camera.position.copy(cameraOffset).add(target);
-    controller.camera.zoom = zoom;
-    controller.camera.updateProjectionMatrix();
-  };
-
-  const applyProgress = (progress: number) => {
-    const position = progress * (viewpoints.length - 1);
-    zones.setSeparatorsVisible(progress > 0);
-    if (reducedMotion) {
-      const viewpoint = viewpoints[Math.round(position)];
-      setCamera(viewpoint.target, viewpoint.zoom);
-      zones.setActive(null);
-      return;
+  const story = createScrollStory({
+    scroller: stage,
+    viewpoints,
+    onFrame({ target, zoom, progress }) {
+      // Los separadores solo aparecen al entrar en el recorrido; en la vista
+      // general el chunk se lee de una pieza.
+      zones.setSeparatorsVisible(progress > 0);
+      controller.camera.position.copy(cameraOffset).add(target);
+      controller.camera.zoom = zoom;
+      controller.camera.updateProjectionMatrix();
+      if (!hoverBeach) zones.setActive(null);
     }
-    const from = Math.min(viewpoints.length - 1, Math.floor(position));
-    const to = Math.min(viewpoints.length - 1, from + 1);
-    const t = smoothstep(position - from);
-    setCamera(
-      viewpoints[from].target.clone().lerp(viewpoints[to].target, t),
-      THREE.MathUtils.lerp(viewpoints[from].zoom, viewpoints[to].zoom, t)
-    );
-    if (!hoverBeach) zones.setActive(null);
-  };
-
-  const scrollProgress = () => {
-    const distance = Math.max(1, stage.offsetHeight - window.innerHeight);
-    return THREE.MathUtils.clamp((window.scrollY - stage.offsetTop) / distance, 0, 1);
-  };
-  const keyedProgress = () => Math.round(scrollProgress() * (viewpoints.length - 1)) / (viewpoints.length - 1);
-  let currentProgress = keyedProgress();
-  let targetProgress = currentProgress;
-  let frame = 0;
-  const animateToScroll = () => {
-    const difference = targetProgress - currentProgress;
-    currentProgress = Math.abs(difference) < .0001
-      ? targetProgress
-      : currentProgress + difference * .16;
-    applyProgress(currentProgress);
-    if (currentProgress !== targetProgress) frame = requestAnimationFrame(animateToScroll);
-  };
-  const requestStoryUpdate = () => {
-    // Scroll chooses a camera keyframe; it does not scrub arbitrary zoom values.
-    targetProgress = keyedProgress();
-    cancelAnimationFrame(frame);
-    if (reducedMotion) {
-      currentProgress = targetProgress;
-      applyProgress(currentProgress);
-    } else {
-      frame = requestAnimationFrame(animateToScroll);
-    }
-  };
-  window.addEventListener("scroll", requestStoryUpdate, { passive: true });
+  });
   window.addEventListener("resize", () => {
     controller.resize();
-    requestStoryUpdate();
+    story.refresh();
   });
-  applyProgress(currentProgress);
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -220,11 +176,6 @@ async function initialise() {
   };
   await refreshStatus();
   refreshStatusAfterHourChange(refreshStatus);
-}
-
-function smoothstep(value: number) {
-  const clamped = THREE.MathUtils.clamp(value, 0, 1);
-  return clamped * clamped * (3 - 2 * clamped);
 }
 
 function splitIntoGroups(length: number, count: number): number[][] {
